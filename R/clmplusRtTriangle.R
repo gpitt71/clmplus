@@ -20,7 +20,7 @@
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
-#' hz.chl=xchl(sifa.mtpl.rtt, 'a')
+#' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
 #' 
 #' @references 
 #' 
@@ -28,17 +28,17 @@
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-xchl <- function(RtTriangle,
+clmplus <- function(RtTriangle,
                  hazard.model,
                  xc=NULL,
                  iter.max=1e+04,
                  tolerance.max=1e-06){
   
-  UseMethod("xchl")}
+  UseMethod("clmplus")}
 
-xchl.default <- function(RtTriangle){message('The object provided must be of class RtTriangle')}
+clmplus.default <- function(RtTriangle){message('The object provided must be of class RtTriangle')}
 
-xchl.RtTriangle <- function(RtTriangle,
+clmplus.RtTriangle <- function(RtTriangle,
                             hazard.model,
                             xc = NULL,
                             iter.max=1e+04,
@@ -58,7 +58,7 @@ xchl.RtTriangle <- function(RtTriangle,
                                iter.max=iter.max,
                                tolerance.max=tolerance.max)
     
-    kt.fit=arima(model$kt,c(0,1,0))
+    kt.fit=stats::arima(model$kt,c(0,1,0))
     
     kt.fcst = forecast::forecast(kt.fit,
                        J)
@@ -183,11 +183,11 @@ xchl.RtTriangle <- function(RtTriangle,
              converged=converged,
              citer=citer)
   
-  class(out) <- c('xchlmodel')
+  class(out) <- c('clmplusmodel')
     
   return(out)
 }
 
 
-setMethod("xchl", "RtTriangle", xchl.RtTriangle)
+setMethod("clmplus", "RtTriangle", clmplus.RtTriangle)
 

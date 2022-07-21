@@ -1,6 +1,6 @@
 Package: clmplus
 Type: Package
-Title: most versatile approach for modeling the claims reserve with the chain-ladder algorithm.
+Title: Versatile chain-ladder model
 Version: 0.0.1
 Author: Gabriele Pittarello, Munir Hiabu, Andres Villegas
 Maintainer: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>
@@ -12,7 +12,9 @@ Imports:
     ggplot2,
     forecast,
     gridExtra,
-    grid
+    grid,
+    methods,
+    reshape2
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
