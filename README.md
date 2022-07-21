@@ -11,13 +11,13 @@ About `clmplus`:
 * `clmplus` relies on the powerful `StMoMo` package. Practitioners can either use the default models we programmed for them or set their own hazard model.
 Examples of model configurations we support: 
 
-|      Model      | Life insurance                  |Non-life insurance              |
-| :-------------: |:-------------------------------:|-------------------------------:|
-| a               | age                             |development (chain-ladder model)|
-| ac              | age-cohort                      |development-accident            |
-| ap              | age-period                      |development-calendar            |
-| apc             | age-period-cohort               |development-calendar-accident   |
-
+|      Model      | Life insurance                  |Non-life insurance                |
+| :-------------: |:-------------------------------:|---------------------------------:|
+| a               | age                             |development (chain-ladder model)  |
+| ac              | age-cohort                      |development-accident              |
+| ap              | age-period                      |development-calendar              |
+| apc             | age-period-cohort               |development-calendar-accident     |
+| lc              | lee-carter                      |development-development x calendar|
 
 ## Installation 
 
