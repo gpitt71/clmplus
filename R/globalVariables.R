@@ -36,10 +36,6 @@ pkg.env$models=list(
                      periodAgeFun = c("1"),
                      cohortAgeFun = NULL),
   
-  aac = StMoMo::StMoMo(link="log",
-                      staticAgeFun = TRUE,
-                      periodAgeFun = NULL,
-                      cohortAgeFun = "NP"),
   
   ## pc model
   

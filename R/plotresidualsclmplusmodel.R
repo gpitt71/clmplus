@@ -27,7 +27,7 @@ plotresiduals.default <- function(clmplusmodel,
 plotresiduals.clmplusmodel <- function(clmplusmodel,
                                     heat.lim=c(-2.5,2.5)){
   
-  if(clmplusmodel$hazard.model %in% names(pkg.env$models)){
+  if((clmplusmodel$hazard.model %in% names(pkg.env$models))|(clmplusmodel$hazard.model=="user.defined")){
     
     res.m = stats::residuals(clmplusmodel$model.fit)
     res.tr=pkg.env$c2t(res.m$residuals)

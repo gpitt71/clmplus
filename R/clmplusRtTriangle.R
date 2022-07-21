@@ -29,22 +29,77 @@
 #' 
 #' @export
 clmplus <- function(RtTriangle,
-                 hazard.model,
+                 hazard.model=NULL,
                  xc=NULL,
                  iter.max=1e+04,
-                 tolerance.max=1e-06){
+                 tolerance.max=1e-06,
+                 link = c("log", "logit"), 
+                 staticAgeFun = TRUE, 
+                 periodAgeFun = "NP",
+                 cohortAgeFun = NULL, 
+                 constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)){
   
   UseMethod("clmplus")}
 
 clmplus.default <- function(RtTriangle){message('The object provided must be of class RtTriangle')}
 
 clmplus.RtTriangle <- function(RtTriangle,
-                            hazard.model,
+                            hazard.model=NULL,
                             xc = NULL,
                             iter.max=1e+04,
-                            tolerance.max=1e-06){
+                            tolerance.max=1e-06,
+                            link = c("log", "logit"), 
+                            staticAgeFun = TRUE, 
+                            periodAgeFun = "NP",
+                            cohortAgeFun = NULL, 
+                            constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)){
   
-  stopifnot(typeof(hazard.model)=="character")
+  stopifnot(is.null(hazard.model) | typeof(hazard.model)=="character")
+  
+  if(is.null(hazard.model)){
+    
+    stmomo.model = StMoMo::StMoMo(link = link, 
+                          staticAgeFun = staticAgeFun, 
+                          periodAgeFun = periodAgeFun,
+                          cohortAgeFun = cohortAgeFun, 
+                          constFun = constFun)
+    
+    model <- StMoMo::fit(stmomo.model, 
+                         Dxt = RtTriangle$occurrance, 
+                         Ext = RtTriangle$exposure,
+                         iterMax=as.integer(1e+05))
+    
+    #forecasting horizon
+    J=dim(RtTriangle$cumulative.payments.triangle)[2]
+    #compute the development factors
+    alphaij <- forecast::forecast(model, h = J)
+    fij=(2+alphaij$rates)/(2-alphaij$rates)
+    # pick the last diagonal
+    d=RtTriangle$diagonal[1:(J-1)]
+    # extrapolate the results
+    lt=array(0.,c(J,J))
+    lt[,1]=c(0.,d)*fij[,1]
+    for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
+    
+    ot_=pkg.env$t2c(RtTriangle$cumulative.payments.triangle)
+    ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
+    reserve=rev(ultimate_cost-ot_[,J])
+    ultimate_cost=rev(ultimate_cost)
+    converged=TRUE
+    citer=NULL
+    
+  
+   out <- list(model.fit=model,
+              hazard.model='user.defined',
+              ultimate.cost=ultimate_cost,
+              reserve=reserve,
+              model.fcst = alphaij,
+              converged=converged,
+              citer=citer)
+  
+  class(out) <- c('clmplusmodel')
+  
+  return(out)}
   
   if(hazard.model=='m8'){
     pkg.env$models$m8= StMoMo::m8(link = c("log"),xc=xc)
@@ -97,56 +152,7 @@ clmplus.RtTriangle <- function(RtTriangle,
     citer=model$citer
     
   }
-  # 
-  # if(hazard.model=='aacohort'){
-  #   
-  #   J=dim(RtTriangle$cumulative.payments.triangle)[2]
-  #   
-  #   ac.model <- StMoMo::fit(pkg.env$models[['ac']], 
-  #                        Dxt = RtTriangle$occurrance, 
-  #                        Ext = RtTriangle$exposure,
-  #                        iterMax=as.integer(1e+05))
-  #   
-  #   model <- pkg.env$fit.aac.nr(data.T=RtTriangle,
-  #                               ax.start=ac.model$ax,
-  #                               gc.start=rev(ac.model$gc[(J):(2*J-1)]),
-  #                               iter.max=iter.max,
-  #                               tolerance.max=tolerance.max)
-  #   
-  #   gc.mx = pkg.env$t2c.full.square(matrix(rep(model$gc,
-  #                      J),
-  #                  byrow = F,
-  #                  ncol=J))[,(J+1):(2*J)]
-  #   
-  #   bx.mx = matrix(rep(model$bx,
-  #                      J),
-  #                  byrow = F,
-  #                  ncol=J)
-  #   
-  #   ax.mx = matrix(rep(model$ax,J),
-  #                  byrow = F,
-  #                  ncol=J)
-  #   
-  #   alphaij = exp(ax.mx+bx.mx*gc.mx)
-  #   
-  #   fij = (2+alphaij)/(2-alphaij)  
-  #   
-  #   d=RtTriangle$diagonal[1:(J-1)]
-  #   
-  #   # extrapolate the results
-  #   lt=array(0.,c(J,J))
-  #   lt[,1]=c(0.,d)*fij[,1]
-  #   for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  #   
-  #   ot_=pkg.env$t2c(RtTriangle$cumulative.payments.triangle)
-  #   ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-  #   reserve=rev(ultimate_cost-ot_[,J])
-  #   ultimate_cost=rev(ultimate_cost)
-  #   
-  #   converged=model$converged
-  #   citer=model$citer
-  #   
-  # }
+
   
   if(hazard.model %in% names(pkg.env$models)){
   
@@ -186,6 +192,7 @@ clmplus.RtTriangle <- function(RtTriangle,
   class(out) <- c('clmplusmodel')
     
   return(out)
+  
 }
 
 

@@ -13,4 +13,7 @@ sifa.mtpl
 \description{
 Dataset of cumulative paid claims for a medium italian company in the line of business: motor third party liability.
 }
+\references{
+Savelli, Nino and Clemente, Gian Paolo. "Stochastic claim reserving based on crm for solvency ii purposes."
+}
 \keyword{datasets}

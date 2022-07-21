@@ -6,10 +6,16 @@
 \usage{
 clmplus(
   RtTriangle,
-  hazard.model,
+  hazard.model = NULL,
   xc = NULL,
   iter.max = 10000,
-  tolerance.max = 1e-06
+  tolerance.max = 1e-06,
+  link = c("log", "logit"),
+  staticAgeFun = TRUE,
+  periodAgeFun = "NP",
+  cohortAgeFun = NULL,
+  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt,
+    b0x = b0x, gc = gc)
 )
 }
 \arguments{

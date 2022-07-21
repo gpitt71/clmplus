@@ -1,0 +1,272 @@
+---
+title: "Case study part 1"
+author: "Gabriele Pittarello"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+```{r tailor made functions, include=FALSE}
+t2c <- function(x){
+  I= dim(x)[1]
+  J= dim(x)[2]
+  
+  mx=matrix(NA,nrow=I,ncol=J)
+  for(i in 1:(I)){
+    for(j in 1:(J)){
+      if(i+j<=J+1){
+        mx[j,(i+j-1)]=x[i,j]
+      }
+    }
+  }
+  return(mx)
+}
+
+
+c2t <- function(x){
+  I= dim(x)[1]
+  J= dim(x)[2]
+  
+  mx=matrix(NA,nrow=I,ncol=J)
+  for(i in 1:(I)){
+    for(j in 1:(J)){
+      if(i+j<=J+1){
+        mx[i,j]=x[j,(i+j-1)]
+      }
+    }
+  }
+  return(mx)
+}
+
+
+```
+
+
+
+# Introduction
+
+The `clmplus` package provides practitioners with a fast and user friendly implementation of the modeling framework we derived in our paper . 
+
+We were able to connect the well-known hazard models developed in life insurance to non-life run-off triangles claims development. 
+The flexibility of this approach goes beyond the methodological novelty: we hope to provide a user-friendly set of tools based on the point of contact between non-life insurance and life insurance in the actuarial science.
+
+This vignette is organized as follows: 
+
+* We show the connection between the age-period representation and run-off triangles.
+
+* We replicate the Mack chain-ladder under within our modeling framework. 
+As shown in the paper, by using the `fchl` approach the resulting model is saving some parameters with respect to the standard GLM approach.
+
+* We show an example were adding a cohort effect can lead to an improvement on the model fit.
+
+In this tutorial, we show an example on the `AutoBIPaid` run-off triangle from the `ChainLadder` package.
+
+## One discipline, one language
+
+Consider the dataset we chose for this tutorial. 
+
+The run-off triangle representation is displayed below:
+
+```{r message=FALSE, warning=FALSE}
+library(ChainLadder)
+
+data("AutoBI")
+dataset=AutoBI$AutoBIPaid 
+dataset
+
+colnames(dataset)=c(0:(dim(dataset)[1]-1))
+rownames(dataset)=c(0:(dim(dataset)[1]-1))
+
+```
+
+Practitioners in general insurance refer to the x axis of this representation as **development years**. Similarly, the y axis is called **accident years**.
+The third dimension that matters is the diagonals: the **calendar years**.
+In ... we showed that there is a one-to-one correspondence between the age-period representation and run-off triangles.
+In notional terms, life insurance actuaries use the following terminology:
+
+* **ages** are **development years**.
+
+* **cohorts** are **accident years**.
+
+* **periods** is **calendar years**.
+
+Indeed, the age-period representation of the run-off triangle is the following:
+
+```{r echo=FALSE}
+t2c(dataset)
+```
+
+Observe that the y axis is now the **development years** (or **age**) component. 
+
+**Calendar years** (or **periods**) are displayed on the x axis. 
+
+**Accident years** (or **cohorts**) are on the diagonals.
+
+# Replicate the chain-ladder with the `fchl` package
+
+Our package is an out of the box set of tools to compute the claims reserve.
+We now show how to replicate the Mack chain-ladder.
+Observe the run-off triangle data structure first needs to be initialized to a `RtTriangle` object.
+
+```{r import, include=FALSE}
+library(clmplus)
+rtt <- RtTriangle(cumulative.payments.triangle = dataset)
+
+#AMONG OURS
+#sifa.gtpl is a case of good improvement
+#amases.gtpl is a case of good improvement
+
+#bz is good for showing apc
+
+# taylor-ashe
+# VNJ almost good
+# auto$CommercialAutoPaid is better than TA
+# AutoBI$AutoBIPaid is better than TA and previous auto
+# MCLpaid is very good
+# MedMal$MedMalPaid is very good
+# incr2cum(austri1autoBI7895$paid) you still have trends but improved ones
+# ustri1fire$paid is good
+
+
+```
+
+Starting from the results in ... we showed how to replicate the chain-ladder with an age model.
+The computation on the `RtTriangle` object is computed with the method `clmplus` specifying an hazard model.
+
+```{r message=FALSE, warning=FALSE}
+a.model=clmplus(RtTriangle =  rtt, 
+             hazard.model = "a")
+
+```
+We show the consistency of our approach by comparing our estimates with those obtained with the Mack chain-ladder method as implemented in the `ChainLadder` package.
+
+```{r message=FALSE, warning=FALSE}
+mck.chl <- MackChainLadder(dataset)
+ultimate.chl=mck.chl$FullTriangle[,dim(mck.chl$FullTriangle)[2]]
+diagonal=rev(t2c(mck.chl$FullTriangle)[,dim(mck.chl$FullTriangle)[2]])
+```
+
+Estimates are gathered in a `data.frame` to ease the understanding.
+
+```{r}
+data.frame(ultimate.cost.mack=ultimate.chl,
+           ultimate.cost.fchl=a.model$ultimate.cost,
+           reserve.mack=ultimate.chl-diagonal,
+           reserve.fchl=a.model$reserve
+           )
+
+cat('\n Total reserve:',
+    sum(a.model$reserve))
+
+```
+
+## Claims reserving with GLMs compared to hazard models
+
+We fit the standard GLM model with the `apc` package. 
+As shown in the paper the chain-ladder model can be replicated by fitting an age-cohort model.
+
+```{r}
+library(apc)
+
+ds.apc = apc.data.list(cum2incr(dataset),
+                       data.format = "CL")
+
+ac.model.apc = apc.fit.model(ds.apc,
+                         model.family = "od.poisson.response",
+                         model.design = "AC")
+
+```
+
+Inspect the model coefficients derived from the output:
+
+```{r}
+
+ac.model.apc$coefficients.canonical[,'Estimate']
+
+ac.fcst.apc = apc.forecast.ac(ac.model.apc)
+
+data.frame(reserve.mack=ultimate.chl-diagonal,
+           reserve.apc=c(0,ac.fcst.apc$response.forecast.coh[,'forecast']),
+           reserve.fchl=a.model$reserve
+           
+           )
+
+
+```
+
+Our method is able to replicate the chain-ladder results with no need to add the cohort component.
+
+```{r}
+a.model$model.fit$ax
+```
+Further inspection can be performed with the `fchl` package, which provides the graphical tools to inspect the fitted effects. Observe we model the rate in continuous time, the choice of a line plot is then consistent.
+
+```{r}
+p.a=plot(a.model)
+```
+# The benefitial effect of adding the cohort component
+
+It is straightforward to state that from the statistical perspective it is desirable to have a model with less parameters. 
+Nevertheless, our approach goes far beyond that. 
+
+By adding the cohort effect we are able to improve our modeling. 
+
+We show these results by inspecting the residuals plots.
+
+```{r}
+#make it triangular
+plotresiduals(a.model)
+```
+
+Clearly, the red and blue areas suggest some trends that the model wasn't able to catch.
+Consider now the age-cohort model and its residuals plot.
+
+```{r message=FALSE, warning=FALSE}
+ac.model <- clmplus(rtt, hazard.model="ac")
+plotresiduals(ac.model)
+```
+
+With no need of extrapolating a period component, we were able to improve the fit already.
+Similarly, it is possible to add a period component and choose an age-period model or an age-period-cohort model.
+
+```{r message=FALSE, warning=FALSE}
+ap.model = clmplus(rtt,hazard.model = "ap")
+apc.model = clmplus(rtt,hazard.model = "apc")
+```
+
+```{r}
+plotresiduals(ap.model)
+```
+It can be seen that the age-period model does not suggest any serious improvement from the age-cohort model. It is worth noticing one more time that the age-cohort model does not require any extrapolation.
+In a similar fashion, we plot the age-period-cohort model below, which seems to lead us to a small improvement. 
+
+```{r}
+plotresiduals(apc.model)
+```
+
+# Conclusions 
+
+In this vignette we wanted to show the flexibility of our modeling approach with respect to the well-known chain-ladder model.
+
+* By modeling the hazard rate we are able to replicate the chain-ladder results with less parameters. Indeed, we model the age component directly and add a cohort effect if needed. 
+
+* Going from an age model to an age-cohort model may lead to a serious improvement in the model results.
+
+
+
+
+
+
+
+
+
