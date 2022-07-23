@@ -4,10 +4,12 @@
 \alias{plot.clmplusmodel}
 \title{Plot the hazard model fitted and forecasted parameters}
 \usage{
-\method{plot}{clmplusmodel}(obj)
+\method{plot}{clmplusmodel}(x, ...)
 }
 \arguments{
-\item{obj}{clmplus model to be plotted.}
+\item{x}{clmplus model to be plotted.}
+
+\item{...}{Arguments to be passed to plot.}
 }
 \description{
 This function allows to define the behavior of the triangle payments.

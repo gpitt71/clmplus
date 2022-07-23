@@ -4,7 +4,7 @@ author: "Gabriele Pittarello"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Models comparison}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,13 +12,15 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 6, 
+  fig.height = 6
 )
 ```
 
 This vignette is made to make the readers able recreate the model comparison with the GLM approach.
 
-```{r stmodels, include=FALSE}
+```{r global variables, include=FALSE}
 
 ## libraries
 library(StMoMo)
@@ -27,6 +29,8 @@ library(ChainLadder)
 library(ggplot2)
 library(apc)
 library(CASdatasets)
+library(dplyr)
+library(tidyr)
 
 ## CASdatasets need to be loaded
 data("austri1autoBI7895")
@@ -38,8 +42,7 @@ data("swtri1auto")
 data("usautotri9504")
 data("ustri1fire")
 data("ustri2GL")
-## global variables to configure
-
+## global variables to configure : list of the models in the case study
 models=list(
   
   ## a model
@@ -47,17 +50,6 @@ models=list(
                        staticAgeFun = TRUE,
                        periodAgeFun = NULL,
                        cohortAgeFun = NULL),
-  ## p model
-  
-  p = StMoMo::StMoMo(link="log",
-                        staticAgeFun = FALSE,
-                        periodAgeFun = c("1"),
-                        cohortAgeFun = NULL),
-  ## c model
-  c = StMoMo::StMoMo(link="log",
-                        staticAgeFun = FALSE,
-                        periodAgeFun = NULL,
-                        cohortAgeFun = c("1")),
   ## ac model
   
   ac = StMoMo::StMoMo(link="log",
@@ -80,25 +72,12 @@ models=list(
   
   ## apc model
   
-  apc = StMoMo::apc(),
-  
-  
-  ## cbd model
-  
-  cbd = StMoMo::cbd(link = c("log")),
-  
-  ## m6 model
-  
-  m6 = StMoMo::m6(link = c("log")),
-  
-  ## m7 model
-  
-  m7 = StMoMo::m7(link = c("log"))
-  
-  
-  )
+  apc = StMoMo::apc()  )
 
 ```
+
+For the case study in the paper we want to make our analysis as close as possible to a real life reserving problem. 
+In order to do so, we decided to select 30 data sets available to the public from the R packages `clmplus`, `ChainLadder`, `apc` and `CASdatasets`.
 
 ```{r datasets}
 
@@ -118,38 +97,24 @@ list.of.datasets <- list(
   autoC= auto$CommercialAutoPaid,
   autoP = auto$PersonalAutoPaid,
   autoBI = AutoBI$AutoBIPaid,
-  # liab triangle, library(ChainLadder has recoveries)
   mclpaid= MCLpaid,
-  medmal=MedMal$MedMalPaid, #interesting to check out
+  medmal=MedMal$MedMalPaid,
   mortgage=Mortgage,
   mw08=MW2008,
   mw14=MW2014, 
-  #RAA triangle with recoveris
   ukmotor = UKMotor,
   usapaid=USAApaid,
-  aus1=incr2cum(austri1autoBI7895$paid),# they seem to be incremental
+  aus1=incr2cum(austri1autoBI7895$paid),
   fre4b=fretri4auto9403$body$paid,
-  # austri2auto has recoveries
-  # fretri1auto9605 is missing some data
-  # fretri2auto9605 is missing some data
-  # fretri4auto9403$damage$paid has recoveries
-  # fretri4auto9403$total$paid is not included: sum of the 2 lobs
-  # norway1=nortritpl8800$paidbyrepdel, # DESELEZIONATO: HA GLI ZERO 
-  # sing1=incr2cum(sgautoBI9301), DESELEZIONATO: HA GLI ZERO  
-  # incr2cum(sgautoprop9701) is too small for this purpose
   swiss1=swtri1auto$paid,
   usa1=usautotri9504,
-  # usreauto8700 contains negative payments
-  # usreGL8190 has recoveries
-  # usreGL8700 has recoveries
-  usa2=ustri1fire$paid, #extremely short
+  usa2=ustri1fire$paid, 
   usa3 = ustri2GL$comauto,
   usa4 = ustri2GL$home,
   usa5 = ustri2GL$work
 )
 
 ```
-
 
 
 ```{r utils, include=FALSE}
@@ -222,7 +187,9 @@ t2c.full.square <- function(x){
 }
 
 abs.min <- function(x){
-  
+  "
+  It returns the minimum value in absolute terms.
+  "
   return(x[abs(x)==min(abs(x))])}
 
 
@@ -387,6 +354,10 @@ fit.lc.nr <- function(data.T,
 
 forecast.lc.nr<-function(model,J){
   
+  "
+  It performs forecasting for the Lee-Carter hazard model.
+  "
+  
     kt.fit=arima(model$kt,c(0,1,0))
     
     kt.fcst = forecast(kt.fit,
@@ -420,10 +391,49 @@ forecast.lc.nr<-function(model,J){
 
 ```
 
+# Bake-off 
+
+Within this section we provide the code to measure the models extrapolation accuracy. 
+In order to do so, we need to coherently split the data set into training, validation and testing. We show an example for a 12x12 run-off triangle.
+
+```{r bake off split, echo=FALSE}
+J=12
+df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
+colnames(df) <- c("origin","dev","value")
+df$value[df$origin+df$dev==(J-1)]=c(3)
+df$value[df$origin+df$dev<(J-2)]=c(1)
+df$value[df$origin+df$dev==(J-2)]=c(2)
+df$value[df$origin+df$dev>=J]=c(NA)
+#nas in the lower
+df[J,3]=c(NA)
+df[J-1,3]=c(NA)
+df[J+J-1,3]=c(NA)
+df[J*J-J+1,3]=c(NA)
+df[J*J-J+1,3]=c(NA)
+#nas in the upper tail
+df[J*J-J+1-12,3]=c(NA)
+df[J*J-J+2-12,3]=c(NA)
+
+ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) + 
+  geom_tile(aes(fill = as.factor(value),color="#000000"))+scale_y_reverse()+
+  scale_fill_manual(values=c("royalblue", "darkred", "darkgreen","white"),
+                    na.value = "white",
+                    labels=c("Train","Validation","Test",""))+
+  theme_classic()+
+  labs(x="Development year", y="Accident year",fill="")+
+  theme(axis.title.x = element_text(size=8), axis.text.x  = element_text(size=7))+
+  theme(axis.title.y = element_text(size=8), axis.text.y  = element_text(size=7))+
+  scale_color_brewer(guide = 'none')
+
+```
 
 
-```{r utils, include=FALSE}
+
+```{r bake off, include=FALSE}
 best.of.the.bests <- function(df1,df2){
+  "
+  Util to turn character columns values into numeric.
+  "
   
   df1=apply(df1,MARGIN=2,FUN=as.numeric)
   df2=apply(df2,MARGIN=2,FUN=as.numeric)
@@ -436,11 +446,11 @@ best.of.the.bests <- function(df1,df2){
 
 modelcomparison.1d <- function(cumulative.payments.triangle){
   "
-  Function to compare the StMoMo package apc models with apc package apc models    performances across different triangles.
+  Function to compare the clmplus package age-period-cohort models with apc package age-period-cohort models  performances across different triangles.
   
   This function takes a triangle of cumulative payments as input.
   
-  It returns the accuracy measures for the two families.
+  It returns the accuracy measures for the two families on the triangle.
   "
   # function internal variables
   
@@ -694,16 +704,14 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
 ```
 
 
-```{r message=TRUE, warning=TRUE, include=FALSE}
+```{r bake off 2, message=TRUE, warning=TRUE, include=FALSE}
 
 modelcomparison<-function(list.of.datasets){
   "This functions returns the datasets to plot the bake-off section of the paper.
   
   The input is a list of datasets that constitue the sample. 
   
-  The output is two datasets:
-  * The first dataset contains all the best fits for the two model families
-  * The second dataset contains a comparison between different families
+  The output is datasets that contain accuracy measures.
   
   "
   best.fit=NULL
@@ -773,7 +781,7 @@ modelcomparison<-function(list.of.datasets){
 ```
 
 
-```{r}
+```{r bake off 3, include=FALSE}
 
 bake.off <- function(models.comparison){
   "
@@ -835,109 +843,27 @@ bake.off <- function(models.comparison){
 
 ```
 
-```{r message=TRUE, warning=TRUE, include=FALSE}
+The models in the `clmplus` package are compared to those in the `apc` package. Below it can be found the code we used to create the bake-off plot in our paper.
+
+```{r call bake off, message=TRUE, warning=TRUE, include=FALSE}
 out=modelcomparison(list.of.datasets = list.of.datasets)
 
 cake = bake.off(out)
 ```
 
-```{r}
-cake$p2
-```
-
-
-
-
-
-
-<-- show the plots geom.polygon geom.text -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
+```{r show paper plot bo, message=FALSE, warning=FALSE}
 cake$p3
 ```
 
-
-```{r}
-validation.check <- function(out){
-  apc= apply(out$agreement.apc,MARGIN=2,FUN=sum)
-  fchl= apply(out$agreement.fchl,MARGIN=2,FUN=sum)
-
-  return(list(
-    apc.agreement.rate=apc,
-    fchl.agreement.rate=fchl
-  ))
-}
-```
-
-
-```{r}
-v.check <- validation.check(out)
-cat(".. APC agreement rate \n")
-v.check$apc.agreement.rate
-cat(".. clmplus agreement rate \n")
-v.check$fchl.agreement.rate
-```
-
-```{r}
-#Most picked 
-cat('.. Most picked rmse: fchl \n')
-table(unlist(out$choices.fchl$rmse))
-cat('.. Most picked rmse: apc \n')
-table(unlist(out$choices.apc$rmse))
-
-```
-
-
-```{r}
-cat('.. Most picked mre: fchl \n')
-table(unlist(out$choices.fchl$mre))
-cat('.. Most picked mre: apc \n')
-table(unlist(out$choices.apc$mre))
-
-```
-
-
-```{r}
-cat('.. Most picked mae: fchl \n')
-table(unlist(out$choices.fchl$mae))
-cat('.. Most picked mae: apc \n')
-table(unlist(out$choices.apc$mae))
-
-```
-
-```{r}
-cat('.. Most picked e.i.: fchl \n')
-table(unlist(out$choices.fchl$error.incidence))
-cat('.. Most picked e.i.: apc \n')
-table(unlist(out$choices.apc$error.incidence))
-
-```
-
-
 # Thirty plots 
+
+As a further analysis, the practitioner may be interested in inspecting the behavior of the age parameter across different models for different data sets. As extensively noticed in the paper we can appreciate a decreasing behavior.
 
 ## a models 
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+In a first place we provide the code to perform the graphical comparison for the age models.
+
+```{r thirty plots ax, eval=FALSE}
 
 for(ix in names(list.of.datasets)){
   rtt <- RtTriangle(cumulative.payments.triangle = list.of.datasets[[ix]])
@@ -949,31 +875,31 @@ for(ix in names(list.of.datasets)){
                     ay=a.model$model.fit$cohorts[length(ax):(2*length(ax)-1)],
                     cy=a.model$model.fit$years,
                     ax)
-  path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\amodelsax\\",
-                    ix,
-                    "aax.png")
-  png(filename=path2file,
-      width=500,
-      height=400)
+  
+  ##################### uncomment to save to folder
+  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\amodelsax\\",
+  #                   ix,
+  #                   "aax.png")
+
+  # png(filename=path2file,
+  #     width=500,
+  #     height=400)
+  ##################### uncomment to save to folder
   plot(ax,
        type="l")
   title(ix)
-  # ggplot2::ggplot(data=df.fitted,
-  #                     ggplot2::aes(x=dy,y=ax))+
-  # ggplot2::geom_line()+
-  # ggplot2::theme_classic()+
-  # ggplot2::xlab('Development year')+
-  # ggplot2::ylab(expression(alpha[x]))
-  dev.off()
-  
+  ##################### uncomment to save
+  # dev.off()
+  #####################
 }
 
 ```
 
 ## apc models
 
+This section provides the code to perform the same analyisis for the apc models.
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
+```{r thirty plots ax apc, message=FALSE, warning=FALSE, include=FALSE}
 
 for(ix in names(list.of.datasets)){
  
@@ -985,80 +911,98 @@ for(ix in names(list.of.datasets)){
   gc = apc.model$model.fit$gc
   gc = apc.model$model.fit$gc[(length(gc)/2+1):length(gc)]
   kt= apc.model$model.fit$kt
-  path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelsax\\",
-                    ix,
-                    "apcax.png")
   
-  png(filename=path2file,
-      width=1200, 
-      height=800)
+  ##################### uncomment to save to folder
+  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelsax\\",
+  #                   ix,
+  #                   "apcax.png")
+  
+  # png(filename=path2file,
+  #     width=1200, 
+  #     height=800)
+  ##################### 
   plot(ax,
        type="l")
   title(ix)
-  # ggplot2::ggplot(data=df.fitted,
-  #                     ggplot2::aes(x=dy,y=ax))+
-  # ggplot2::geom_line()+
-  # ggplot2::theme_classic()+
-  # ggplot2::xlab('Development year')+
-  # ggplot2::ylab(expression(alpha[x]))
-  dev.off()
+  ##################### uncomment to save to folder
+  # dev.off()
+  ##################### 
   
-  path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelsgc\\",
-                    ix,
-                    "apcgc.png")
-  png(filename=path2file,
-      width=1200, 
-      height=800)
+  ##################### uncomment to save to folder
+  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelsgc\\",
+  #                   ix,
+  #                   "apcgc.png")
+  # 
+  # png(filename=path2file,
+  #     width=1200, 
+  #     height=800)
+  ##################### 
   plot(gc,
        type="l")
   title(ix)
 
-  dev.off()
+  # dev.off()
+  ##################### uncomment to save to folder
+  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelskt\\",
+  #                   ix,
+  #                   "apckt.png")
   
-  path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelskt\\",
-                    ix,
-                    "apckt.png")
-  png(filename=path2file,
-      width=1200, 
-      height=800)
+  # png(filename=path2file,
+  #     width=1200, 
+  #     height=800)
+  #####################
   plot(as.vector(kt),
        type="l")
   title(ix)
-
-  dev.off()
+  ##################### uncomment to save to folder
+  # dev.off()
+  ##################### 
 }
 
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Rankings 
 
-```{r}
+Within this section we provide practitioners with the code to perform models ranking. Please observe that now we have a different training validation split as pointed out in the paper.
+The training validation split we use is represented in the following picture.
+
+```{r models ranking split, echo=FALSE}
+# models ranking
+
+J=12
+df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
+colnames(df) <- c("origin","dev","value")
+df$value[df$origin+df$dev==(J-1)]=c(2)
+df$value[df$origin+df$dev<(J-1)]=c(1)
+df$value[df$origin+df$dev>=J]=c(NA)
+df[J,3]=c(NA)
+df[J*J-J+1,3]=c(NA)
+
+ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) + 
+  geom_tile(aes(fill = as.factor(value),color="#000000"))+scale_y_reverse()+
+  scale_fill_manual(values=c("royalblue", "darkred", "white"),
+                    na.value = "white",
+                    labels=c("Train","Validation",""))+
+  theme_classic()+
+  labs(x="Development year", y="Accident year",fill="")+
+  theme(axis.title.x = element_text(size=8), axis.text.x  = element_text(size=7))+
+  theme(axis.title.y = element_text(size=8), axis.text.y  = element_text(size=7))+
+  scale_color_brewer(guide = 'none')
+```
+
+
+```{r models ranking 1, include=FALSE}
 
 modelsranking.1d <- function(data.T){
+    "
+  Function to rank the clmplus package and apc package age-period-cohort models.
+  
+  This function takes a triangle of cumulative payments as input.
+  
+  It returns the ranking on the triangle.
+  "
+
   
   leave.out=1
   
@@ -1117,13 +1061,6 @@ modelsranking.1d <- function(data.T){
     mre = c(mre,mean(r.errors))
     
     }
-    # else{
-    # model.name = c(model.name,
-    #                paste0('clmplus.',ix))
-    # error.incidence = c(error.incidence,1e+06)
-    # mre = c(mre,1e+06)
-    # }
-    
     out1 <- data.frame(
     model.name,
     # mre,
@@ -1203,8 +1140,17 @@ modelsranking.1d <- function(data.T){
 ```
 
 
-```{r}
+```{r models ranking 2, include=FALSE}
 modelsranking <- function(list.of.datasets){
+  
+  "
+  This functions returns the datasets to plot in the ranking section of the paper.
+  
+  The input is a list of datasets that constitue the sample. 
+  
+  The output is the rankings across different data sources.
+  "
+  
   
   full.ranks=NULL
   
@@ -1219,12 +1165,13 @@ modelsranking <- function(list.of.datasets){
 }
 ```
 
-```{r}
+```{r models ranking 3, include=FALSE}
 full.ranks=modelsranking(list.of.datasets)
 ```
 
+The following picture is the models ranks plot we included in the paper.
 
-```{r}
+```{r ranking plot, echo=FALSE}
 p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
    geom_tile(aes(fill = cut(ei.rank, breaks=0:6, labels=1:6)), colour = "grey") +
    ggtitle(" ") +
@@ -1235,7 +1182,10 @@ p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
    xlab("Model") + ylab("Data source")
 p_min_expd0
 ```
-```{r}
+
+It can be useful to inspect the average rank of the different models we were comparing.
+
+```{r average rank}
 tbl=full.ranks$full.ranks %>%
   dplyr::group_by(model.name) %>%
   dplyr::summarise(mean.rank = mean(ei.rank))
@@ -1243,15 +1193,18 @@ tbl
 ```
 
 
-
-```{r}
+```{r ranks counts by model, include=FALSE}
 library(dplyr)
 temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
   group_by(model.name, ei.rank) %>% summarise(count = n())
 temp.df
 
 ```
-```{r}
+
+
+The following picture was not included in the paper but it shows the models ranks counts. It provides additional consistency to the results we included in our work.
+
+```{r plot ranks}
 ggplot(temp.df, aes(y=count, x=factor(ei.rank))) + 
     geom_bar(position="stack", stat="identity",fill='#6699CC') +
   scale_y_continuous(limits=c(0,15))+
@@ -1259,7 +1212,6 @@ ggplot(temp.df, aes(y=count, x=factor(ei.rank))) +
   theme_classic()+
   ylab("")+
   xlab("Rank")
-
 
 ```
 

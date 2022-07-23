@@ -2,7 +2,8 @@
 #'
 #' This function allows to define the behavior of the triangle payments.
 #' 
-#' @param obj clmplus model to be plotted.
+#' @param x clmplus model to be plotted.
+#' @param ... Arguments to be passed to plot.
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
@@ -15,13 +16,13 @@
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-plot.clmplusmodel <- function(obj){
+plot.clmplusmodel <- function(x, ...){
   
-  if(!is.null(obj$model.fit$ax)){
-    ax=obj$model.fit$ax
-    df.fitted= data.frame(dy=obj$model.fit$ages,
-                          ay=obj$model.fit$cohorts[length(ax):(2*length(ax)-1)],
-                          cy=obj$model.fit$years,
+  if(!is.null(x$model.fit$ax)){
+    ax=x$model.fit$ax
+    df.fitted= data.frame(dy=x$model.fit$ages,
+                          ay=x$model.fit$cohorts[length(ax):(2*length(ax)-1)],
+                          cy=x$model.fit$years,
                           ax)
     p1 <- ggplot2::ggplot(data=df.fitted,
                           ggplot2::aes(x=dy,y=ax))+
@@ -30,23 +31,23 @@ plot.clmplusmodel <- function(obj){
       ggplot2::xlab('Development year')+
       ggplot2::ylab(expression(alpha[x]))
   }else{p1<-ggplot2::ggplot()
-        df.fitted= data.frame(dy=obj$model.fit$ages,
-                              ay=obj$model.fit$cohorts[length(obj$model.fit$ages):(2*length(obj$model.fit$ages)-1)],
-                              cy=obj$model.fit$years)}
+        df.fitted= data.frame(dy=x$model.fit$ages,
+                              ay=x$model.fit$cohorts[length(x$model.fit$ages):(2*length(x$model.fit$ages)-1)],
+                              cy=x$model.fit$years)}
   
-  if(!is.null(obj$model.fit$kt[1,])){
-    kt=as.vector(obj$model.fit$kt[1,])
-    kt.f=as.vector(obj$model.fcst$kt.f$mean[1,])
-    kt.u80=as.vector(obj$model.fcst$kt.f$upper[1,,1])
-    kt.u95=as.vector(obj$model.fcst$kt.f$upper[1,,2])
-    kt.l80=as.vector(obj$model.fcst$kt.f$lower[1,,1])
-    kt.l95=as.vector(obj$model.fcst$kt.f$lower[1,,2])
+  if(!is.null(x$model.fit$kt[1,])){
+    kt=as.vector(x$model.fit$kt[1,])
+    kt.f=as.vector(x$model.fcst$kt.f$mean[1,])
+    kt.u80=as.vector(x$model.fcst$kt.f$upper[1,,1])
+    kt.u95=as.vector(x$model.fcst$kt.f$upper[1,,2])
+    kt.l80=as.vector(x$model.fcst$kt.f$lower[1,,1])
+    kt.l95=as.vector(x$model.fcst$kt.f$lower[1,,2])
     
     df.fitted= cbind(df.fitted,kt)
-    df.forecasted=data.frame(ay=c(obj$model.fit$cohorts[length(kt):(2*length(kt)-1)],
-                                  obj$model.fcst$gc.f$cohorts),
-                             cy=c(obj$model.fit$years,
-                                  obj$model.fcst$kt.f$years),
+    df.forecasted=data.frame(ay=c(x$model.fit$cohorts[length(kt):(2*length(kt)-1)],
+                                  x$model.fcst$gc.f$cohorts),
+                             cy=c(x$model.fit$years,
+                                  x$model.fcst$kt.f$years),
                              kt=c(kt,kt.f),
                              kt.u80=c(rep(0,length(kt)),kt.u80),
                              kt.u95=c(rep(0,length(kt)),kt.u95),
@@ -72,13 +73,13 @@ plot.clmplusmodel <- function(obj){
   }else{p2<-ggplot2::ggplot()
       p2.f<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$kt[1,])&&dim(obj$model.fit$kt)[1]>1){
-    kt2=as.vector(obj$model.fit$kt[2,])
-    kt2.f=as.vector(obj$model.fcst$kt.f$mean[2,])
-    kt2.u80=as.vector(obj$model.fcst$kt.f$upper[2,,1])
-    kt2.u95=as.vector(obj$model.fcst$kt.f$upper[2,,2])
-    kt2.l80=as.vector(obj$model.fcst$kt.f$lower[2,,1])
-    kt2.l95=as.vector(obj$model.fcst$kt.f$lower[2,,2])
+  if(!is.null(x$model.fit$kt[1,])&&dim(x$model.fit$kt)[1]>1){
+    kt2=as.vector(x$model.fit$kt[2,])
+    kt2.f=as.vector(x$model.fcst$kt.f$mean[2,])
+    kt2.u80=as.vector(x$model.fcst$kt.f$upper[2,,1])
+    kt2.u95=as.vector(x$model.fcst$kt.f$upper[2,,2])
+    kt2.l80=as.vector(x$model.fcst$kt.f$lower[2,,1])
+    kt2.l95=as.vector(x$model.fcst$kt.f$lower[2,,2])
     
     df.fitted= cbind(df.fitted,kt2)
     df.forecasted=cbind(df.forecasted,
@@ -107,13 +108,13 @@ plot.clmplusmodel <- function(obj){
   }else{p22<-ggplot2::ggplot()
   p22.f<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$kt[1,])&&dim(obj$model.fit$kt)[1]>2){
-    kt3=as.vector(obj$model.fit$kt[3,])
-    kt3.f=as.vector(obj$model.fcst$kt.f$mean[3,])
-    kt3.u80=as.vector(obj$model.fcst$kt.f$upper[3,,1])
-    kt3.u95=as.vector(obj$model.fcst$kt.f$upper[3,,2])
-    kt3.l80=as.vector(obj$model.fcst$kt.f$lower[3,,1])
-    kt3.l95=as.vector(obj$model.fcst$kt.f$lower[3,,2])
+  if(!is.null(x$model.fit$kt[1,])&&dim(x$model.fit$kt)[1]>2){
+    kt3=as.vector(x$model.fit$kt[3,])
+    kt3.f=as.vector(x$model.fcst$kt.f$mean[3,])
+    kt3.u80=as.vector(x$model.fcst$kt.f$upper[3,,1])
+    kt3.u95=as.vector(x$model.fcst$kt.f$upper[3,,2])
+    kt3.l80=as.vector(x$model.fcst$kt.f$lower[3,,1])
+    kt3.l95=as.vector(x$model.fcst$kt.f$lower[3,,2])
     
     df.fitted= cbind(df.fitted,kt3)
     df.forecasted=cbind(df.forecasted,
@@ -142,8 +143,8 @@ plot.clmplusmodel <- function(obj){
   }else{p23<-ggplot2::ggplot()
   p23.f<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$bx[,1])){
-    bx=as.vector(obj$model.fit$bx[,1])
+  if(!is.null(x$model.fit$bx[,1])){
+    bx=as.vector(x$model.fit$bx[,1])
     df.fitted=cbind(df.fitted,bx)
     
     p3 <- ggplot2::ggplot(data=df.fitted,
@@ -156,8 +157,8 @@ plot.clmplusmodel <- function(obj){
     
   }else{p3<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$bx)&&dim(obj$model.fit$bx)[2]>1){
-    bx2=as.vector(obj$model.fit$bx[,2])
+  if(!is.null(x$model.fit$bx)&&dim(x$model.fit$bx)[2]>1){
+    bx2=as.vector(x$model.fit$bx[,2])
     df.fitted=cbind(df.fitted,bx2)
     
     p32 <- ggplot2::ggplot(data=df.fitted,
@@ -170,8 +171,8 @@ plot.clmplusmodel <- function(obj){
     
   }else{p32<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$bx)&&dim(obj$model.fit$bx)[2]>2){
-    bx3=as.vector(obj$model.fit$bx[,3])
+  if(!is.null(x$model.fit$bx)&&dim(x$model.fit$bx)[2]>2){
+    bx3=as.vector(x$model.fit$bx[,3])
     df.fitted=cbind(df.fitted,bx3)
     
     p33 <- ggplot2::ggplot(data=df.fitted,
@@ -184,13 +185,13 @@ plot.clmplusmodel <- function(obj){
     
   }else{p33<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$gc)){
-    gc=as.vector(obj$model.fit$gc[!is.na(obj$model.fit$gc)])
-    gc.f=as.vector(obj$model.fcst$gc.f$mean)
-    gc.u80=obj$model.fcst$gc.f$upper[1:length(gc)]
-    gc.u95=obj$model.fcst$gc.f$upper[(length(gc)+1):(2*length(gc))]
-    gc.l80=obj$model.fcst$gc.f$lower[1:length(gc)]
-    gc.l95=obj$model.fcst$gc.f$lower[(length(gc)+1):(2*length(gc))]
+  if(!is.null(x$model.fit$gc)){
+    gc=as.vector(x$model.fit$gc[!is.na(x$model.fit$gc)])
+    gc.f=as.vector(x$model.fcst$gc.f$mean)
+    gc.u80=x$model.fcst$gc.f$upper[1:length(gc)]
+    gc.u95=x$model.fcst$gc.f$upper[(length(gc)+1):(2*length(gc))]
+    gc.l80=x$model.fcst$gc.f$lower[1:length(gc)]
+    gc.l95=x$model.fcst$gc.f$lower[(length(gc)+1):(2*length(gc))]
     
     df.fitted= cbind(df.fitted,gc)
     df.forecasted=data.frame(df.forecasted,
@@ -219,8 +220,8 @@ plot.clmplusmodel <- function(obj){
   }else{p4<-ggplot2::ggplot()
         p4.f<-ggplot2::ggplot()}
   
-  if(!is.null(obj$model.fit$b0x)){
-    b0x=as.vector(obj$model.fit$b0x)
+  if(!is.null(x$model.fit$b0x)){
+    b0x=as.vector(x$model.fit$b0x)
     df.fitted=cbind(df.fitted,b0x)
     p5 <- ggplot2::ggplot(data=df.fitted,
                           ggplot2::aes(x=ay,y=b0x))+
@@ -242,7 +243,7 @@ plot.clmplusmodel <- function(obj){
                           layout_matrix = lay,
                           top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
   
-  if(!is.null(obj$model.fit$bx[,2])||!is.null(obj$model.fit$bx[,3])){
+  if(!is.null(x$model.fit$bx[,2])||!is.null(x$model.fit$bx[,3])){
   lay.extra <- rbind(c(1,2),
                 c(3,4))
   plt<-gridExtra::grid.arrange(p22,
@@ -259,7 +260,7 @@ plot.clmplusmodel <- function(obj){
   plt2<-gridExtra::grid.arrange(p2.f,p4.f,layout_matrix = lay2,
                           top = grid::textGrob("Forecasted effects",gp=grid::gpar(fontsize=20)))
   
-  if(!is.null(obj$model.fit$bx[,2])||!is.null(obj$model.fit$bx[,3])){
+  if(!is.null(x$model.fit$bx[,2])||!is.null(x$model.fit$bx[,3])){
     
     plt2.extra<-gridExtra::grid.arrange(p22.f,p23.f,layout_matrix = lay2,
                                   top = grid::textGrob("Forecasted effects",gp=grid::gpar(fontsize=20)))
@@ -268,7 +269,7 @@ plot.clmplusmodel <- function(obj){
   }
 }
 
-
+globalVariables(c("dy", "cy", "ay","aes","dev","origin","value","incrementals","cumulatives"))
 
 
 

@@ -4,10 +4,12 @@
 \alias{plot.RtTriangle}
 \title{Plot the payments behavior}
 \usage{
-\method{plot}{RtTriangle}(obj)
+\method{plot}{RtTriangle}(x, ...)
 }
 \arguments{
-\item{obj}{RtTriangle to be plotted.}
+\item{x}{RtTriangle to be plotted.}
+
+\item{...}{Arguments to be passed to plot.}
 }
 \description{
 This function allows to define the behavior of the triangle payments.

@@ -10,13 +10,18 @@ RtTriangle(cumulative.payments.triangle)
 \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
 }
 \value{
-A list with class \code{"RtTriangle"} with components:
+An object of class \code{"RtTriangle"} with components:
+  \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
   
   \item{occurrance}{Matrix that contains the occurrance derived from the input triangle.}
   
   \item{exposure}{Matrix that contains the exposure derived from the input triangle, under the uniform claims arrival assumption.}
   
   \item{incremental.payments.triangle}{Triangle of incremental payments derived from the input.}
+  
+  \item{J}{Run-off triangle dimension.}
+  
+  \item{diagonal}{Cumulatives payments last diagonal.}
 }
 \description{
 This function allows to define the class of triangles for reverse time models.

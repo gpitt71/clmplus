@@ -7,13 +7,18 @@
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 #' 
-#' @return A list with class \code{"RtTriangle"} with components:
+#' @return An object of class \code{"RtTriangle"} with components:
+#'   \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
 #'   
 #'   \item{occurrance}{Matrix that contains the occurrance derived from the input triangle.}
 #'   
 #'   \item{exposure}{Matrix that contains the exposure derived from the input triangle, under the uniform claims arrival assumption.}
 #'   
 #'   \item{incremental.payments.triangle}{Triangle of incremental payments derived from the input.}
+#'   
+#'   \item{J}{Run-off triangle dimension.}
+#'   
+#'   \item{diagonal}{Cumulatives payments last diagonal.}
 #'  
 #'   
 #' @references 
@@ -48,7 +53,7 @@ RtTriangle <- function(cumulative.payments.triangle)
   
   ## Set the name for the class
   class(tr) <- "RtTriangle"
-  return(tr)
+  tr
   
 }
 

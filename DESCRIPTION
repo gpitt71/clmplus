@@ -1,11 +1,13 @@
 Package: clmplus
 Type: Package
-Title: Versatile chain-ladder model
+Title: Tool-box of chain ladder + models
 Version: 0.0.1
-Author: Gabriele Pittarello, Munir Hiabu, Andres Villegas
+Author: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>,Munir Hiabu <mh@math.ku.dk>, Andres Villegas <a.villegas@unsw.edu.au>
 Maintainer: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>
 Description: clmplus adds flexibilty to the chain-ladder model: we provide a new and more versatile framework for claims reserving given the cumulative payments data.It achieves the ambitious objective of showing the contact point between models often used in life insurance and non-life insurance models for claims reserving.Notice clmplus relies on the powerful `StMoMo` package. Practitioners can either use the default models we programmed for them or set their own hazard model.
-License: BSD 3-Clause
+URL: https://github.com/gpitt71/clmplus
+BugReports: https://github.com/gpitt71/clmplus/issues
+License: BSD_3_clause + file LICENSE
 Imports:
     StMoMo,
     ChainLadder,
@@ -13,13 +15,19 @@ Imports:
     forecast,
     gridExtra,
     grid,
-    methods,
     reshape2
 Encoding: UTF-8
 LazyData: true
-VignetteBuilder: knitr
-RoxygenNote: 7.2.0
 Suggests: 
     knitr,
     rmarkdown,
-    apc
+    apc,
+    CASdatasets,
+    dplyr,
+    tidyr
+VignetteBuilder: knitr, rmarkdown
+RoxygenNote: 7.2.0
+
+
+
+

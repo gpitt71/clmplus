@@ -2,7 +2,8 @@
 #'
 #' This function allows to define the behavior of the triangle payments.
 #' 
-#' @param obj RtTriangle to be plotted.
+#' @param x RtTriangle to be plotted.
+#' @param ... Arguments to be passed to plot.
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
@@ -14,14 +15,14 @@
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-plot.RtTriangle <- function(obj){
+plot.RtTriangle <- function(x, ...){
   
-  temp=obj$incremental.payments.triangle
+  temp=x$incremental.payments.triangle
   colnames(temp)<-seq(0,dim(temp)[1]-1)
   rownames(temp)<-seq(1,dim(temp)[1])
   temp.long <- reshape2::melt(temp,
                         value.name=c('incrementals'))
-  temp.long=cbind(temp.long,reshape2::melt(obj$cumulative.payments.triangle,
+  temp.long=cbind(temp.long,reshape2::melt(x$cumulative.payments.triangle,
                                              value.name=c('cumulatives'))[,'cumulatives'])
   colnames(temp.long) <-c('ay','dy','incrementals','cumulatives')
   temp.long$ay = as.factor(temp.long$ay)

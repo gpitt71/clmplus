@@ -4,7 +4,7 @@ author: "Gabriele Pittarello"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Case study part 1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,6 +18,13 @@ knitr::opts_chunk$set(
 
 ```{r tailor made functions, include=FALSE}
 t2c <- function(x){
+  "
+  Function to transform an upper run-off triangle into a half-square.
+    
+  This function takes an upper run-off triangle as input.
+  
+  It returns a half square.
+  "
   I= dim(x)[1]
   J= dim(x)[2]
   
@@ -34,6 +41,13 @@ t2c <- function(x){
 
 
 c2t <- function(x){
+  "
+  Function to transform a square into an upper run-off triangle.
+  
+  This function takes a half square as input.
+  
+  It returns an upper run-off triangle. 
+  "
   I= dim(x)[1]
   J= dim(x)[2]
   
@@ -77,7 +91,7 @@ Consider the dataset we chose for this tutorial.
 
 The run-off triangle representation is displayed below:
 
-```{r message=FALSE, warning=FALSE}
+```{r sand box, message=FALSE, warning=FALSE}
 library(ChainLadder)
 
 data("AutoBI")
@@ -102,7 +116,7 @@ In notional terms, life insurance actuaries use the following terminology:
 
 Indeed, the age-period representation of the run-off triangle is the following:
 
-```{r echo=FALSE}
+```{r life representation, echo=FALSE}
 t2c(dataset)
 ```
 
@@ -118,39 +132,23 @@ Our package is an out of the box set of tools to compute the claims reserve.
 We now show how to replicate the Mack chain-ladder.
 Observe the run-off triangle data structure first needs to be initialized to a `RtTriangle` object.
 
-```{r import, include=FALSE}
+```{r rtt data, include=FALSE}
 library(clmplus)
 rtt <- RtTriangle(cumulative.payments.triangle = dataset)
 
-#AMONG OURS
-#sifa.gtpl is a case of good improvement
-#amases.gtpl is a case of good improvement
-
-#bz is good for showing apc
-
-# taylor-ashe
-# VNJ almost good
-# auto$CommercialAutoPaid is better than TA
-# AutoBI$AutoBIPaid is better than TA and previous auto
-# MCLpaid is very good
-# MedMal$MedMalPaid is very good
-# incr2cum(austri1autoBI7895$paid) you still have trends but improved ones
-# ustri1fire$paid is good
-
-
 ```
 
-Starting from the results in ... we showed how to replicate the chain-ladder with an age model.
+Starting from the results in the paper we showed how to replicate the chain-ladder with an age model.
 The computation on the `RtTriangle` object is computed with the method `clmplus` specifying an hazard model.
 
-```{r message=FALSE, warning=FALSE}
+```{r amodel, message=FALSE, warning=FALSE}
 a.model=clmplus(RtTriangle =  rtt, 
              hazard.model = "a")
 
 ```
 We show the consistency of our approach by comparing our estimates with those obtained with the Mack chain-ladder method as implemented in the `ChainLadder` package.
 
-```{r message=FALSE, warning=FALSE}
+```{r mack, message=FALSE, warning=FALSE}
 mck.chl <- MackChainLadder(dataset)
 ultimate.chl=mck.chl$FullTriangle[,dim(mck.chl$FullTriangle)[2]]
 diagonal=rev(t2c(mck.chl$FullTriangle)[,dim(mck.chl$FullTriangle)[2]])
@@ -158,7 +156,7 @@ diagonal=rev(t2c(mck.chl$FullTriangle)[,dim(mck.chl$FullTriangle)[2]])
 
 Estimates are gathered in a `data.frame` to ease the understanding.
 
-```{r}
+```{r clm replicated}
 data.frame(ultimate.cost.mack=ultimate.chl,
            ultimate.cost.fchl=a.model$ultimate.cost,
            reserve.mack=ultimate.chl-diagonal,
@@ -175,7 +173,7 @@ cat('\n Total reserve:',
 We fit the standard GLM model with the `apc` package. 
 As shown in the paper the chain-ladder model can be replicated by fitting an age-cohort model.
 
-```{r}
+```{r apc clm}
 library(apc)
 
 ds.apc = apc.data.list(cum2incr(dataset),
@@ -189,7 +187,7 @@ ac.model.apc = apc.fit.model(ds.apc,
 
 Inspect the model coefficients derived from the output:
 
-```{r}
+```{r show comparison}
 
 ac.model.apc$coefficients.canonical[,'Estimate']
 
@@ -206,12 +204,12 @@ data.frame(reserve.mack=ultimate.chl-diagonal,
 
 Our method is able to replicate the chain-ladder results with no need to add the cohort component.
 
-```{r}
+```{r fitted ax amodel}
 a.model$model.fit$ax
 ```
 Further inspection can be performed with the `fchl` package, which provides the graphical tools to inspect the fitted effects. Observe we model the rate in continuous time, the choice of a line plot is then consistent.
 
-```{r}
+```{r plot effects ax}
 p.a=plot(a.model)
 ```
 # The benefitial effect of adding the cohort component
@@ -223,7 +221,7 @@ By adding the cohort effect we are able to improve our modeling.
 
 We show these results by inspecting the residuals plots.
 
-```{r}
+```{r amodel residuals}
 #make it triangular
 plotresiduals(a.model)
 ```
@@ -239,18 +237,18 @@ plotresiduals(ac.model)
 With no need of extrapolating a period component, we were able to improve the fit already.
 Similarly, it is possible to add a period component and choose an age-period model or an age-period-cohort model.
 
-```{r message=FALSE, warning=FALSE}
+```{r apapc models, message=FALSE, warning=FALSE}
 ap.model = clmplus(rtt,hazard.model = "ap")
 apc.model = clmplus(rtt,hazard.model = "apc")
 ```
 
-```{r}
+```{r residuals apmodel}
 plotresiduals(ap.model)
 ```
 It can be seen that the age-period model does not suggest any serious improvement from the age-cohort model. It is worth noticing one more time that the age-cohort model does not require any extrapolation.
 In a similar fashion, we plot the age-period-cohort model below, which seems to lead us to a small improvement. 
 
-```{r}
+```{r residuals apcmodel}
 plotresiduals(apc.model)
 ```
 

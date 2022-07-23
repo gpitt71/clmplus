@@ -2,7 +2,8 @@
 #'
 #' This function allows to plot the hazard model residuals on the triangle payments.
 #' 
-#' @param obj clmplusmodel object to be plotted.
+#' @param clmplusmodel clmplusmodel object to be plotted.
+#' @param heat.lim limits in the residuals plot.
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
@@ -20,10 +21,45 @@ plotresiduals <- function(clmplusmodel,
   
   UseMethod("plotresiduals")}
 
+#' Plot the hazard model residuals 
+#'
+#' This function allows to plot the hazard model residuals on the triangle payments.
+#' 
+#' @param clmplusmodel clmplusmodel object to be plotted.
+#' @param heat.lim limits in the residuals plot.
+#' @examples
+#' data(sifa.mtpl)
+#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
+#' plotresiduals(hz.chl)
+#' 
+#' @references 
+#' 
+#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
+#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' 
+#' @export
 plotresiduals.default <- function(clmplusmodel,
                                   heat.lim=c(-2.5,2.5)){message('The object provided must be of class clmplusmodel')}
 
-
+#' Plot the hazard model residuals 
+#'
+#' This function allows to plot the hazard model residuals on the triangle payments.
+#' 
+#' @param clmplusmodel clmplusmodel object to be plotted.
+#' @param heat.lim limits in the residuals plot.
+#' @examples
+#' data(sifa.mtpl)
+#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
+#' plotresiduals(hz.chl)
+#' 
+#' @references 
+#' 
+#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
+#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' 
+#' @export
 plotresiduals.clmplusmodel <- function(clmplusmodel,
                                     heat.lim=c(-2.5,2.5)){
   
@@ -100,9 +136,6 @@ plotresiduals.clmplusmodel <- function(clmplusmodel,
     p_hm
   
 }
-
-
-setMethod("plotresiduals", "clmplusmodel",plotresiduals.clmplusmodel)
 
 
 
