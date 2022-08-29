@@ -78,8 +78,8 @@ This vignette is organized as follows:
 
 * We show the connection between the age-period representation and run-off triangles.
 
-* We replicate the Mack chain-ladder under within our modeling framework. 
-As shown in the paper, by using the `fchl` approach the resulting model is saving some parameters with respect to the standard GLM approach.
+* We replicate the chain ladder within our modeling framework. 
+As shown in the paper, by using the `clmplus` approach the resulting model is saving some parameters with respect to the standard GLM approach.
 
 * We show an example were adding a cohort effect can lead to an improvement on the model fit.
 
@@ -87,7 +87,7 @@ In this tutorial, we show an example on the `AutoBIPaid` run-off triangle from t
 
 ## One discipline, one language
 
-Consider the dataset we chose for this tutorial. 
+Consider the data set we chose for this tutorial. 
 
 The run-off triangle representation is displayed below:
 
@@ -105,7 +105,7 @@ rownames(dataset)=c(0:(dim(dataset)[1]-1))
 
 Practitioners in general insurance refer to the x axis of this representation as **development years**. Similarly, the y axis is called **accident years**.
 The third dimension that matters is the diagonals: the **calendar years**.
-In ... we showed that there is a one-to-one correspondence between the age-period representation and run-off triangles.
+There is a one-to-one correspondence between the age-period representation and run-off triangles.
 In notional terms, life insurance actuaries use the following terminology:
 
 * **ages** are **development years**.
@@ -126,10 +126,10 @@ Observe that the y axis is now the **development years** (or **age**) component.
 
 **Accident years** (or **cohorts**) are on the diagonals.
 
-# Replicate the chain-ladder with the `fchl` package
+# Replicate the chain-ladder with the `clmplus` package
 
 Our package is an out of the box set of tools to compute the claims reserve.
-We now show how to replicate the Mack chain-ladder.
+We now show how to replicate the chain ladder model.
 Observe the run-off triangle data structure first needs to be initialized to a `RtTriangle` object.
 
 ```{r rtt data, include=FALSE}
@@ -138,7 +138,7 @@ rtt <- RtTriangle(cumulative.payments.triangle = dataset)
 
 ```
 
-Starting from the results in the paper we showed how to replicate the chain-ladder with an age model.
+Starting from the results in the paper we showed how to replicate the chain ladder with an age model.
 The computation on the `RtTriangle` object is computed with the method `clmplus` specifying an hazard model.
 
 ```{r amodel, message=FALSE, warning=FALSE}
@@ -146,7 +146,7 @@ a.model=clmplus(RtTriangle =  rtt,
              hazard.model = "a")
 
 ```
-We show the consistency of our approach by comparing our estimates with those obtained with the Mack chain-ladder method as implemented in the `ChainLadder` package.
+We show the consistency of our approach by comparing our estimates with those obtained with the Mack chain ladder method as implemented in the `ChainLadder` package.
 
 ```{r mack, message=FALSE, warning=FALSE}
 mck.chl <- MackChainLadder(dataset)

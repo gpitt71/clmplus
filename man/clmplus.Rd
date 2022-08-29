@@ -30,6 +30,7 @@ Generic method to fit the chain ladder +.
 data(sifa.mtpl)
 sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 hz.chl=clmplus(sifa.mtpl.rtt, 'a')
+
 }
 \references{
 Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 

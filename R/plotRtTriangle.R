@@ -33,7 +33,7 @@ plot.RtTriangle <- function(x, ...){
                                      by=ay,
                                      colour=ay))+
     ggplot2::geom_line()+
-    ggplot2::ggtitle("Incremental costs")+
+    ggplot2::ggtitle("Incremental payments")+
     ggplot2::theme_classic()
   
   p2 <- ggplot2::ggplot(data=temp.long,

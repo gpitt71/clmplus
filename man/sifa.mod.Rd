@@ -11,7 +11,7 @@ Run-off triangle with 12 development periods.
 sifa.mod
 }
 \description{
-Dataset of cumulative paid claims for a medium italian company in the line of business: general third party liability.
+Dataset of cumulative paid claims for a medium italian company in the line of business: motor or damage.
 }
 \references{
 Savelli, Nino and Clemente, Gian Paolo. "Stochastic claim reserving based on crm for solvency ii purposes."

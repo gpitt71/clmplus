@@ -14,8 +14,8 @@
   staticAgeFun = TRUE,
   periodAgeFun = "NP",
   cohortAgeFun = NULL,
-  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt,
-    b0x = b0x, gc = gc),
+  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x
+    = b0x, gc = gc),
   ...
 )
 }
@@ -97,6 +97,7 @@ This function allows to fit chain-ladder+ models to cumulative payments run-off 
 data(sifa.mtpl)
 sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 hz.chl=clmplus(sifa.mtpl.rtt, 'a')
+
 }
 \references{
 Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 

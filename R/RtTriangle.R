@@ -22,7 +22,6 @@
 #'  
 #'   
 #' @references 
-#' 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 

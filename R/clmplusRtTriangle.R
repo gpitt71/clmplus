@@ -20,9 +20,11 @@
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
+#' 
 #' @references 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' 
 #' @export
 clmplus <- function(RtTriangle,
                  hazard.model=NULL,
@@ -31,7 +33,9 @@ clmplus <- function(RtTriangle,
   UseMethod("clmplus")}
 
 #' Fit chain-ladder+ to reverse time triangles.
+#' 
 #' This function allows to fit chain-ladder+ models to cumulative payments run-off triangles.
+#' 
 #' @param RtTriangle RtTriangle object to be fitted.
 #' @param hazard.model hazard model supported from our package, must be provided as a string. The model can be choosen from:
 #' \itemize{
@@ -45,9 +49,11 @@ clmplus <- function(RtTriangle,
 #' \item{'m8': CBD m7 extension.}
 #' }
 #' @param ... parameters to be passed to clmplus.
+#' 
 #' @references 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' 
 #' @export
 clmplus.default <- function(RtTriangle,
                             hazard.model=NULL,
@@ -100,6 +106,7 @@ clmplus.default <- function(RtTriangle,
 #'   omitted no identifiability constraints are applied to the model.
 #'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
 #' @param ... extra arguments to be passed from or to other methods.
+#' 
 #' @return An object of class \code{"clmplusmodel"} with components:
 #'   \item{model.fit}{Hazard model fit from StMoMo.}
 #'   
@@ -119,9 +126,11 @@ clmplus.default <- function(RtTriangle,
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
+#' 
 #' @references 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' 
 #' @export
 clmplus.RtTriangle <- function(RtTriangle,
                             hazard.model=NULL,

@@ -18,30 +18,29 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette is made to make the readers able recreate the model comparison with the GLM approach.
+The `clmplus` package was created to provide actuarial scientists the tool-box that we illustrate in our theoretical paper. This vignette is made to make the readers able to recreate the type of analysis we make in the data application section of our paper.
+We believe it is extremely important to provide this vignette to disclose to the public the code we used to perform our analysis. Our results can be replicated by just running this vignette with the following seed.
+This vignette is organized as follows:
+
+* In the bake-off section we provide numerical results to compare `clmplus` models performances to the `apc` package models performances on the test set.
+
+* In the rankings section we try to rank `clmplus` models and the `apc` package models based on their performances on the validation set.
+
+During the analysis we suggest how practitioners should split the data in order to perform the studies we just described.
 
 ```{r global variables, include=FALSE}
-
+# set seed
+set.seed(42)
 ## libraries
 library(StMoMo)
 library(clmplus)
 library(ChainLadder)
 library(ggplot2)
 library(apc)
-library(CASdatasets)
 library(dplyr)
 library(tidyr)
 
-## CASdatasets need to be loaded
-data("austri1autoBI7895")
-data("fretri4auto9403")
-data("nortritpl8800")
-data("sgautoBI9301")
-data("sgautoprop9701")
-data("swtri1auto")
-data("usautotri9504")
-data("ustri1fire")
-data("ustri2GL")
+
 ## global variables to configure : list of the models in the case study
 models=list(
   
@@ -103,15 +102,7 @@ list.of.datasets <- list(
   mw08=MW2008,
   mw14=MW2014, 
   ukmotor = UKMotor,
-  usapaid=USAApaid,
-  aus1=incr2cum(austri1autoBI7895$paid),
-  fre4b=fretri4auto9403$body$paid,
-  swiss1=swtri1auto$paid,
-  usa1=usautotri9504,
-  usa2=ustri1fire$paid, 
-  usa3 = ustri2GL$comauto,
-  usa4 = ustri2GL$home,
-  usa5 = ustri2GL$work
+  usapaid=USAApaid
 )
 
 ```
@@ -396,7 +387,7 @@ forecast.lc.nr<-function(model,J){
 Within this section we provide the code to measure the models extrapolation accuracy. 
 In order to do so, we need to coherently split the data set into training, validation and testing. We show an example for a 12x12 run-off triangle.
 
-```{r bake off split, echo=FALSE}
+```{r bake off split, eval=FALSE}
 J=12
 df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
 colnames(df) <- c("origin","dev","value")
@@ -426,10 +417,10 @@ ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) +
   scale_color_brewer(guide = 'none')
 
 ```
+![Train, validation and test split we adopted in the bake-off section.](./chunk5.png)
 
 
-
-```{r bake off, include=FALSE}
+```{r bake off, eval=FALSE}
 best.of.the.bests <- function(df1,df2){
   "
   Util to turn character columns values into numeric.
@@ -704,7 +695,7 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
 ```
 
 
-```{r bake off 2, message=TRUE, warning=TRUE, include=FALSE}
+```{r bake off 2, message=TRUE, warning=TRUE, eval=FALSE}
 
 modelcomparison<-function(list.of.datasets){
   "This functions returns the datasets to plot the bake-off section of the paper.
@@ -781,7 +772,7 @@ modelcomparison<-function(list.of.datasets){
 ```
 
 
-```{r bake off 3, include=FALSE}
+```{r bake off 3, eval=FALSE}
 
 bake.off <- function(models.comparison){
   "
@@ -845,121 +836,16 @@ bake.off <- function(models.comparison){
 
 The models in the `clmplus` package are compared to those in the `apc` package. Below it can be found the code we used to create the bake-off plot in our paper.
 
-```{r call bake off, message=TRUE, warning=TRUE, include=FALSE}
+```{r call bake off, message=TRUE, warning=TRUE, eval=FALSE}
 out=modelcomparison(list.of.datasets = list.of.datasets)
 
 cake = bake.off(out)
 ```
 
-```{r show paper plot bo, message=FALSE, warning=FALSE}
+```{r show paper plot bo, message=FALSE, warning=FALSE, eval=FALSE}
 cake$p3
 ```
-
-# Thirty plots 
-
-As a further analysis, the practitioner may be interested in inspecting the behavior of the age parameter across different models for different data sets. As extensively noticed in the paper we can appreciate a decreasing behavior.
-
-## a models 
-
-In a first place we provide the code to perform the graphical comparison for the age models.
-
-```{r thirty plots ax, eval=FALSE}
-
-for(ix in names(list.of.datasets)){
-  rtt <- RtTriangle(cumulative.payments.triangle = list.of.datasets[[ix]])
-  a.model <- clmplus(RtTriangle = rtt,
-                  hazard.model = 'a')
-  
-  ax=a.model$model.fit$ax
-  df.fitted= data.frame(dy=a.model$model.fit$ages-1,
-                    ay=a.model$model.fit$cohorts[length(ax):(2*length(ax)-1)],
-                    cy=a.model$model.fit$years,
-                    ax)
-  
-  ##################### uncomment to save to folder
-  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\amodelsax\\",
-  #                   ix,
-  #                   "aax.png")
-
-  # png(filename=path2file,
-  #     width=500,
-  #     height=400)
-  ##################### uncomment to save to folder
-  plot(ax,
-       type="l")
-  title(ix)
-  ##################### uncomment to save
-  # dev.off()
-  #####################
-}
-
-```
-
-## apc models
-
-This section provides the code to perform the same analyisis for the apc models.
-
-```{r thirty plots ax apc, message=FALSE, warning=FALSE, include=FALSE}
-
-for(ix in names(list.of.datasets)){
- 
-  rtt <- RtTriangle(cumulative.payments.triangle = list.of.datasets[[ix]])
-  apc.model <- clmplus(RtTriangle = rtt,
-                  hazard.model = 'apc')
-  
-  ax=apc.model$model.fit$ax
-  gc = apc.model$model.fit$gc
-  gc = apc.model$model.fit$gc[(length(gc)/2+1):length(gc)]
-  kt= apc.model$model.fit$kt
-  
-  ##################### uncomment to save to folder
-  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelsax\\",
-  #                   ix,
-  #                   "apcax.png")
-  
-  # png(filename=path2file,
-  #     width=1200, 
-  #     height=800)
-  ##################### 
-  plot(ax,
-       type="l")
-  title(ix)
-  ##################### uncomment to save to folder
-  # dev.off()
-  ##################### 
-  
-  ##################### uncomment to save to folder
-  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelsgc\\",
-  #                   ix,
-  #                   "apcgc.png")
-  # 
-  # png(filename=path2file,
-  #     width=1200, 
-  #     height=800)
-  ##################### 
-  plot(gc,
-       type="l")
-  title(ix)
-
-  # dev.off()
-  ##################### uncomment to save to folder
-  # path2file= paste0("C:\\Users\\gpitt\\Pictures\\effectsonCHL\\apcmodelskt\\",
-  #                   ix,
-  #                   "apckt.png")
-  
-  # png(filename=path2file,
-  #     width=1200, 
-  #     height=800)
-  #####################
-  plot(as.vector(kt),
-       type="l")
-  title(ix)
-  ##################### uncomment to save to folder
-  # dev.off()
-  ##################### 
-}
-
-```
+![Comparison between apc and clmplus in terms of error incidence and mean relative error on the test set according the data split we showed above.](./chunk10.png)
 
 
 # Rankings 
@@ -967,7 +853,7 @@ for(ix in names(list.of.datasets)){
 Within this section we provide practitioners with the code to perform models ranking. Please observe that now we have a different training validation split as pointed out in the paper.
 The training validation split we use is represented in the following picture.
 
-```{r models ranking split, echo=FALSE}
+```{r models ranking split, eval=FALSE}
 # models ranking
 
 J=12
@@ -990,9 +876,10 @@ ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) +
   theme(axis.title.y = element_text(size=8), axis.text.y  = element_text(size=7))+
   scale_color_brewer(guide = 'none')
 ```
+![Train, validation split we used for models rankings.](./chunk11.png)
 
 
-```{r models ranking 1, include=FALSE}
+```{r models ranking 1, eval=FALSE}
 
 modelsranking.1d <- function(data.T){
     "
@@ -1140,7 +1027,7 @@ modelsranking.1d <- function(data.T){
 ```
 
 
-```{r models ranking 2, include=FALSE}
+```{r models ranking 2, eval=FALSE}
 modelsranking <- function(list.of.datasets){
   
   "
@@ -1165,13 +1052,13 @@ modelsranking <- function(list.of.datasets){
 }
 ```
 
-```{r models ranking 3, include=FALSE}
+```{r models ranking 3, eval=FALSE}
 full.ranks=modelsranking(list.of.datasets)
 ```
 
 The following picture is the models ranks plot we included in the paper.
 
-```{r ranking plot, echo=FALSE}
+```{r ranking plot, eval=FALSE}
 p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
    geom_tile(aes(fill = cut(ei.rank, breaks=0:6, labels=1:6)), colour = "grey") +
    ggtitle(" ") +
@@ -1183,28 +1070,41 @@ p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
 p_min_expd0
 ```
 
+![Results of models rankings.](./chunk15.png)
+
 It can be useful to inspect the average rank of the different models we were comparing.
 
-```{r average rank}
+```{r average rank, eval=FALSE}
 tbl=full.ranks$full.ranks %>%
   dplyr::group_by(model.name) %>%
   dplyr::summarise(mean.rank = mean(ei.rank))
 tbl
+
+#Output
+# A tibble: 7 × 2
+#   model.name  mean.rank
+#   <chr>           <dbl>
+# 1 apc.ac           3.77
+# 2 apc.apc          4.59
+# 3 clmplus.a        3.77
+# 4 clmplus.ac       3.36
+# 5 clmplus.ap       2.41
+# 6 clmplus.apc      2.41
+# 7 clmplus.lc       3.38
 ```
 
 
-```{r ranks counts by model, include=FALSE}
+```{r ranks counts by model, eval=FALSE}
 library(dplyr)
 temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
   group_by(model.name, ei.rank) %>% summarise(count = n())
-temp.df
 
 ```
 
 
 The following picture was not included in the paper but it shows the models ranks counts. It provides additional consistency to the results we included in our work.
 
-```{r plot ranks}
+```{r plot ranks,eval=FALSE}
 ggplot(temp.df, aes(y=count, x=factor(ei.rank))) + 
     geom_bar(position="stack", stat="identity",fill='#6699CC') +
   scale_y_continuous(limits=c(0,15))+
@@ -1214,6 +1114,15 @@ ggplot(temp.df, aes(y=count, x=factor(ei.rank))) +
   xlab("Rank")
 
 ```
+![Number of times each model scored positions from 1 to 6.](./chunk18.png)
+
+# Conclusions 
+
+In this vignette we wanted to show how the tool-box of actuarial scientists is enriched thanks to `clmplus`.
+
+* It is important to perform different analysis to validate results. In this work we showed two.
+
+* There is no best model in absolute terms: our purpose is to show that more options can improve claims reserving.
 
 
 

@@ -2,8 +2,7 @@
 % Please edit documentation in R/clmplusRtTriangle.R
 \name{clmplus.default}
 \alias{clmplus.default}
-\title{Fit chain-ladder+ to reverse time triangles.
-This function allows to fit chain-ladder+ models to cumulative payments run-off triangles.}
+\title{Fit chain-ladder+ to reverse time triangles.}
 \usage{
 \method{clmplus}{default}(RtTriangle, hazard.model = NULL, ...)
 }
@@ -25,7 +24,6 @@ This function allows to fit chain-ladder+ models to cumulative payments run-off 
 \item{...}{parameters to be passed to clmplus.}
 }
 \description{
-Fit chain-ladder+ to reverse time triangles.
 This function allows to fit chain-ladder+ models to cumulative payments run-off triangles.
 }
 \references{
