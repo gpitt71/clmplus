@@ -1,10 +1,19 @@
 Package: clmplus
 Type: Package
-Title: 'Tool-Box of Chain Ladder + Models'
+Title: 'Tool-box of chain ladder + models'
 Version: 0.0.1
-Author: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>,Munir Hiabu <mh@math.ku.dk>, Andres Villegas <a.villegas@unsw.edu.au>
+Author: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>,
+        Munir Hiabu <mh@math.ku.dk>, 
+        Andres Villegas <a.villegas@unsw.edu.au>
 Maintainer: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>
-Description: This package adds flexibilty to the chain ladder model: we provide a new and more versatile framework for claims reserving given the cumulative payments data. It achieves the ambitious objective of showing the contact point between models often used in life insurance and non-life insurance models for claims reserving. Notice that this package relies on the powerful `StMoMo` package. Practitioners can either use the default models we programmed for them or set their own hazard model.
+Description: A new and more versatile framework for claims reserving 
+             given the cumulative payments data that extends the standard 
+             chain ladder model. 
+             It achieves the ambitious objective of showing the contact 
+             point between models often used in 
+             life insurance and non-life insurance models for claims reserving. 
+             Practitioners can either use the default models we programmed for 
+             them or set their own hazard model.
 URL: https://github.com/gpitt71/clmplus
 BugReports: https://github.com/gpitt71/clmplus/issues
 License: BSD_3_clause + file LICENSE
