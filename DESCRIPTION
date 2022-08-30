@@ -16,7 +16,7 @@ Description: A new and more versatile framework for claims reserving
              them or set their own hazard model.
 URL: https://github.com/gpitt71/clmplus
 BugReports: https://github.com/gpitt71/clmplus/issues
-License: BSD_3_clause + file LICENSE
+License: GPL (>= 2)
 Imports:
     StMoMo,
     ChainLadder,
