@@ -23,6 +23,9 @@ clmplus(RtTriangle, hazard.model = NULL, ...)
 
 \item{...}{arguments to be passed to or from other methods.}
 }
+\value{
+No return value, called to pass method clmplus.
+}
 \description{
 Generic method to fit the chain ladder +.
 }

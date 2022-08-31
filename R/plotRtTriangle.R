@@ -9,6 +9,8 @@
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 #' plot(sifa.mtpl.rtt)
 #' 
+#' @return No return value, plots the run-off triangle cumulative payments and incremental payments.
+#' 
 #' @references 
 #' 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 

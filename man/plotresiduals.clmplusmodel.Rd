@@ -11,6 +11,9 @@
 
 \item{heat.lim}{limits in the residuals plot.}
 }
+\value{
+No return value, plots the hazard model residuals in triangular form.
+}
 \description{
 This function allows to plot the hazard model residuals on the triangle payments.
 }

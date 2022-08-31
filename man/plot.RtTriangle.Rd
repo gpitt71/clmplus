@@ -11,6 +11,9 @@
 
 \item{...}{Arguments to be passed to plot.}
 }
+\value{
+No return value, plots the run-off triangle cumulative payments and incremental payments.
+}
 \description{
 This function allows to define the behavior of the triangle payments.
 }

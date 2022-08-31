@@ -11,6 +11,9 @@
 
 \item{...}{Arguments to be passed to plot.}
 }
+\value{
+No return value, plots coefficients of the hazard models.
+}
 \description{
 This function allows to define the behavior of the triangle payments.
 }

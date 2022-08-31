@@ -75,7 +75,7 @@ To be disregarded unless the practitioner specifies his own hazard model in StMo
 \item{...}{extra arguments to be passed from or to other methods.}
 }
 \value{
-An object of class \code{"clmplusmodel"} with components:
+An object of class \code{"clmplusmodel"}. A list with the following elements:
   \item{model.fit}{Hazard model fit from StMoMo.}
   
   \item{hazard.model}{Hazard model chosen.}

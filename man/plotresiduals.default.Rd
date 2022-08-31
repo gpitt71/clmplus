@@ -11,6 +11,9 @@
 
 \item{heat.lim}{limits in the residuals plot.}
 }
+\value{
+No return value, called as plotresiduals method default.
+}
 \description{
 This function allows to plot the hazard model residuals on the triangle payments.
 }

@@ -1,19 +1,26 @@
 Package: clmplus
 Type: Package
-Title: 'Tool-box of chain ladder + models'
+Title: Tool-Box of Chain Ladder + Models
 Version: 0.0.1
-Author: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>,
-        Munir Hiabu <mh@math.ku.dk>, 
-        Andres Villegas <a.villegas@unsw.edu.au>
-Maintainer: Gabriele Pittarello <gabriele.pittarello@uniroma1.it>
-Description: A new and more versatile framework for claims reserving 
-             given the cumulative payments data that extends the standard 
-             chain ladder model. 
-             It achieves the ambitious objective of showing the contact 
-             point between models often used in 
-             life insurance and non-life insurance models for claims reserving. 
-             Practitioners can either use the default models we programmed for 
-             them or set their own hazard model.
+Authors@R:
+    c(person(given = "Gabriele",
+             family = "Pittarello",
+             role = c("aut", "cre", "cph"),
+             email = "gabriele.pittarello@uniroma1.it",
+             comment = c(ORCID = "0000-0003-3360-5826")),
+      person(given = "Munir",
+             family = "Hiabu",
+             email="mh@math.ku.dk",
+             role = c("aut", "cph"),
+             comment = c(ORCID = "0000-0001-5846-667X")),
+      person(given = "Andres",
+             family = "Villegas",
+             role = c("aut", "cph"),
+             email="a.villegas@unsw.edu.au"))
+Description: Implementation of the chain ladder model under the reverse time framework
+    introduced in Hiabu (2017) <doi:10.1080/03461238.2016.1240709>.
+    It also implements extensions that add flexibility to the individual development factors modeling
+    by allowing practitioners to set their own hazard rate model.
 URL: https://github.com/gpitt71/clmplus
 BugReports: https://github.com/gpitt71/clmplus/issues
 License: GPL (>= 2)

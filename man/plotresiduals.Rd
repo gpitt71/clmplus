@@ -11,6 +11,9 @@ plotresiduals(clmplusmodel, heat.lim = c(-2.5, 2.5))
 
 \item{heat.lim}{limits in the residuals plot.}
 }
+\value{
+No return value, called to pass method plotresiduals.
+}
 \description{
 This function allows to plot the hazard model residuals on the triangle payments.
 }

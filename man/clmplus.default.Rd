@@ -23,6 +23,9 @@
 
 \item{...}{parameters to be passed to clmplus.}
 }
+\value{
+No return value, called as clmplus method default.
+}
 \description{
 This function allows to fit chain-ladder+ models to cumulative payments run-off triangles.
 }

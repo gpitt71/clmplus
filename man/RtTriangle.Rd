@@ -10,7 +10,7 @@ RtTriangle(cumulative.payments.triangle)
 \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
 }
 \value{
-An object of class \code{"RtTriangle"} with components:
+An object of class \code{"RtTriangle"}. Lists the following elements:
   \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
   
   \item{occurrance}{Matrix that contains the occurrance derived from the input triangle.}

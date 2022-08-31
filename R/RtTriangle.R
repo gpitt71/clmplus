@@ -7,7 +7,7 @@
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 #' 
-#' @return An object of class \code{"RtTriangle"} with components:
+#' @return An object of class \code{"RtTriangle"}. Lists the following elements:
 #'   \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
 #'   
 #'   \item{occurrance}{Matrix that contains the occurrance derived from the input triangle.}

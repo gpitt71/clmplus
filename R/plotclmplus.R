@@ -10,6 +10,8 @@
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plot(hz.chl)
 #' 
+#' @return No return value, plots coefficients of the hazard models.
+#' 
 #' @references 
 #' 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 

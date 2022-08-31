@@ -16,6 +16,8 @@
 #' }
 #' @param ... arguments to be passed to or from other methods.
 #' 
+#' @return No return value, called to pass method clmplus.
+#' 
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
@@ -49,6 +51,8 @@ clmplus <- function(RtTriangle,
 #' \item{'m8': CBD m7 extension.}
 #' }
 #' @param ... parameters to be passed to clmplus.
+#' 
+#' @return No return value, called as clmplus method default.
 #' 
 #' @references 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
@@ -107,7 +111,7 @@ clmplus.default <- function(RtTriangle,
 #'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
 #' @param ... extra arguments to be passed from or to other methods.
 #' 
-#' @return An object of class \code{"clmplusmodel"} with components:
+#' @return An object of class \code{"clmplusmodel"}. A list with the following elements:
 #'   \item{model.fit}{Hazard model fit from StMoMo.}
 #'   
 #'   \item{hazard.model}{Hazard model chosen.}

@@ -10,6 +10,8 @@
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plotresiduals(hz.chl)
 #' 
+#' @return No return value, called to pass method plotresiduals.
+#' 
 #' @references 
 #' 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
@@ -33,6 +35,8 @@ plotresiduals <- function(clmplusmodel,
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plotresiduals(hz.chl)
 #' 
+#' @return No return value, called as plotresiduals method default.
+#' 
 #' @references 
 #' 
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
@@ -53,6 +57,8 @@ plotresiduals.default <- function(clmplusmodel,
 #' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plotresiduals(hz.chl)
+#' 
+#' @return No return value, plots the hazard model residuals in triangular form.
 #' 
 #' @references 
 #' 
