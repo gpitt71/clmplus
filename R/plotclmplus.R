@@ -32,6 +32,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::theme_classic()+
       ggplot2::xlab('Development year')+
       ggplot2::ylab(expression(alpha[x]))
+    
   }else{p1<-ggplot2::ggplot()
         df.fitted= data.frame(dy=x$model.fit$ages,
                               ay=x$model.fit$cohorts[length(x$model.fit$ages):(2*length(x$model.fit$ages)-1)],
@@ -66,8 +67,8 @@ plot.clmplusmodel <- function(x, ...){
     
     p2.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt))+
       ggplot2::geom_line()+
-      ggplot2::geom_ribbon(aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2)+
-      ggplot2::geom_ribbon(aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
       ggplot2::ylab(expression(kappa[t]))
@@ -101,8 +102,8 @@ plot.clmplusmodel <- function(x, ...){
     
     p22.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt2))+
       ggplot2::geom_line()+
-      ggplot2::geom_ribbon(aes(ymin = kt2.l80, ymax = kt2.u80), alpha = 0.2)+
-      ggplot2::geom_ribbon(aes(ymin = kt2.l95, ymax = kt2.u95), alpha = 0.1)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = kt2.l80, ymax = kt2.u80), alpha = 0.2)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = kt2.l95, ymax = kt2.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
       ggplot2::ylab(expression(kappa[t]^2))
@@ -136,8 +137,8 @@ plot.clmplusmodel <- function(x, ...){
     
     p23.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt3))+
       ggplot2::geom_line()+
-      ggplot2::geom_ribbon(aes(ymin = kt3.l80, ymax = kt3.u80), alpha = 0.2)+
-      ggplot2::geom_ribbon(aes(ymin = kt3.l95, ymax = kt3.u95), alpha = 0.1)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = kt3.l80, ymax = kt3.u80), alpha = 0.2)+
+      ggplot2::geom_ribbon(ggplot2::aes(ymin = kt3.l95, ymax = kt3.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
       ggplot2::ylab(expression(kappa[t]^3))
