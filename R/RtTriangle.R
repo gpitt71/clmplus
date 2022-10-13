@@ -38,8 +38,8 @@ RtTriangle <- function(cumulative.payments.triangle)
   occurrance=pkg.env$t2c(incrementals)
   exposure=pkg.env$t2c(cumulative.payments.triangle-incrementals/2)
   
-  occurrance[is.na(occurrance)]=c(0.)
-  exposure[is.na(occurrance)]=c(0.)
+  # occurrance[is.na(occurrance)]=c(0.)
+  # exposure[is.na(occurrance)]=c(0.)
   
   tr <- list(
     cumulative.payments.triangle = cumulative.payments.triangle,
