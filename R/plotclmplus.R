@@ -31,7 +31,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
       ggplot2::xlab('Development year')+
-      ggplot2::ylab(expression(alpha[x]))
+      ggplot2::ylab(expression(a[j]))
     
   }else{p1<-ggplot2::ggplot()
         df.fitted= data.frame(dy=x$model.fit$ages,
@@ -63,7 +63,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(kappa[t]))
+      ggplot2::ylab(expression(c[k+j]))
     
     p2.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt))+
       ggplot2::geom_line()+
@@ -71,10 +71,10 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(kappa[t]))
+      ggplot2::ylab(expression(c[k+j]))
     
   }else{p2<-ggplot2::ggplot()
-      p2.f<-ggplot2::ggplot()}
+      p2.f<-NULL}
   
   if(!is.null(x$model.fit$kt[1,])&&dim(x$model.fit$kt)[1]>1){
     kt2=as.vector(x$model.fit$kt[2,])
@@ -98,7 +98,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(kappa[t]^2))
+      ggplot2::ylab(expression(c[k+j]^2))
     
     p22.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt2))+
       ggplot2::geom_line()+
@@ -106,7 +106,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt2.l95, ymax = kt2.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(kappa[t]^2))
+      ggplot2::ylab(expression(c[k+j]^2))
     
   }else{p22<-ggplot2::ggplot()
   p22.f<-ggplot2::ggplot()}
@@ -133,7 +133,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(kappa[t]^3))
+      ggplot2::ylab(expression(c[k+j]^3))
     
     p23.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt3))+
       ggplot2::geom_line()+
@@ -141,7 +141,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt3.l95, ymax = kt3.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(kappa[t]^3))
+      ggplot2::ylab(expression(c[k+j]^3))
     
   }else{p23<-ggplot2::ggplot()
   p23.f<-ggplot2::ggplot()}
@@ -190,19 +190,19 @@ plot.clmplusmodel <- function(x, ...){
   
   if(!is.null(x$model.fit$gc)){
     gc=as.vector(x$model.fit$gc[!is.na(x$model.fit$gc)])
-    gc.f=as.vector(x$model.fcst$gc.f$mean)
-    gc.u80=x$model.fcst$gc.f$upper[1:length(gc)]
-    gc.u95=x$model.fcst$gc.f$upper[(length(gc)+1):(2*length(gc))]
-    gc.l80=x$model.fcst$gc.f$lower[1:length(gc)]
-    gc.l95=x$model.fcst$gc.f$lower[(length(gc)+1):(2*length(gc))]
+    # gc.f=as.vector(x$model.fcst$gc.f$mean)
+    # gc.u80=x$model.fcst$gc.f$upper[1:length(gc)]
+    # gc.u95=x$model.fcst$gc.f$upper[(length(gc)+1):(2*length(gc))]
+    # gc.l80=x$model.fcst$gc.f$lower[1:length(gc)]
+    # gc.l95=x$model.fcst$gc.f$lower[(length(gc)+1):(2*length(gc))]
     
     df.fitted= cbind(df.fitted,gc)
-    df.forecasted=data.frame(df.forecasted,
-                             gc=c(gc,gc.f),
-                             gc.u80=c(rep(0,length(gc)),gc.u80),
-                             gc.u95=c(rep(0,length(gc)),gc.u95),
-                             gc.l80=c(rep(0,length(gc)),gc.l80),
-                             gc.l95=c(rep(0,length(gc)),gc.l95))
+    # df.forecasted=data.frame(df.forecasted,
+    #                          gc=c(gc,gc.f),
+    #                          gc.u80=c(rep(0,length(gc)),gc.u80),
+    #                          gc.u95=c(rep(0,length(gc)),gc.u95),
+    #                          gc.l80=c(rep(0,length(gc)),gc.l80),
+    #                          gc.l95=c(rep(0,length(gc)),gc.l95))
     
     p4 <- ggplot2::ggplot(data=df.fitted,
                           ggplot2::aes(x=ay,
@@ -210,18 +210,18 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
       ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(gamma[t-x]))
+      ggplot2::ylab(expression(g[k]))
     
-    p4.f <- ggplot2::ggplot(data=df.forecasted,
-                            ggplot2::aes(x=ay,y=gc))+
-      ggplot2::geom_line()+
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = gc.l80, ymax = gc.u80), alpha = 0.2)+
-      ggplot2::geom_ribbon(ggplot2::aes(ymin = gc.l95, ymax = gc.u95), alpha = 0.1)+
-      ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
-      ggplot2::ylab(expression(gamma[t-x]))
-  }else{p4<-ggplot2::ggplot()
-        p4.f<-ggplot2::ggplot()}
+    # p4.f <- ggplot2::ggplot(data=df.forecasted,
+    #                         ggplot2::aes(x=ay,y=gc))+
+    #   ggplot2::geom_line()+
+    #   ggplot2::geom_ribbon(ggplot2::aes(ymin = gc.l80, ymax = gc.u80), alpha = 0.2)+
+    #   ggplot2::geom_ribbon(ggplot2::aes(ymin = gc.l95, ymax = gc.u95), alpha = 0.1)+
+    #   ggplot2::theme_classic()+
+    #   ggplot2::xlab('Calendar year')+
+    #   ggplot2::ylab(expression(g[k]))
+    
+  }else{p4 <- ggplot2::ggplot()}
   
   if(!is.null(x$model.fit$b0x)){
     b0x=as.vector(x$model.fit$b0x)
@@ -246,7 +246,10 @@ plot.clmplusmodel <- function(x, ...){
                           layout_matrix = lay,
                           top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
   
-  if(!is.null(x$model.fit$bx[,2])||!is.null(x$model.fit$bx[,3])){
+  
+  if(!is.null(x$model.fit$bx)){
+    
+    if(dim(x$model.fit$bx)[2]>1){
   lay.extra <- rbind(c(1,2),
                 c(3,4))
   plt<-gridExtra::grid.arrange(p22,
@@ -257,20 +260,25 @@ plot.clmplusmodel <- function(x, ...){
                                top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))}
   
   
-  lay2 <- rbind(c(1),
-               c(2))
+  lay2 <- rbind(c(1))
+
+  plt2<-gridExtra::grid.arrange(p2.f,layout_matrix = lay2,
+                           top = grid::textGrob("Forecasted effects",gp=grid::gpar(fontsize=20)))
   
-  plt2<-gridExtra::grid.arrange(p2.f,p4.f,layout_matrix = lay2,
-                          top = grid::textGrob("Forecasted effects",gp=grid::gpar(fontsize=20)))
   
-  if(!is.null(x$model.fit$bx[,2])||!is.null(x$model.fit$bx[,3])){
+  if(dim(x$model.fit$bx)[2]>1){
     
     plt2.extra<-gridExtra::grid.arrange(p22.f,p23.f,layout_matrix = lay2,
                                   top = grid::textGrob("Forecasted effects",gp=grid::gpar(fontsize=20)))
     
     
   }
-}
+  
+  }
+
+  
+  
+  }
 
 globalVariables(c("dy", "cy", "ay","aes","dev","origin","value","incrementals","cumulatives"))
 
