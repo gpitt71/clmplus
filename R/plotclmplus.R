@@ -108,7 +108,7 @@ plot.clmplusmodel <- function(x, type ="fitted", ...){
       if(type=="fitted"){
       return(p1+ggplot2::ggtitle("Fitted effect"))}else{
         
-        return(cat("There are no forecasted effects in the age-model."))
+        return(cat("There are no forecasted effects in the age model."))
       }
       }
     
@@ -358,7 +358,7 @@ plot.clmplusmodel <- function(x, type ="fitted", ...){
                                      top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
         
         return(cat("\n"))}else{
-          return(cat("There are no forecasted effects in the age-model."))
+          return(cat("There are no forecasted effects in the age-cohort model."))
         }
       
     }
