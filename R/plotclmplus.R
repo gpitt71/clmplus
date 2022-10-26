@@ -209,7 +209,7 @@ plot.clmplusmodel <- function(x, ...){
                                        y=gc))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Accident year')+
       ggplot2::ylab(expression(g[k]))
     
     # p4.f <- ggplot2::ggplot(data=df.forecasted,
@@ -263,7 +263,7 @@ plot.clmplusmodel <- function(x, ...){
   lay2 <- rbind(c(1))
 
   plt2<-gridExtra::grid.arrange(p2.f,layout_matrix = lay2,
-                           top = grid::textGrob("Forecasted effects",gp=grid::gpar(fontsize=20)))
+                           top = grid::textGrob("Forecasted effect",gp=grid::gpar(fontsize=20)))
   
   
   if(dim(x$model.fit$bx)[2]>1){
