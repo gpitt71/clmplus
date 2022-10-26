@@ -15,6 +15,7 @@ clmplus(RtTriangle, hazard.model = NULL, ...)
 \item{'ac': Age and cohort effects.}
 \item{'ap': Age and cohort effects.}
 \item{'apc': Age cohort and period effects.}
+\item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
 \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
 \item{'m6': CBD with cohorts.}
 \item{'m7': CBD m7 extension.}

@@ -4,10 +4,12 @@
 \alias{plot.clmplusmodel}
 \title{Plot the hazard model fitted and forecasted parameters}
 \usage{
-\method{plot}{clmplusmodel}(x, ...)
+\method{plot}{clmplusmodel}(x, type = "fitted", ...)
 }
 \arguments{
 \item{x}{clmplus model to be plotted.}
+
+\item{type}{whether to show fitted or forecasted effects. Default is "fitted", possible to set to "forecasted".}
 
 \item{...}{Arguments to be passed to plot.}
 }

@@ -57,4 +57,3 @@ RtTriangle <- function(cumulative.payments.triangle)
 }
 
 
-

@@ -3,6 +3,7 @@
 #' This function allows to define the behavior of the triangle payments.
 #' 
 #' @param x clmplus model to be plotted.
+#' @param type whether to show fitted or forecasted effects. Default is "fitted", possible to set to "forecasted".
 #' @param ... Arguments to be passed to plot.
 #' @examples
 #' data(sifa.mtpl)
@@ -18,7 +19,77 @@
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-plot.clmplusmodel <- function(x, ...){
+plot.clmplusmodel <- function(x, type ="fitted", ...){
+
+  if(x$hazard.model=="lc"){
+    
+    p1 <- ggplot2::ggplot(data=data.frame(ax=x$model.fit$ax,
+                                          dy=seq(0,length(x$model.fit$ax)-1)),
+                          ggplot2::aes(x=dy,y=ax))+
+      ggplot2::geom_line()+
+      ggplot2::theme_classic()+
+      ggplot2::xlab('Development period')+
+      ggplot2::ylab(expression(a[j]))
+    
+    p2 <- ggplot2::ggplot(data=data.frame(kt=x$model.fit$kt,
+                                          cy=seq(0,length(x$model.fit$kt)-1)),
+                          ggplot2::aes(x=cy,
+                                       y=kt))+
+      ggplot2::geom_line()+
+      ggplot2::theme_classic()+
+      ggplot2::xlab('Calendar period')+
+      ggplot2::ylab(expression(c[k+j]))
+    
+    p3 <- ggplot2::ggplot(data=data.frame(ax=x$model.fit$bx,
+                                          dy=seq(0,length(x$model.fit$bx)-1)),
+                          ggplot2::aes(x=dy,y=ax))+
+      ggplot2::geom_line()+
+      ggplot2::theme_classic()+
+      ggplot2::xlab('Development period')+
+      ggplot2::ylab(expression(b[j]))
+    
+    lay <- rbind(c(1,NA),
+                 c(2,NA),
+                 c(3,NA))
+    
+    if(type=="fitted"){
+      
+      plt<-gridExtra::grid.arrange(p1,
+                                   p2,
+                                   p3,
+                                   layout_matrix = lay,
+                                   top = grid::textGrob("Fitted effects",
+                                                        gp=grid::gpar(fontsize=20)))
+      
+      return(cat("\n"))}
+    if(type=="forecasted"){
+      
+      kt.u80=as.vector(x$model.fit$kt.fcst$upper[,1])
+      kt.u95=as.vector(x$model.fit$kt.fcst$upper[,2])
+      kt.l80=as.vector(x$model.fit$kt.fcst$lower[,1])
+      kt.l95=as.vector(x$model.fit$kt.fcst$lower[,2])
+      
+      
+      p2.f <- ggplot2::ggplot(data=data.frame(cy=seq(0,2*length(x$model.fit$kt)-1),
+                                              kt=c(x$model.fit$kt,
+                                                   x$model.fit$kt.fcst$mean),
+                                              kt.u80=c(rep(0,length(x$model.fit$kt)),kt.u80),
+                                              kt.u95=c(rep(0,length(x$model.fit$kt)),kt.u95),
+                                              kt.l80=c(rep(0,length(x$model.fit$kt)),kt.l80),
+                                              kt.l95=c(rep(0,length(x$model.fit$kt)),kt.l95)),
+                              
+                              ggplot2::aes(x=cy,y=kt))+
+        ggplot2::geom_line()+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2)+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
+        ggplot2::theme_classic()+
+        ggplot2::xlab('Calendar period')+
+        ggplot2::ylab(expression(c[k+j]))
+      
+      
+      return(p2.f+ggplot2::ggtitle("Forecasted effect"))
+      
+    }}
   
   if(!is.null(x$model.fit$ax)){
     ax=x$model.fit$ax
@@ -30,8 +101,12 @@ plot.clmplusmodel <- function(x, ...){
                           ggplot2::aes(x=dy,y=ax))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Development year')+
+      ggplot2::xlab('Development period')+
       ggplot2::ylab(expression(a[j]))
+    
+    if(x$hazard.model=="a"){
+      return(p1+ggplot2::ggtitle("Fitted effect"))
+      }
     
   }else{p1<-ggplot2::ggplot()
         df.fitted= data.frame(dy=x$model.fit$ages,
@@ -62,7 +137,7 @@ plot.clmplusmodel <- function(x, ...){
                                        y=kt))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Calendar period')+
       ggplot2::ylab(expression(c[k+j]))
     
     p2.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt))+
@@ -70,8 +145,29 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2)+
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Calendar period')+
       ggplot2::ylab(expression(c[k+j]))
+    
+    if(x$hazard.model=="ap"){
+      
+      lay <- rbind(c(1,2))
+      
+      if(type=="fitted"){
+        
+        plt<-gridExtra::grid.arrange(p1,
+                                     p2,
+                                     layout_matrix = lay,
+                                     top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
+        
+        return(cat("\n"))}
+      if(type=="forecasted"){
+        
+        return(p2.f+ggplot2::ggtitle("Forecasted effect"))
+        
+      }
+      
+    }
+    
     
   }else{p2<-ggplot2::ggplot()
       p2.f<-NULL}
@@ -97,7 +193,7 @@ plot.clmplusmodel <- function(x, ...){
                                        y=kt2))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Calendar period')+
       ggplot2::ylab(expression(c[k+j]^2))
     
     p22.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt2))+
@@ -105,7 +201,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt2.l80, ymax = kt2.u80), alpha = 0.2)+
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt2.l95, ymax = kt2.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Calendar period')+
       ggplot2::ylab(expression(c[k+j]^2))
     
   }else{p22<-ggplot2::ggplot()
@@ -132,7 +228,7 @@ plot.clmplusmodel <- function(x, ...){
                                         y=kt3))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Calendar period')+
       ggplot2::ylab(expression(c[k+j]^3))
     
     p23.f <- ggplot2::ggplot(data=df.forecasted,ggplot2::aes(x=cy,y=kt3))+
@@ -140,7 +236,7 @@ plot.clmplusmodel <- function(x, ...){
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt3.l80, ymax = kt3.u80), alpha = 0.2)+
       ggplot2::geom_ribbon(ggplot2::aes(ymin = kt3.l95, ymax = kt3.u95), alpha = 0.1)+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Calendar year')+
+      ggplot2::xlab('Calendar period')+
       ggplot2::ylab(expression(c[k+j]^3))
     
   }else{p23<-ggplot2::ggplot()
@@ -155,7 +251,7 @@ plot.clmplusmodel <- function(x, ...){
                                        y=bx))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Development year')+
+      ggplot2::xlab('Development period')+
       ggplot2::ylab(expression(beta[x]^1))
     
   }else{p3<-ggplot2::ggplot()}
@@ -169,7 +265,7 @@ plot.clmplusmodel <- function(x, ...){
                                        y=bx2))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Development year')+
+      ggplot2::xlab('Development period')+
       ggplot2::ylab(expression(beta[x]^2))
     
   }else{p32<-ggplot2::ggplot()}
@@ -183,7 +279,7 @@ plot.clmplusmodel <- function(x, ...){
                                         y=bx3))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Development year')+
+      ggplot2::xlab('Development period')+
       ggplot2::ylab(expression(beta[x]^3))
     
   }else{p33<-ggplot2::ggplot()}
@@ -209,7 +305,7 @@ plot.clmplusmodel <- function(x, ...){
                                        y=gc))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Accident year')+
+      ggplot2::xlab('Accident period')+
       ggplot2::ylab(expression(g[k]))
     
     # p4.f <- ggplot2::ggplot(data=df.forecasted,
@@ -218,8 +314,49 @@ plot.clmplusmodel <- function(x, ...){
     #   ggplot2::geom_ribbon(ggplot2::aes(ymin = gc.l80, ymax = gc.u80), alpha = 0.2)+
     #   ggplot2::geom_ribbon(ggplot2::aes(ymin = gc.l95, ymax = gc.u95), alpha = 0.1)+
     #   ggplot2::theme_classic()+
-    #   ggplot2::xlab('Calendar year')+
+    #   ggplot2::xlab('Calendar period')+
     #   ggplot2::ylab(expression(g[k]))
+    
+    if(x$hazard.model=="apc"){
+      
+      lay <- rbind(c(1,NA),
+                   c(2,NA),
+                   c(3,NA))
+      
+      if(type=="fitted"){
+        
+        plt<-gridExtra::grid.arrange(p1,
+                                     p2,
+                                     p4,
+                                     layout_matrix = lay,
+                                     top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
+        
+        return(cat("\n"))}
+      if(type=="forecasted"){
+        
+        return(p2.f+ggplot2::ggtitle("Forecasted effect"))
+        
+      }
+      
+    }
+    
+    if(x$hazard.model=="ac"){
+      
+      lay <- rbind(c(1,NA),
+                   c(2,NA))
+      
+      if(type=="fitted"){
+        
+        plt<-gridExtra::grid.arrange(p1,
+                                     p4,
+                                     layout_matrix = lay,
+                                     top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
+        
+        return(cat("\n"))}
+      
+    }
+    
+    
     
   }else{p4 <- ggplot2::ggplot()}
   
@@ -230,13 +367,16 @@ plot.clmplusmodel <- function(x, ...){
                           ggplot2::aes(x=ay,y=b0x))+
       ggplot2::geom_line()+
       ggplot2::theme_classic()+
-      ggplot2::xlab('Development year')+
+      ggplot2::xlab('Development period')+
       ggplot2::ylab(expression(beta[x]^0))
   }else{p5<-ggplot2::ggplot()}
   
   lay <- rbind(c(1,NA),
                c(2,3),
                c(4,5))
+  
+  
+  if(type=="fitted"){
   
   plt<-gridExtra::grid.arrange(p1,
                           p4,
@@ -245,7 +385,8 @@ plot.clmplusmodel <- function(x, ...){
                           p3,
                           layout_matrix = lay,
                           top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
-  
+ 
+   }else if(type=="forecasted"){
   
   if(!is.null(x$model.fit$bx)){
     
@@ -275,7 +416,7 @@ plot.clmplusmodel <- function(x, ...){
   }
   
   }
-
+}else{cat("Please set type either to 'fitted' or 'forecasted'")}
   
   
   }

@@ -9,6 +9,7 @@
 #' \item{'ac': Age and cohort effects.}
 #' \item{'ap': Age and cohort effects.}
 #' \item{'apc': Age cohort and period effects.}
+#' \item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
 #' \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
 #' \item{'m6': CBD with cohorts.}
 #' \item{'m7': CBD m7 extension.}
@@ -46,6 +47,7 @@ clmplus <- function(RtTriangle,
 #' \item{'ap': Age and cohort effects.}
 #' \item{'apc': Age cohort and period effects.}
 #' \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
+#' \item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
 #' \item{'m6': CBD with cohorts.}
 #' \item{'m7': CBD m7 extension.}
 #' \item{'m8': CBD m7 extension.}
@@ -74,6 +76,7 @@ clmplus.default <- function(RtTriangle,
 #' \item{'ac': Age and cohort effects.}
 #' \item{'ap': Age and cohort effects.}
 #' \item{'apc': Age cohort and period effects.}
+#' \item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
 #' \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
 #' \item{'m6': CBD with cohorts.}
 #' \item{'m7': CBD m7 extension.}
@@ -207,10 +210,13 @@ clmplus.RtTriangle <- function(RtTriangle,
                                iter.max=iter.max,
                                tolerance.max=tolerance.max)
     
+    
     kt.fit=stats::arima(model$kt,c(0,1,0))
     
     kt.fcst = forecast::forecast(kt.fit,
                        J)
+    
+    model$kt.fcst=kt.fcst
     
     kt.mx = matrix(rep(kt.fcst$mean,
                        J),
