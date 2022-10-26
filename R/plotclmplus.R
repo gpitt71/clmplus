@@ -105,7 +105,11 @@ plot.clmplusmodel <- function(x, type ="fitted", ...){
       ggplot2::ylab(expression(a[j]))
     
     if(x$hazard.model=="a"){
-      return(p1+ggplot2::ggtitle("Fitted effect"))
+      if(type=="fitted"){
+      return(p1+ggplot2::ggtitle("Fitted effect"))}else{
+        
+        return(cat("There are no forecasted effects in the age-model."))
+      }
       }
     
   }else{p1<-ggplot2::ggplot()
@@ -150,7 +154,8 @@ plot.clmplusmodel <- function(x, type ="fitted", ...){
     
     if(x$hazard.model=="ap"){
       
-      lay <- rbind(c(1,2))
+      lay <- rbind(c(1,NA),
+                   c(2,NA))
       
       if(type=="fitted"){
         
@@ -352,7 +357,9 @@ plot.clmplusmodel <- function(x, type ="fitted", ...){
                                      layout_matrix = lay,
                                      top = grid::textGrob("Fitted effects",gp=grid::gpar(fontsize=20)))
         
-        return(cat("\n"))}
+        return(cat("\n"))}else{
+          return(cat("There are no forecasted effects in the age-model."))
+        }
       
     }
     
