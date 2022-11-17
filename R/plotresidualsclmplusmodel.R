@@ -74,7 +74,7 @@ plotresiduals.clmplusmodel <- function(clmplusmodel,
     res.m = stats::residuals(clmplusmodel$model.fit)
     res.tr=pkg.env$c2t(res.m$residuals)
     colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
-    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
+    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr[,2:dim(res.tr)[2]])
     
   }
   
@@ -115,7 +115,7 @@ plotresiduals.clmplusmodel <- function(clmplusmodel,
     
     res.tr=pkg.env$c2t(res.m)
     colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
-    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
+    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr[,2:dim(res.tr)[2]])
 
   }
 

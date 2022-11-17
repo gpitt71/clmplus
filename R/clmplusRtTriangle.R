@@ -155,6 +155,7 @@ clmplus.RtTriangle <- function(RtTriangle,
   
   if(is.null(hazard.model)){
     
+
     stmomo.model = StMoMo::StMoMo(link = link, 
                           staticAgeFun = staticAgeFun, 
                           periodAgeFun = periodAgeFun,
@@ -164,6 +165,7 @@ clmplus.RtTriangle <- function(RtTriangle,
     model <- StMoMo::fit(stmomo.model, 
                          Dxt = RtTriangle$occurrance, 
                          Ext = RtTriangle$exposure,
+                         wxt = RtTriangle$fit.w,
                          iterMax=as.integer(1e+05))
     
     #forecasting horizon
@@ -255,10 +257,10 @@ clmplus.RtTriangle <- function(RtTriangle,
 
   
   if(hazard.model %in% names(pkg.env$models)){
-  
   model <- StMoMo::fit(pkg.env$models[[hazard.model]], 
                        Dxt = RtTriangle$occurrance, 
                        Ext = RtTriangle$exposure,
+                       wxt=RtTriangle$fit.w,
                        iterMax=as.integer(1e+05))
   
   #forecasting horizon

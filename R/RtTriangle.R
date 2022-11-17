@@ -41,10 +41,17 @@ RtTriangle <- function(cumulative.payments.triangle)
   # occurrance[is.na(occurrance)]=c(0.)
   # exposure[is.na(occurrance)]=c(0.)
   
+  # find out the weights
+  fit.w <- matrix(1,nrow=J,ncol = J)
+  # fit.w[,1]=0
+  fit.w=pkg.env$t2c(fit.w)
+  fit.w[is.na(fit.w)]=0
+  
   tr <- list(
     cumulative.payments.triangle = cumulative.payments.triangle,
     occurrance = occurrance,
     exposure = exposure,
+    fit.w=fit.w,
     incremental.payments.triangle = incrementals,
     J=J,
     diagonal=pkg.env$t2c(cumulative.payments.triangle)[,J]
