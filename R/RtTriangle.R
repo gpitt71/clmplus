@@ -42,8 +42,8 @@ RtTriangle <- function(cumulative.payments.triangle)
   # exposure[is.na(occurrance)]=c(0.)
   
   # find out the weights
-  fit.w <- matrix(1,nrow=J,ncol = J)
-  # fit.w[,1]=0
+  fit.w <- matrix(1,nrow=J,ncol = J) 
+  fit.w[,1]=0
   fit.w=pkg.env$t2c(fit.w)
   fit.w[is.na(fit.w)]=0
   
