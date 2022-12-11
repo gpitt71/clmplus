@@ -17,7 +17,6 @@ Examples of model configurations we support:
 | ac              | age-cohort                      |development-accident              |
 | ap              | age-period                      |development-calendar              |
 | apc             | age-period-cohort               |development-calendar-accident     |
-| lc              | lee-carter                      |development-development x calendar|
 
 ## Installation 
 
