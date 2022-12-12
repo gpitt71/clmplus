@@ -15,6 +15,10 @@
 #' \item{'m7': CBD m7 extension.}
 #' \item{'m8': CBD m7 extension.}
 #' }
+#' @param gk.fc.model model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
+#' @param ckj.fc.model model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
+#' @param gk.order order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
+#' @param ckj.fc.model order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
 #' @param ... arguments to be passed to or from other methods.
 #' 
 #' @return No return value, called to pass method clmplus.
@@ -31,6 +35,10 @@
 #' @export
 clmplus <- function(RtTriangle,
                  hazard.model=NULL,
+                 gk.fc.model='a',
+                 ckj.fc.model='a',
+                 gk.order=c(1,1,0),
+                 ckj.order=c(0,1,0),
                  ...){
   
   UseMethod("clmplus")}
@@ -63,6 +71,10 @@ clmplus <- function(RtTriangle,
 #' @export
 clmplus.default <- function(RtTriangle,
                             hazard.model=NULL,
+                            gk.fc.model='a',
+                            ckj.fc.model='a',
+                            gk.order=c(1,1,0),
+                            ckj.order=c(0,1,0),
                             ...){message('The object provided must be of class RtTriangle')}
 
 #' Fit chain-ladder+ to reverse time triangles.
@@ -149,6 +161,10 @@ clmplus.RtTriangle <- function(RtTriangle,
                             periodAgeFun = "NP",
                             cohortAgeFun = NULL, 
                             constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
+                            gk.fc.model='a',
+                            ckj.fc.model='a',
+                            gk.order=c(1,1,0),
+                            ckj.order=c(0,1,0),
                             ...){
   
   stopifnot(is.null(hazard.model) | typeof(hazard.model)=="character")
@@ -172,7 +188,8 @@ clmplus.RtTriangle <- function(RtTriangle,
     J=dim(RtTriangle$cumulative.payments.triangle)[2]
     #compute the development factors
     alphaij <- forecast::forecast(model, h = J)
-    fij=(2+alphaij$rates)/(2-alphaij$rates)
+    # fij=(2+alphaij$rates)/(2-alphaij$rates)
+    fij=(1+(1-RtTriangle$k)*alphaij$rates)/(1-(RtTriangle$k*alphaij$rates))
     # pick the last diagonal
     d=RtTriangle$diagonal[1:(J-1)]
     # extrapolate the results
@@ -213,14 +230,30 @@ clmplus.RtTriangle <- function(RtTriangle,
                                tolerance.max=tolerance.max)
     
     
-    kt.fit=stats::arima(model$kt,c(0,1,0))
+    kt.nNA <- max(which(!is.na(model$kt)))
     
-    kt.fcst = forecast::forecast(kt.fit,
-                       J)
+    if(ckj.fc.model=='a'){
+      
+      kt.model=forecast::Arima(as.vector(model$kt[1:kt.nNA]),c(0,1,0),include.constant = T)
+      kt.f <- forecast::forecast(kt.model,h=J)
+      
+    }else{
+      
+      kt.data=data.frame(y=model$kt[1:kt.nNA],
+                         x=1:kt.nNA)
+      new.kt.data <- data.frame(x=seq(J+1,2*J))
+      
+      kt.model <- lm('y~x', 
+                     data=kt.data)
+      
+      kt.f <- forecast::forecast(kt.model,newdata=new.kt.data)
+      
+    }
     
-    model$kt.fcst=kt.fcst
+    # model$kt.fcst=kt.f
     
-    kt.mx = matrix(rep(kt.fcst$mean,
+    
+    kt.mx = matrix(rep(kt.f$mean,
                        J),
                    byrow = T,
                    nrow=J)
@@ -236,7 +269,8 @@ clmplus.RtTriangle <- function(RtTriangle,
     
     alphaij = exp(ax.mx+bx.mx*kt.mx)
     
-    fij = (2+alphaij)/(2-alphaij)  
+    # fij = (2+alphaij)/(2-alphaij)  
+    fij=(1+(1-RtTriangle$k)*alphaij)/(1-(RtTriangle$k*alphaij))
     
     d=RtTriangle$diagonal[1:(J-1)]
     
@@ -253,6 +287,9 @@ clmplus.RtTriangle <- function(RtTriangle,
     converged=model$converged
     citer=model$citer
     
+    alphaij = list(rates=alphaij,
+                   kt.f=kt.f)
+    
   }
 
   
@@ -266,8 +303,17 @@ clmplus.RtTriangle <- function(RtTriangle,
   #forecasting horizon
   J=dim(RtTriangle$cumulative.payments.triangle)[2]
   #compute the development factors
-  alphaij <- forecast::forecast(model, h = J)
-  fij=(2+alphaij$rates)/(2-alphaij$rates)
+  # with stmomo:
+  # alphaij <- forecast::forecast(model, h = J)
+  alphaij <- pkg.env$fcst(model, 
+                          hazard.model = hazard.model,
+                          gk.fc.model=gk.fc.model,
+                          ckj.fc.model=ckj.fc.model,
+                          gk.order=gk.order,
+                          ckj.order=ckj.order
+                          )
+  # fij=(2+alphaij$rates)/(2-alphaij$rates)
+  fij=(1+(1-RtTriangle$k)*alphaij$rates)/(1-(RtTriangle$k*alphaij$rates))
   # pick the last diagonal
   d=RtTriangle$diagonal[1:(J-1)]
   # extrapolate the results

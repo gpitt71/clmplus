@@ -18,7 +18,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-The `clmplus` package was created to provide actuarial scientists the tool-box that we illustrate in our theoretical paper. This vignette is made to make the readers able to recreate the type of analysis we make in the data application section of our paper.
+The `clmplus` package was created to provide actuarial scientists the tool-box that we illustrate in our paper, *Pittarello G., Hiabu M., and Villegas A., Chain ladder Plus: a versatile approach for claims reserving, (pre-print, 2022)*. This vignette is made to make the readers able to recreate the type of analysis we make in the data application section of our paper. **Please observe that the results we obtained in the paper were performed on a larger number of run-off triangles.**
+
 We believe it is extremely important to provide this vignette to disclose to the public the code we used to perform our analysis. Our results can be replicated by just running this vignette with the following seed.
 This vignette is organized as follows:
 
@@ -46,37 +47,39 @@ models=list(
   
   ## a model
   a = StMoMo::StMoMo(link="log",
-                       staticAgeFun = TRUE,
-                       periodAgeFun = NULL,
-                       cohortAgeFun = NULL),
+                     staticAgeFun = TRUE,
+                     periodAgeFun = NULL,
+                     cohortAgeFun = NULL),
   ## ac model
   
   ac = StMoMo::StMoMo(link="log",
-                     staticAgeFun = TRUE,
-                     periodAgeFun = NULL,
-                     cohortAgeFun = c("1")),
+                      staticAgeFun = TRUE,
+                      periodAgeFun = NULL,
+                      cohortAgeFun = c("1")),
   
   ## ap model
   
   ap = StMoMo::StMoMo(link="log",
-                     staticAgeFun = TRUE,
-                     periodAgeFun = c("1"),
-                     cohortAgeFun = NULL),
+                      staticAgeFun = TRUE,
+                      periodAgeFun = c("1"),
+                      cohortAgeFun = NULL),
   ## pc model
   
   pc = StMoMo::StMoMo(link="log",
-                     staticAgeFun = FALSE,
-                     periodAgeFun = c("1"),
-                     cohortAgeFun = c("1")),
+                      staticAgeFun = FALSE,
+                      periodAgeFun = c("1"),
+                      cohortAgeFun = c("1")),
   
   ## apc model
   
   apc = StMoMo::apc()  )
 
+
+
 ```
 
 For the case study in the paper we want to make our analysis as close as possible to a real life reserving problem. 
-In order to do so, we decided to select 30 data sets available to the public from the R packages `clmplus`, `ChainLadder`, `apc` and `CASdatasets`.
+In order to do so, we decided to select data sets available to the public from the R packages `clmplus`, `ChainLadder`, and `apc`.
 
 ```{r datasets}
 
@@ -183,201 +186,121 @@ abs.min <- function(x){
   "
   return(x[abs(x)==min(abs(x))])}
 
-
-fit.lc.nr <- function(data.T,
-                      iter.max=2e+04,
-                      tolerance.max=1e-06){
-  "
-  Fits the LC model via a Netwon-Rhapson from scratch implementation to the data.
+fcst.fn <- function(object,
+                 hazard.model,
+                 gk.fc.model='a',
+                 ckj.fc.model='a',
+                 gk.order=c(1,1,0),
+                 ckj.order=c(0,1,0)){
   
-  "
+  J=dim(object$Dxt)[2]
   
-  data.O <- data.T$occurrance
-  data.E <- data.T$exposure
+  rates=array(.0,dim=c(J,J))
   
-  wxc <- matrix(1,
-                nrow = dim(data.O)[1],
-                ncol=dim(data.O)[2])
-  wxc[is.na(data.E)]<-0
-  
-  
-  ## parameters initial values
-  ax = runif(dim(data.O)[1])
-  bx = rep(1/dim(data.O)[1],dim(data.O)[1])
-  kt = rep(0,dim(data.O)[2])
-  
-  #create matrices to compute the linear predictor
-  ax.mx = matrix(rep(ax,dim(data.O)[2]),
-                 byrow = F,
-                 ncol=dim(data.O)[2])
-  
-  bx.mx = matrix(rep(bx,
-                     dim(data.O)[2]),
-                 byrow = F,
-                 ncol=dim(data.O)[2])
-  
-  kt.mx = matrix(rep(kt,
-                     dim(data.O)[1]),
-                 byrow = T,
-                 nrow=dim(data.O)[1])
-  
-  
-  mu.mx = exp(ax.mx+bx.mx*kt.mx)
-  
-  dhat = data.E*mu.mx
-  
-  dxt0=1000
-  niter=1000
-  
-  deltaax=100
-  deltabx=100
-  deltakt=100
-  
-  deltadxt=100
-  
-  kt0=(abs(kt))
-  ax0=(abs(ax))
-  bx0=(abs(bx))
-  
-  citer=0
-  
-  dxt.v=NULL
-  
-  deltakt.v=NULL
-  deltaax.v=NULL
-  deltabx.v=NULL
-  
-  deltadxt.v=NULL
-  
-  kt1.v=NULL
-  
-  converged=TRUE
-  
-  while((abs(deltaax)>tolerance.max|abs(deltabx)>tolerance.max|abs(deltakt)>tolerance.max)&citer<iter.max){
-    #update alpha
-    ax.num = apply((data.O-dhat)*wxc, 1, sum, na.rm=T)
-    ax.den = apply(dhat*wxc, 1, sum, na.rm=T)
-    ax = ax - ax.num/(-ax.den)
+  if(!is.null(hazard.model)){
     
-    deltaax=sum(abs(ax)-ax0)
-    ax0=abs(ax)
-    deltaax.v=c(deltaax.v,deltaax)
+    a.tf <- grepl('a',hazard.model)
+    c.tf <- grepl('c',hazard.model)
+    p.tf <- grepl('p',hazard.model)
+    kt.f=NULL
+    gc.f=NULL
     
-    ## compute the new estimates
-    ax.mx = matrix(rep(ax,dim(data.O)[2]),
-                   byrow = F,
-                   ncol=dim(data.O)[2])
-    mu.mx = exp(ax.mx+bx.mx*kt.mx)
-    
-    dhat = data.E*mu.mx
-    
-    #update gc
-    kt.num = apply((data.O-dhat)*wxc*bx.mx, 2, sum, na.rm=T)
-    kt.den = apply(dhat*wxc*(bx.mx^2), 2, sum, na.rm=T)
-    kt = kt - kt.num/(-kt.den)
-    kt[1]=0
-    
-    deltakt=sum(abs(kt)-kt0)
-    kt0=(abs(kt))
-    deltakt.v=c(deltakt.v,deltakt)
-    
-    kt1.v=c(kt1.v,kt[2])
-    
-    ## compute the new estimates
-    
-    kt.mx = matrix(rep(kt,
-                       dim(data.O)[1]),
-                   byrow = T,
-                   nrow=dim(data.O)[1])
-    
-    mu.mx = exp(ax.mx+bx.mx*kt.mx)
-    
-    dhat = data.E*mu.mx
-    
-    #update beta
-    bx.num = apply((data.O-dhat)*wxc*kt.mx, 1, sum, na.rm=T)
-    bx.den = apply(dhat*wxc*(kt.mx^2), 1, sum, na.rm=T)
-    bx = bx - bx.num/(-bx.den)
-    bx=bx/sum(bx)
-    
-    deltabx=sum(abs(bx)-bx0)
-    bx0=abs(bx)
-    deltabx.v=c(deltabx.v,deltabx)
-    
-    ## compute the new estimates
-    bx.mx = matrix(rep(bx,
-                       dim(data.O)[2]),
-                   byrow = F,
-                   ncol=dim(data.O)[2])
-    mu.mx = exp(ax.mx+bx.mx*kt.mx)
-    
-    dhat = data.E*mu.mx
-    
-    dxt1= sum(2*wxc*(data.O*log(data.O/dhat)-(data.O-dhat)),na.rm = T)
-    deltadxt= dxt1-dxt0
-    
-    deltadxt.v=c(deltadxt.v,deltadxt)
-    dxt.v=c(dxt.v,dxt1)
-    
-    dxt0=dxt1
-    citer=citer+1
   }
   
-  if((abs(deltaax)>tolerance.max|abs(deltabx)>tolerance.max|abs(deltakt)>tolerance.max)){
-    warning('The Newton-Rhapson algorithm for the lee-carter may have not converged')
-    converged=FALSE
+  ## cohorts model
+  if(c.tf){
+    # c.model <- substr(fc.model,1,1)
+    gc.nNA <- max(which(!is.na(object$gc)))
+    
+    if(gk.fc.model=='a'){
+      
+      gc.model <- forecast::Arima(object$gc[1:gc.nNA], 
+                                  order = gk.order, 
+                                  include.constant = T)
+      gc.f <- forecast::forecast(gc.model,h=(length(object$cohorts)-gc.nNA))
+      
+      
+    }else{
+      
+      gc.data=data.frame(y=object$gc[1:gc.nNA],
+                         x=object$cohorts[1:gc.nNA])
+      new.gc.data <- data.frame(x=object$cohorts[(gc.nNA+1):length(object$cohorts)])
+      
+      gc.model <- lm('y~x', 
+                     data=gc.data)
+      
+      gc.f <- forecast::forecast(gc.model,
+                                 newdata=new.gc.data)
+      
+      
+    }
+    
+    #forecasting rates
+    cond = !is.na(object$gc)
+    gc.2.add = c(object$gc[cond],gc.f$mean)
+    gc.mx= matrix(rep(unname(gc.2.add),
+                      J),
+                  byrow = F,
+                  nrow=J)
+    rates <- gc.mx+rates
+    rates <- t2c.full.square(rates)
+    rates[is.na(rates)]=.0
+    rates <- rates[,(J+1):(2*J)]
+    
+    
+    
   }
   
-  return(list(ax=ax,
-              bx=bx,
-              kt=kt,
-              citer=citer,
-              converged=converged,
-              deltaax=deltaax,
-              deltabx=deltabx,
-              deltakt=deltakt,
-              dxt0=dxt0,
-              deltadxt=deltadxt,
-              converged=converged
-              ))
-  
-}
-
-forecast.lc.nr<-function(model,J){
-  
-  "
-  It performs forecasting for the Lee-Carter hazard model.
-  "
-  
-    kt.fit=arima(model$kt,c(0,1,0))
+  ## period model
+  if(p.tf){
+    # p.model <- substr(fc.model,2,2)
+    kt.nNA <- max(which(!is.na(object$kt[1, ])))
     
-    kt.fcst = forecast(kt.fit,
-                       J)
-    
-    kt.mx = matrix(rep(kt.fcst$mean,
+    if(ckj.fc.model=='a'){
+      
+      kt.model=forecast::Arima(as.vector(object$kt[1:kt.nNA]),ckj.order,include.constant = T)
+      kt.f <- forecast::forecast(kt.model,h=J)
+      
+    }else{
+      
+      kt.data=data.frame(y=object$kt[1:kt.nNA],
+                         x=object$years[1:kt.nNA])
+      new.kt.data <- data.frame(x=seq(J+1,2*J))
+      
+      kt.model <- lm('y~x', 
+                     data=kt.data)
+      
+      kt.f <- forecast::forecast(kt.model,newdata=new.kt.data)
+      
+    }
+    #forecasting rates
+    kt.mx = matrix(rep(unname(kt.f$mean),
                        J),
                    byrow = T,
                    nrow=J)
     
-    bx.mx = matrix(rep(model$bx,
+    rates=kt.mx+rates
+    
+  }
+  
+  # projecting age
+  if(a.tf){
+    
+    ax.mx = matrix(rep(unname(object$ax),
                        J),
                    byrow = F,
-                   ncol=J)
-    
-    ax.mx = matrix(rep(model$ax,J),
-                   byrow = F,
-                   ncol=J)
-    
-    alphaij = exp(ax.mx+bx.mx*kt.mx)
-    
-    fij = (2+alphaij)/(2-alphaij)  
-    
-    
-    return(list(rates=alphaij,
-      fij=fij))
+                   nrow=J)
+    ax.mx[is.na(ax.mx)]=.0
+    rates=ax.mx+rates
+  }
+  
+  output<- list(rates=exp(rates),
+                kt.f=kt.f,
+                gc.f=gc.f)
+  
+  return(output)
   
 }
-
 
 
 ```
@@ -387,7 +310,7 @@ forecast.lc.nr<-function(model,J){
 Within this section we provide the code to measure the models extrapolation accuracy. 
 In order to do so, we need to coherently split the data set into training, validation and testing. We show an example for a 12x12 run-off triangle.
 
-```{r bake off split, eval=FALSE}
+```{r bake off split}
 J=12
 df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
 colnames(df) <- c("origin","dev","value")
@@ -417,10 +340,8 @@ ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) +
   scale_color_brewer(guide = 'none')
 
 ```
-![Train, validation and test split we adopted in the bake-off section.](./chunk5.png)
 
-
-```{r bake off, eval=FALSE}
+```{r bake off}
 best.of.the.bests <- function(df1,df2){
   "
   Util to turn character columns values into numeric.
@@ -430,7 +351,7 @@ best.of.the.bests <- function(df1,df2){
   df2=apply(df2,MARGIN=2,FUN=as.numeric)
   df3 <- rbind(df1,df2)
   df3=apply(df3,FUN=abs.min,MARGIN = 2)
-
+  
   return(df3)
   
 }
@@ -474,8 +395,12 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
     hz.fit <- StMoMo::fit(models[[ix]], 
                           Dxt = newt.rtt$occurrance, 
                           Ext = newt.rtt$exposure,
+                          wxt=newt.rtt$fit.w,
                           iterMax=as.integer(1e+05))
-    hz.rate = forecast::forecast(hz.fit,h=leave.out)$rates
+    hz.rate = fcst.fn(hz.fit,
+                   hazard.model = ix,
+                   gk.fc.model = 'a',
+                   ckj.fc.model= 'a')$rates[,1:leave.out]
     
     J.new=dim(reduced.triangle)[2]
     fij = (2+hz.rate)/(2-hz.rate)
@@ -502,33 +427,7 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
     error.incidence = c(error.incidence,error.inc.num/error.inc.den)
     
   }
-    ix='lc'
-    hz.fit <- fit.lc.nr(data.T = newt.rtt)
-    if(hz.fit$converged==TRUE){hz.rate = forecast.lc.nr(hz.fit,J=dim(newt.rtt$cumulative.payments.triangle)[2])$rates[,1:leave.out]
-    
-    J.new=dim(reduced.triangle)[2]
-    fij = (2+hz.rate)/(2-hz.rate)
-    pred.mx = fij
-    pred.mx[,1]=fij[,1]*c(NA,to.project)
-    temp=unname(pred.mx[1:(J.new-1),1][!is.na(pred.mx[1:(J.new-1),1])])
-    pred.mx[,2]=fij[,2]*c(rep(NA,J.new-length(temp)),temp)
-    true.mx= rbind(rep(NA,2),true.values)
-    # this is meant to be NA
-    true.mx[2,2]=NA
-  
-    sq.errors = (pred.mx-true.mx)^2
-    abs.errors = abs(pred.mx-true.mx)
-    r.errors = (pred.mx-true.mx)/true.mx
-    error.inc.num = apply(pred.mx-true.mx,sum,MARGIN=2,na.rm=T)
-    error.inc.den = apply(true.mx,sum,MARGIN=2,na.rm=T)
-    model.name.ix = c(paste0(ix,".val"),paste0(ix,".test"))
-    
-    model.name = c(model.name,model.name.ix)
-    model.family = c(model.family,rep(ix,2))
-    rmse = c(rmse,sqrt(apply(sq.errors,MARGIN = 2,mean,na.rm=T)))
-    mae = c(mae,apply(abs.errors,MARGIN = 2,mean,na.rm=T))
-    mre = c(mre,apply(r.errors,MARGIN = 2,mean,na.rm=T))
-    error.incidence = c(error.incidence,error.inc.num/error.inc.den)}
+
   
   ## stmomo results ---- 
   
@@ -563,13 +462,13 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
     error.incidence=out3$model.name[which(abs(out3$error.incidence)==min(abs(out3$error.incidence)))])
   
   temp.mx=matrix((sub("\\..*", "", out2) == sub("\\..*", "", out.test.min)),nrow=1)
-  choices.mx.fchl=matrix(sub("\\..*", "", out2),nrow=1)
+  choices.mx.clmplus=matrix(sub("\\..*", "", out2),nrow=1)
   
-  agreement.frame.fchl=data.frame(temp.mx)
-  choices.frame.fchl=data.frame(choices.mx.fchl)
+  agreement.frame.clmplus=data.frame(temp.mx)
+  choices.frame.clmplus=data.frame(choices.mx.clmplus)
   
-  colnames(agreement.frame.fchl)=colnames(out2)
-  colnames(choices.frame.fchl)=colnames(out2)
+  colnames(agreement.frame.clmplus)=colnames(out2)
+  colnames(choices.frame.clmplus)=colnames(out2)
   
   for(col.ix in colnames(out2)){
   
@@ -681,11 +580,11 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
   
   
   out = list(
-    best.model.fchl = best.df,
+    best.model.clmplus = best.df,
     best.model.apc = best.df.apc,
-    agreement.frame.fchl=agreement.frame.fchl,
+    agreement.frame.clmplus=agreement.frame.clmplus,
     agreement.frame.apc=agreement.frame.apc,
-    choices.frame.fchl=choices.frame.fchl,
+    choices.frame.clmplus=choices.frame.clmplus,
     choices.frame.apc=choices.frame.apc,
     comparison.df = rbind(comparison.df,
                           comparison.df.apc))
@@ -695,7 +594,7 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
 ```
 
 
-```{r bake off 2, message=TRUE, warning=TRUE, eval=FALSE}
+```{r bake off 2, message=TRUE, warning=TRUE}
 
 modelcomparison<-function(list.of.datasets){
   "This functions returns the datasets to plot the bake-off section of the paper.
@@ -707,38 +606,38 @@ modelcomparison<-function(list.of.datasets){
   "
   best.fit=NULL
   families.fit=NULL
-  agreement.fchl=NULL
+  agreement.clmplus=NULL
   agreement.apc=NULL
-  choices.fchl=NULL
+  choices.clmplus=NULL
   choices.apc=NULL
   
   for(df.ix in names(list.of.datasets)){
     cat(paste0(".. Comparison on dataset: ",df.ix))
     out.ix = modelcomparison.1d(list.of.datasets[[df.ix]])
     
-    best.of.the.bests.df=best.of.the.bests(out.ix$best.model.fchl,
+    best.of.the.bests.df=best.of.the.bests(out.ix$best.model.clmplus,
                                         out.ix$best.model.apc)
     
-    out.ix$best.model.fchl['package']= 'clmplus'
+    out.ix$best.model.clmplus['package']= 'clmplus'
     out.ix$best.model.apc['package']= 'apc'
     best.of.the.bests.df['package']='overall.best'
     
     best.fit=rbind(best.fit,
-                   out.ix$best.model.fchl,
+                   out.ix$best.model.clmplus,
                    out.ix$best.model.apc,
                    best.of.the.bests.df)
     
     families.fit=rbind(families.fit,
                    out.ix$comparison.df)
     
-    agreement.fchl=rbind(agreement.fchl,
-                         out.ix$agreement.frame.fchl)
+    agreement.clmplus=rbind(agreement.clmplus,
+                         out.ix$agreement.frame.clmplus)
     
     agreement.apc=rbind(agreement.apc,
                          out.ix$agreement.frame.apc)
     
-    choices.fchl=rbind(choices.fchl,
-                         out.ix$choices.frame.fchl)
+    choices.clmplus=rbind(choices.clmplus,
+                         out.ix$choices.frame.clmplus)
     
     choices.apc=rbind(choices.apc,
                          out.ix$choices.frame.apc)
@@ -760,9 +659,9 @@ modelcomparison<-function(list.of.datasets){
   
   out = list(best.fit=best.fit,
              families.fit=families.fit,
-             agreement.fchl=agreement.fchl,
+             agreement.clmplus=agreement.clmplus,
              agreement.apc=agreement.apc,
-             choices.fchl=choices.fchl,
+             choices.clmplus=choices.clmplus,
              choices.apc=choices.apc)
   
   return(out)
@@ -772,7 +671,7 @@ modelcomparison<-function(list.of.datasets){
 ```
 
 
-```{r bake off 3, eval=FALSE}
+```{r bake off 3}
 
 bake.off <- function(models.comparison){
   "
@@ -836,24 +735,59 @@ bake.off <- function(models.comparison){
 
 The models in the `clmplus` package are compared to those in the `apc` package. Below it can be found the code we used to create the bake-off plot in our paper.
 
-```{r call bake off, message=TRUE, warning=TRUE, eval=FALSE}
+```{r call bake off, message=TRUE, warning=TRUE}
 out=modelcomparison(list.of.datasets = list.of.datasets)
 
 cake = bake.off(out)
 ```
 
-```{r show paper plot bo, message=FALSE, warning=FALSE, eval=FALSE}
+```{r show paper plot bo, message=FALSE, warning=FALSE}
 cake$p3
 ```
-![Comparison between apc and clmplus in terms of error incidence and mean relative error on the test set according the data split we showed above.](./chunk10.png)
+
+In detail, having the three set at disposal, for each case we are able to pick the best model based on the error incidence.
+
+```{r detail on ei, eval =FALSE}
+abs.best=out$best.fit[,c("error.incidence","package")]
+abs.best[,c("error.incidence")]=abs(abs.best[,c("error.incidence")])
+abs.best[,'data.source']=sort(rep(seq(1,dim(abs.best)[1]/3),3))
+
+
+p3<- ggplot(abs.best,aes(x=package,
+                         y=error.incidence,
+                         fill=package,
+                         label=data.source)) +
+  geom_boxplot(outlier.shape = NA)+
+  viridis::scale_fill_viridis(discrete=T, alpha=0.6) +
+  geom_jitter(color="black", 
+              size=1, 
+              alpha=0.9, 
+              position = position_jitter(seed = 1)) +
+  geom_text(aes(label=ifelse(data.source%in% c(15,24,17,18),
+                   as.character(data.source),'')),
+  hjust=0,
+  vjust=0,
+  size=5,
+  position = position_jitter(seed = 1))+
+  # geom_text(position = position_jitter(seed = 42))+
+  coord_flip()+
+  theme_bw()+
+  ggplot2::labs(x="Package", y="Error Incidence")+
+  theme(axis.text.y = element_text(size=15),
+        axis.text.x  = element_text(size=15))+
+  theme(axis.title.y = element_text(size=20), 
+        axis.title.x  = element_text(size=20))
+
+p3
+
+```
 
 
 # Rankings 
 
-Within this section we provide practitioners with the code to perform models ranking. Please observe that now we have a different training validation split as pointed out in the paper.
-The training validation split we use is represented in the following picture.
+Within this section we provide practitioners with the code to perform models ranking. Now we have a different training validation split. The training validation split we use is represented in the following picture.
 
-```{r models ranking split, eval=FALSE}
+```{r models ranking split}
 # models ranking
 
 J=12
@@ -876,24 +810,24 @@ ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) +
   theme(axis.title.y = element_text(size=8), axis.text.y  = element_text(size=7))+
   scale_color_brewer(guide = 'none')
 ```
-![Train, validation split we used for models rankings.](./chunk11.png)
 
 
-```{r models ranking 1, eval=FALSE}
+
+```{r models ranking 1}
 
 modelsranking.1d <- function(data.T){
-    "
+  "
   Function to rank the clmplus package and apc package age-period-cohort models.
   
   This function takes a triangle of cumulative payments as input.
   
   It returns the ranking on the triangle.
   "
-
+  
   
   leave.out=1
   
-
+  
   model.name = NULL
   error.incidence = NULL
   mre = NULL
@@ -906,14 +840,18 @@ modelsranking.1d <- function(data.T){
   to.project <- t2c(triangle)[1:(J-leave.out-1),J-leave.out]
   true.values <- t2c(triangle)[2:(J-leave.out),J]
   
-    
+  
   for(ix in c('a','ac','ap','apc')){
     
     hz.fit <- StMoMo::fit(models[[ix]], 
                           Dxt = newt.rtt$occurrance, 
                           Ext = newt.rtt$exposure,
+                          wxt=newt.rtt$fit.w,
                           iterMax=as.integer(1e+05))
-    hz.rate = forecast::forecast(hz.fit,h=leave.out)$rates
+    hz.rate = fcst.fn(hz.fit,
+                   hazard.model = ix,
+                   gk.fc.model = 'a',
+                   ckj.fc.model= 'a')$rates[,1]
     
     fij = (2+hz.rate)/(2-hz.rate)
     pred.fij = fij[(leave.out+1):length(fij)]
@@ -930,35 +868,35 @@ modelsranking.1d <- function(data.T){
     
     
   }
-    ix='lc'
-    hz.fit <- fit.lc.nr(data.T = newt.rtt,
-                        iter.max = 3e+04)
-    if(hz.fit$converged==TRUE){hz.rate = forecast.lc.nr(hz.fit,J=dim(newt.rtt$cumulative.payments.triangle)[2])$rates[,1:leave.out]
-    fij = (2+hz.rate)/(2-hz.rate)
-    pred.fij = fij[(leave.out+1):length(fij)]
-    pred.v=to.project*pred.fij
-    r.errors = (pred.v-true.values)/true.values
-    
-    error.inc.num = sum(pred.v-true.values,na.rm = T)
-    error.inc.den = sum(true.values)
-    
-    model.name = c(model.name,
-                   paste0('clmplus.',ix))
-    error.incidence = c(error.incidence,error.inc.num/error.inc.den)
-    mre = c(mre,mean(r.errors))
-    
-    }
-    out1 <- data.frame(
+  
+  # ix='lc'
+  # hz.fit <- fit.lc.nr(data.T = newt.rtt,
+  #                     iter.max = 3e+04)
+  # if(hz.fit$converged==TRUE){hz.rate = forecast.lc.nr(hz.fit,J=dim(newt.rtt$cumulative.payments.triangle)[2])$rates[,1:leave.out]
+  # fij = (2+hz.rate)/(2-hz.rate)
+  # pred.fij = fij[(leave.out+1):length(fij)]
+  # pred.v=to.project*pred.fij
+  # r.errors = (pred.v-true.values)/true.values
+  # 
+  # error.inc.num = sum(pred.v-true.values,na.rm = T)
+  # error.inc.den = sum(true.values)
+  # 
+  # model.name = c(model.name,
+  #                paste0('clmplus.',ix))
+  # error.incidence = c(error.incidence,error.inc.num/error.inc.den)
+  # mre = c(mre,mean(r.errors))}
+  
+  out1 <- data.frame(
     model.name,
     # mre,
     error.incidence)
-    
+  
   ## APC package
-    
+  
   newt.apc <- apc.data.list(response=newt.rtt$incremental.payments.triangle,
                             data.format="CL")
-    
-    ## apc ----
+  
+  ## apc
   
   rmse = NULL
   mae = NULL
@@ -1027,7 +965,8 @@ modelsranking.1d <- function(data.T){
 ```
 
 
-```{r models ranking 2, eval=FALSE}
+```{r models ranking 2}
+
 modelsranking <- function(list.of.datasets){
   
   "
@@ -1052,13 +991,13 @@ modelsranking <- function(list.of.datasets){
 }
 ```
 
-```{r models ranking 3, eval=FALSE}
+```{r models ranking 3}
 full.ranks=modelsranking(list.of.datasets)
 ```
 
 The following picture is the models ranks plot we included in the paper.
 
-```{r ranking plot, eval=FALSE}
+```{r ranking plot}
 p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
    geom_tile(aes(fill = cut(ei.rank, breaks=0:6, labels=1:6)), colour = "grey") +
    ggtitle(" ") +
@@ -1070,31 +1009,21 @@ p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
 p_min_expd0
 ```
 
-![Results of models rankings.](./chunk15.png)
+
 
 It can be useful to inspect the average rank of the different models we were comparing.
 
-```{r average rank, eval=FALSE}
+```{r average rank}
 tbl=full.ranks$full.ranks %>%
   dplyr::group_by(model.name) %>%
   dplyr::summarise(mean.rank = mean(ei.rank))
 tbl
 
-#Output
-# A tibble: 7 × 2
-#   model.name  mean.rank
-#   <chr>           <dbl>
-# 1 apc.ac           3.77
-# 2 apc.apc          4.59
-# 3 clmplus.a        3.77
-# 4 clmplus.ac       3.36
-# 5 clmplus.ap       2.41
-# 6 clmplus.apc      2.41
-# 7 clmplus.lc       3.38
+
 ```
 
 
-```{r ranks counts by model, eval=FALSE}
+```{r ranks counts by model}
 library(dplyr)
 temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
   group_by(model.name, ei.rank) %>% summarise(count = n())
@@ -1104,7 +1033,7 @@ temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
 
 The following picture was not included in the paper but it shows the models ranks counts. It provides additional consistency to the results we included in our work.
 
-```{r plot ranks,eval=FALSE}
+```{r plot ranks}
 ggplot(temp.df, aes(y=count, x=factor(ei.rank))) + 
     geom_bar(position="stack", stat="identity",fill='#6699CC') +
   scale_y_continuous(limits=c(0,15))+
@@ -1114,7 +1043,7 @@ ggplot(temp.df, aes(y=count, x=factor(ei.rank))) +
   xlab("Rank")
 
 ```
-![Number of times each model scored positions from 1 to 6.](./chunk18.png)
+
 
 # Conclusions 
 

@@ -26,7 +26,7 @@
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-RtTriangle <- function(cumulative.payments.triangle)
+RtTriangle <- function(cumulative.payments.triangle, k=1/2)
 {
   
   rtt.input.env$properties.cpt(cumulative.payments.triangle)
@@ -36,7 +36,8 @@ RtTriangle <- function(cumulative.payments.triangle)
   
   # find out occurrance and exposure
   occurrance=pkg.env$t2c(incrementals)
-  exposure=pkg.env$t2c(cumulative.payments.triangle-incrementals/2)
+  drop=1-k
+  exposure=pkg.env$t2c(cumulative.payments.triangle-drop*incrementals)
   
   # occurrance[is.na(occurrance)]=c(0.)
   # exposure[is.na(occurrance)]=c(0.)
@@ -54,7 +55,8 @@ RtTriangle <- function(cumulative.payments.triangle)
     fit.w=fit.w,
     incremental.payments.triangle = incrementals,
     J=J,
-    diagonal=pkg.env$t2c(cumulative.payments.triangle)[,J]
+    diagonal=pkg.env$t2c(cumulative.payments.triangle)[,J],
+    k=k
   )
   
   ## Set the name for the class

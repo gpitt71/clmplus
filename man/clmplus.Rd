@@ -4,7 +4,15 @@
 \alias{clmplus}
 \title{Fit chain-ladder+ to reverse time triangles.}
 \usage{
-clmplus(RtTriangle, hazard.model = NULL, ...)
+clmplus(
+  RtTriangle,
+  hazard.model = NULL,
+  gk.fc.model = "a",
+  ckj.fc.model = "a",
+  gk.order = c(1, 1, 0),
+  ckj.order = c(0, 1, 0),
+  ...
+)
 }
 \arguments{
 \item{RtTriangle}{RtTriangle object to be fitted.}
@@ -21,6 +29,12 @@ clmplus(RtTriangle, hazard.model = NULL, ...)
 \item{'m7': CBD m7 extension.}
 \item{'m8': CBD m7 extension.}
 }}
+
+\item{gk.fc.model}{model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.}
+
+\item{ckj.fc.model}{order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).}
+
+\item{gk.order}{order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).}
 
 \item{...}{arguments to be passed to or from other methods.}
 }

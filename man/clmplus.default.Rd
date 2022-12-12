@@ -4,7 +4,15 @@
 \alias{clmplus.default}
 \title{Fit chain-ladder+ to reverse time triangles.}
 \usage{
-\method{clmplus}{default}(RtTriangle, hazard.model = NULL, ...)
+\method{clmplus}{default}(
+  RtTriangle,
+  hazard.model = NULL,
+  gk.fc.model = "a",
+  ckj.fc.model = "a",
+  gk.order = c(1, 1, 0),
+  ckj.order = c(0, 1, 0),
+  ...
+)
 }
 \arguments{
 \item{RtTriangle}{RtTriangle object to be fitted.}

@@ -16,6 +16,10 @@
   cohortAgeFun = NULL,
   constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x
     = b0x, gc = gc),
+  gk.fc.model = "a",
+  ckj.fc.model = "a",
+  gk.order = c(1, 1, 0),
+  ckj.order = c(0, 1, 0),
   ...
 )
 }

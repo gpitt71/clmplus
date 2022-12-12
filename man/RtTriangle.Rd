@@ -4,7 +4,7 @@
 \alias{RtTriangle}
 \title{Reverse time triangles}
 \usage{
-RtTriangle(cumulative.payments.triangle)
+RtTriangle(cumulative.payments.triangle, k = 1/2)
 }
 \arguments{
 \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}

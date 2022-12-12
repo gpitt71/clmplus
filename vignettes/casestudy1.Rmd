@@ -69,7 +69,7 @@ c2t <- function(x){
 
 # Introduction
 
-The `clmplus` package provides practitioners with a fast and user friendly implementation of the modeling framework we derived in our paper . 
+The `clmplus` package provides practitioners with a fast and user friendly implementation of the modeling framework we derived in our paper *Pittarello G., Hiabu M., and Villegas A., Chain ladder Plus: a versatile approach for claims reserving, (pre-print, 2022)*. 
 
 We were able to connect the well-known hazard models developed in life insurance to non-life run-off triangles claims development. 
 The flexibility of this approach goes beyond the methodological novelty: we hope to provide a user-friendly set of tools based on the point of contact between non-life insurance and life insurance in the actuarial science.
@@ -78,10 +78,9 @@ This vignette is organized as follows:
 
 * We show the connection between the age-period representation and run-off triangles.
 
-* We replicate the chain ladder within our modeling framework. 
-As shown in the paper, by using the `clmplus` approach the resulting model is saving some parameters with respect to the standard GLM approach.
+* We replicate the chain-ladder model with an age-model. As shown in the paper, by using the `clmplus` approach the resulting model is saving some parameters with respect to the standard GLM approach.
 
-* We show an example were adding a cohort effect can lead to an improvement on the model fit.
+* We show an example where adding a cohort effect can lead to an improvement on the model fit.
 
 In this tutorial, we show an example on the `AutoBIPaid` run-off triangle from the `ChainLadder` package.
 
@@ -128,7 +127,7 @@ Observe that the y axis is now the **development years** (or **age**) component.
 
 # Replicate the chain-ladder with the `clmplus` package
 
-Our package is an out of the box set of tools to compute the claims reserve.
+`clmplus` is an out-of-the box set of tools to compute the claims reserve.
 We now show how to replicate the chain ladder model.
 Observe the run-off triangle data structure first needs to be initialized to a `RtTriangle` object.
 
@@ -158,9 +157,9 @@ Estimates are gathered in a `data.frame` to ease the understanding.
 
 ```{r clm replicated}
 data.frame(ultimate.cost.mack=ultimate.chl,
-           ultimate.cost.fchl=a.model$ultimate.cost,
+           ultimate.cost.clmplus=a.model$ultimate.cost,
            reserve.mack=ultimate.chl-diagonal,
-           reserve.fchl=a.model$reserve
+           reserve.clmplus=a.model$reserve
            )
 
 cat('\n Total reserve:',
@@ -195,7 +194,7 @@ ac.fcst.apc = apc.forecast.ac(ac.model.apc)
 
 data.frame(reserve.mack=ultimate.chl-diagonal,
            reserve.apc=c(0,ac.fcst.apc$response.forecast.coh[,'forecast']),
-           reserve.fchl=a.model$reserve
+           reserve.clmplus=a.model$reserve
            
            )
 
@@ -207,11 +206,13 @@ Our method is able to replicate the chain-ladder results with no need to add the
 ```{r fitted ax amodel}
 a.model$model.fit$ax
 ```
-Further inspection can be performed with the `fchl` package, which provides the graphical tools to inspect the fitted effects. Observe we model the rate in continuous time, the choice of a line plot is then consistent.
+Further inspection can be performed with the `clmplus` package, which provides the graphical tools to inspect the fitted effects. Observe we model the rate in continuous time, the choice of a line plot is then consistent.
 
-```{r plot effects ax}
-p.a=plot(a.model)
+```{r plot effects ax, message=FALSE, warning=FALSE}
+plot(a.model)
 ```
+
+
 # The benefitial effect of adding the cohort component
 
 It is straightforward to state that from the statistical perspective it is desirable to have a model with less parameters. 
@@ -230,27 +231,55 @@ Clearly, the red and blue areas suggest some trends that the model wasn't able t
 Consider now the age-cohort model and its residuals plot.
 
 ```{r message=FALSE, warning=FALSE}
-ac.model <- clmplus(rtt, hazard.model="ac")
+ac.model <- clmplus(rtt, 
+                    hazard.model="ac",
+                    gk.fc.model='a')
 plotresiduals(ac.model)
 ```
 
 With no need of extrapolating a period component, we were able to improve the fit already.
+Pay attention, the cohort component for the cohort `m` is extrapolated.
+
+```{r message=FALSE, warning=FALSE}
+
+plot(ac.model)
+
+```
+
+## Extrapolation of a period component
+
 Similarly, it is possible to add a period component and choose an age-period model or an age-period-cohort model.
 
 ```{r apapc models, message=FALSE, warning=FALSE}
-ap.model = clmplus(rtt,hazard.model = "ap")
-apc.model = clmplus(rtt,hazard.model = "apc")
+ap.model = clmplus(rtt,
+                   hazard.model = "ap", 
+                   ckj.fc.model='a',
+                   ckj.order = c(0,1,0))
+
+apc.model = clmplus(rtt,hazard.model = "apc", 
+                   gk.fc.model='a', 
+                   ckj.fc.model='a',
+                   gk.order = c(1,1,0),
+                   ckj.order = c(0,1,0))
 ```
 
 ```{r residuals apmodel}
 plotresiduals(ap.model)
 ```
+
 It can be seen that the age-period model does not suggest any serious improvement from the age-cohort model. It is worth noticing one more time that the age-cohort model does not require any extrapolation.
 In a similar fashion, we plot the age-period-cohort model below, which seems to lead us to a small improvement. 
 
 ```{r residuals apcmodel}
 plotresiduals(apc.model)
 ```
+
+Below, the effects of the age-period-cohort model.
+
+```{r apc effects, message=FALSE, warning=FALSE}
+plot(apc.model)
+```
+
 
 # Conclusions 
 

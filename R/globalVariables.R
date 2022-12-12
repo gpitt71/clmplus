@@ -48,7 +48,6 @@ pkg.env$models=list(
   
   apc = StMoMo::apc(),
   
-  
   ## cbd model
   
   cbd = StMoMo::cbd(link = c("log")),
@@ -133,6 +132,8 @@ pkg.env$t2c.full.square <- function(x){
     return(mx)
   }
 
+
+# lee-carter models
 pkg.env$fit.lc.nr <- function(data.T,
                               iter.max=1e+04,
                               tolerance.max=1e-06){
@@ -144,10 +145,12 @@ pkg.env$fit.lc.nr <- function(data.T,
   data.O <- data.T$occurrance
   data.E <- data.T$exposure
   
-  wxc <- matrix(1,
-                nrow = dim(data.O)[1],
-                ncol=dim(data.O)[2])
-  wxc[is.na(data.E)]<-0
+  wxc <- data.T$fit.w
+  
+  # wxc <- matrix(1,
+  #               nrow = dim(data.O)[1],
+  #               ncol=dim(data.O)[2])
+  # wxc[is.na(data.E)]<-0
   
   
   ## parameters initial values
@@ -208,7 +211,7 @@ pkg.env$fit.lc.nr <- function(data.T,
     ax.den = apply(dhat*wxc, 1, sum, na.rm=T)
     ax = ax - ax.num/(-ax.den)
     
-    deltaax=sum(abs(ax)-ax0)
+    deltaax=sum(abs(ax)-ax0,na.rm = T)
     ax0=abs(ax)
     deltaax.v=c(deltaax.v,deltaax)
     
@@ -224,9 +227,9 @@ pkg.env$fit.lc.nr <- function(data.T,
     kt.num = apply((data.O-dhat)*wxc*bx.mx, 2, sum, na.rm=T)
     kt.den = apply(dhat*wxc*(bx.mx^2), 2, sum, na.rm=T)
     kt = kt - kt.num/(-kt.den)
-    kt[1]=0
+    kt[2]=0
     
-    deltakt=sum(abs(kt)-kt0)
+    deltakt=sum(abs(kt)-kt0,na.rm = T)
     kt0=(abs(kt))
     deltakt.v=c(deltakt.v,deltakt)
     
@@ -247,9 +250,9 @@ pkg.env$fit.lc.nr <- function(data.T,
     bx.num = apply((data.O-dhat)*wxc*kt.mx, 1, sum, na.rm=T)
     bx.den = apply(dhat*wxc*(kt.mx^2), 1, sum, na.rm=T)
     bx = bx - bx.num/(-bx.den)
-    bx=bx/sum(bx)
+    bx=bx/sum(bx,na.rm = T)
     
-    deltabx=sum(abs(bx)-bx0)
+    deltabx=sum(abs(bx)-bx0,na.rm = T)
     bx0=abs(bx)
     deltabx.v=c(deltabx.v,deltabx)
     
@@ -271,6 +274,7 @@ pkg.env$fit.lc.nr <- function(data.T,
     dxt0=dxt1
     citer=citer+1
   }
+  
   
   if((abs(deltaax)>tolerance.max|abs(deltabx)>tolerance.max|abs(deltakt)>tolerance.max)){
     warning('The Newton-Rhapson algorithm for the lee-carter may have not converged')
@@ -370,7 +374,7 @@ pkg.env$fit.aac.nr <- function(data.T,
     ax.den = apply(dhat*wxc, 1, sum, na.rm=T)
     ax = ax - ax.num/(-ax.den)
     
-    deltaax=sum(abs(ax)-ax0)
+    deltaax=sum(abs(ax)-ax0,na.rm = T)
     ax0=abs(ax)
     deltaax.v=c(deltaax.v,deltaax)
     
@@ -388,7 +392,7 @@ pkg.env$fit.aac.nr <- function(data.T,
     gc = gc - gc.num/(-gc.den)
     gc[1]=0
     
-    deltagc=sum(abs(gc)-gc0)
+    deltagc=sum(abs(gc)-gc0,na.rm = T)
     gc0=(abs(gc))
     deltagc.v=c(deltagc.v,deltagc)
     
@@ -409,9 +413,9 @@ pkg.env$fit.aac.nr <- function(data.T,
     bx.num = apply((data.O-dhat)*wxc*gc.mx, 1, sum, na.rm=T)
     bx.den = apply(dhat*wxc*(gc.mx^2), 1, sum, na.rm=T)
     bx = bx - bx.num/(-bx.den)
-    bx=bx/sum(bx)
+    bx=bx/sum(bx,na.rm = T)
     
-    deltabx=sum(abs(bx)-bx0)
+    deltabx=sum(abs(bx)-bx0,na.rm = T)
     bx0=abs(bx)
     deltabx.v=c(deltabx.v,deltabx)
     
@@ -453,6 +457,128 @@ pkg.env$fit.aac.nr <- function(data.T,
   ))
   
 }
+
+# forecasting with linear trend
+
+
+pkg.env$fcst <- function(object,
+                         hazard.model,
+                         gk.fc.model='a',
+                         ckj.fc.model='a',
+                         gk.order=c(1,1,0),
+                         ckj.order=c(0,1,0)){
+  
+  J=dim(object$Dxt)[2]
+  
+  rates=array(.0,dim=c(J,J))
+  
+  if(!is.null(hazard.model)){
+    
+    a.tf <- grepl('a',hazard.model)
+    c.tf <- grepl('c',hazard.model)
+    p.tf <- grepl('p',hazard.model)
+    kt.f=NULL
+    gc.f=NULL
+    
+  }
+  
+  ## cohorts model
+  if(c.tf){
+    # c.model <- substr(fc.model,1,1)
+    gc.nNA <- max(which(!is.na(object$gc)))
+    
+    if(gk.fc.model=='a'){
+      
+      gc.model <- forecast::Arima(object$gc[1:gc.nNA], 
+                                  order = gk.order, 
+                                  include.constant = T)
+      gc.f <- forecast::forecast(gc.model,h=(length(object$cohorts)-gc.nNA))
+      
+      
+    }else{
+      
+      gc.data=data.frame(y=object$gc[1:gc.nNA],
+                         x=object$cohorts[1:gc.nNA])
+      new.gc.data <- data.frame(x=object$cohorts[(gc.nNA+1):length(object$cohorts)])
+      
+      gc.model <- lm('y~x', 
+                     data=gc.data)
+      
+      gc.f <- forecast::forecast(gc.model,
+                                 newdata=new.gc.data)
+      
+      
+    }
+    
+    #forecasting rates
+    cond = !is.na(object$gc)
+    gc.2.add = c(object$gc[cond],gc.f$mean)
+    gc.mx= matrix(rep(unname(gc.2.add),
+                      J),
+                  byrow = F,
+                  nrow=J)
+    rates <- gc.mx+rates
+    rates <- pkg.env$t2c.full.square(rates)
+    rates[is.na(rates)]=.0
+    rates <- rates[,(J+1):(2*J)]
+    
+    
+    
+  }
+  
+  ## period model
+  if(p.tf){
+    # p.model <- substr(fc.model,2,2)
+    kt.nNA <- max(which(!is.na(object$kt[1, ])))
+    
+    if(ckj.fc.model=='a'){
+      
+      kt.model=forecast::Arima(as.vector(object$kt[1:kt.nNA]),ckj.order,include.constant = T)
+      kt.f <- forecast::forecast(kt.model,h=J)
+      
+    }else{
+      
+      kt.data=data.frame(y=object$kt[1:kt.nNA],
+                         x=object$years[1:kt.nNA])
+      new.kt.data <- data.frame(x=seq(J+1,2*J))
+      
+      kt.model <- lm('y~x', 
+                     data=kt.data)
+      
+      kt.f <- forecast::forecast(kt.model,newdata=new.kt.data)
+      
+    }
+    #forecasting rates
+    kt.mx = matrix(rep(unname(kt.f$mean),
+                       J),
+                   byrow = T,
+                   nrow=J)
+    
+    rates=kt.mx+rates
+    
+  }
+  
+  # projecting age
+  if(a.tf){
+    
+    ax.mx = matrix(rep(unname(object$ax),
+                       J),
+                   byrow = F,
+                   nrow=J)
+    ax.mx[is.na(ax.mx)]=.0
+    rates=ax.mx+rates
+  }
+  
+  output<- list(rates=exp(rates),
+                kt.f=kt.f,
+                gc.f=gc.f)
+  
+  return(output)
+  
+}
+
+
+
 
 
 

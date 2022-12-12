@@ -74,7 +74,7 @@ plotresiduals.clmplusmodel <- function(clmplusmodel,
     res.m = stats::residuals(clmplusmodel$model.fit)
     res.tr=pkg.env$c2t(res.m$residuals)
     colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
-    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr[,2:dim(res.tr)[2]])
+    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
     
   }
   
@@ -115,12 +115,12 @@ plotresiduals.clmplusmodel <- function(clmplusmodel,
     
     res.tr=pkg.env$c2t(res.m)
     colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
-    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr[,2:dim(res.tr)[2]])
+    longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
 
   }
 
   
-  p_hm <- ggplot2::ggplot(data=longdf.no.0, ggplot2::aes(x=as.integer(dev), y=as.integer(origin))) + 
+  p_hm <- ggplot2::ggplot(data=longdf.no.0, ggplot2::aes(x=as.integer(dev)-1, y=as.integer(origin)-1)) + 
     ggplot2::geom_tile(ggplot2::aes(fill = value))+ggplot2::scale_y_reverse()+
     ggplot2::scale_fill_gradient2(name="model residuals", 
                          low="royalblue", 

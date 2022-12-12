@@ -16,5 +16,3 @@ rtt.input.env$properties.cpt <- function(cumulative.payments.triangle){
   
 }
 
-
-
