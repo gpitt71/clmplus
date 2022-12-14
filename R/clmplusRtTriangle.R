@@ -60,6 +60,13 @@ clmplus <- function(RtTriangle,
 #' \item{'m7': CBD m7 extension.}
 #' \item{'m8': CBD m7 extension.}
 #' }
+#' 
+#' @param gk.fc.model model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
+#' @param ckj.fc.model model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
+#' @param gk.order order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
+#' @param ckj.fc.model order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
+#' @param ... arguments to be passed to or from other methods.
+#' 
 #' @param ... parameters to be passed to clmplus.
 #' 
 #' @return No return value, called as clmplus method default.
@@ -94,6 +101,14 @@ clmplus.default <- function(RtTriangle,
 #' \item{'m7': CBD m7 extension.}
 #' \item{'m8': CBD m7 extension.}
 #' }
+#' 
+#' @param gk.fc.model model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
+#' @param ckj.fc.model model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
+#' @param gk.order order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
+#' @param ckj.fc.model order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
+#' @param ... arguments to be passed to or from other methods.
+#' 
+#' 
 #' @param xc xc constant parameter to be set for the m8 model. Default to NULL.
 #' @param iter.max maximum number of iterations for the Newton-Rhapson algorithm. It will be ignored for other fitting procedures.
 #' @param tolerance.max maximum tolerance of parameters difference for convergence for the Newton-Rhapson algorithm implementation.Ignored for other fitting procedures.

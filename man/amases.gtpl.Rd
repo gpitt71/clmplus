@@ -14,6 +14,6 @@ amases.gtpl
 Dataset of cumulative paid claims for a small italian company in the line of business: general third party liability.
 }
 \references{
-Savelli, Nino and Clemente, Gian Paolo. "Stochastic claim reserving based on crm for solvency ii purposes."
+Savelli, Nino, and  Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 }
 \keyword{datasets}

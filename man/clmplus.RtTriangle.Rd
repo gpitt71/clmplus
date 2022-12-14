@@ -77,6 +77,12 @@ of the model parameters with the identifiability constraints applied. If
 omitted no identifiability constraints are applied to the model.
 To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
 
+\item{gk.fc.model}{model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.}
+
+\item{ckj.fc.model}{order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).}
+
+\item{gk.order}{order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).}
+
 \item{...}{extra arguments to be passed from or to other methods.}
 }
 \value{

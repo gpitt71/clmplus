@@ -108,7 +108,7 @@ plot.clmplusmodel <- function(x,
     
     if(a.tp){
       
-      a.df <- data.frame(x=x$model.fit$ages,
+      a.df <- data.frame(x=(x$model.fit$ages-1),
                          y=x$model.fit$ax)
       p1 <- ggplot2::ggplot(a.df,
                             ggplot2::aes(x=x,y=y))+

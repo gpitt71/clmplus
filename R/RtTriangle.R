@@ -2,6 +2,7 @@
 #'
 #' This function allows to define the class of triangles for reverse time models.
 #' @param cumulative.payments.triangle Input triangle of cumulative payments.
+#' @param k Claims exposure in the cell, also known as lost exposure.
 #' 
 #' @examples
 #' data(sifa.mtpl)

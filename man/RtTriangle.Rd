@@ -8,6 +8,8 @@ RtTriangle(cumulative.payments.triangle, k = 1/2)
 }
 \arguments{
 \item{cumulative.payments.triangle}{Input triangle of cumulative payments.}
+
+\item{k}{Claims exposure in the cell, also known as lost exposure.}
 }
 \value{
 An object of class \code{"RtTriangle"}. Lists the following elements:
