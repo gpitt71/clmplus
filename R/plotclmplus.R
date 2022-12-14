@@ -220,7 +220,7 @@ plot.clmplusmodel <- function(x,
   }else{
     
     warning('For non standard models clmplus only shows StMoMo default')
-    StMoMo::plot(x$model.fit)
+    plot(x$model.fit)
   }
   
   do.call(getExportedValue("gridExtra","grid.arrange"), c(plot_list, ncol = 1)) 
@@ -229,7 +229,7 @@ plot.clmplusmodel <- function(x,
 
 
 
-globalVariables(c("dy", "cy", "ay","aes","dev","origin","value","incrementals","cumulatives"))
+globalVariables(c("dy", "cy","y", "y2","ay","aes","dev","origin","value","incrementals","cumulatives"))
 
 
 

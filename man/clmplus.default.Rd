@@ -7,6 +7,15 @@
 \method{clmplus}{default}(
   RtTriangle,
   hazard.model = NULL,
+  xc = NULL,
+  iter.max = 10000,
+  tolerance.max = 1e-06,
+  link = c("log", "logit"),
+  staticAgeFun = TRUE,
+  periodAgeFun = "NP",
+  cohortAgeFun = NULL,
+  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x
+    = b0x, gc = gc),
   gk.fc.model = "a",
   ckj.fc.model = "a",
   gk.order = c(1, 1, 0),
@@ -30,11 +39,51 @@
 \item{'m8': CBD m7 extension.}
 }}
 
+\item{xc}{xc constant parameter to be set for the m8 model. Default to NULL.}
+
+\item{iter.max}{maximum number of iterations for the Newton-Rhapson algorithm. It will be ignored for other fitting procedures.}
+
+\item{tolerance.max}{maximum tolerance of parameters difference for convergence for the Newton-Rhapson algorithm implementation.Ignored for other fitting procedures.}
+
+\item{link}{defines the link function and random component associated with 
+the mortality model. \code{"log"} would assume that deaths follow a 
+Poisson distribution and use a log link while \code{"logit"} would assume 
+that deaths follow a Binomial distribution and a logit link.
+To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
+
+\item{staticAgeFun}{logical value indicating if a static age function 
+\eqn{\alpha_x} is to be included. To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
+
+\item{periodAgeFun}{a list of length \eqn{N} with the definitions of the 
+period age modulating parameters \eqn{\beta_x^{(i)}}. Each entry can take 
+values: \code{"NP"} for non-parametric age terms, \code{"1"} for 
+\eqn{\beta_x^{(i)}=1} or a predefined parametric function of 
+age (see details). Set this to \code{NULL} if there are no period terms 
+in the model.
+To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
+
+\item{cohortAgeFun}{defines the cohort age modulating parameter 
+\eqn{\beta_x^{(0)}}. It can take values: \code{"NP"} for non-parametric 
+age terms, \code{"1"} for \eqn{\beta_x^{(0)}=1}, a predefined parametric 
+function of age (see details) or \code{NULL} if there is no cohort effect. 
+To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
+
+\item{constFun}{function defining the identifiability constraints of the 
+model. It must be a function of the form 
+\code{constFun <- function(ax, bx, kt, b0x, gc, wxt, ages)} taking a set
+of fitted model parameters and returning a list 
+\code{list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)}
+of the model parameters with the identifiability constraints applied. If 
+omitted no identifiability constraints are applied to the model.
+To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
+
 \item{gk.fc.model}{model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.}
 
-\item{ckj.fc.model}{order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).}
+\item{ckj.fc.model}{model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.}
 
 \item{gk.order}{order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).}
+
+\item{ckj.order}{order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).}
 
 \item{...}{parameters to be passed to clmplus.}
 }
