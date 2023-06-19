@@ -1,3 +1,5 @@
+[![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/grand-total/clmplus?color=blue)](https://r-pkg.org/pkg/clmplus)
+
 # clmplus
 
 Repository GitHub that contains the code for the package `clmplus`. 
