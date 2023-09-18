@@ -12,7 +12,9 @@
 #' @return No return value, plots the run-off triangle cumulative payments and incremental payments.
 #' 
 #' @references 
-#' 
+#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
+#' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
+#'  
 #' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
