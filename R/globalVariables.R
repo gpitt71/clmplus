@@ -578,7 +578,53 @@ pkg.env$fcst <- function(object,
 }
 
 
+pkg.env$create_lower_triangle <- function(lt){
+  
+  J <- dim(lt)[1]
+  J.stop <- dim(lt)[2]
+  out <- array(NA,c(J,J))
+  
+  for(age in 1:J){
+    
+    for(calendar in 1:J.stop){
+      
+      tmp.ix <- J+calendar
+      if(tmp.ix-age+1<=J & age<=J){
+      out[tmp.ix-age+1,age] <- lt[age,calendar]}
+      
+      
+    }
+    
+  }
+  
+  return(out)
+  
+  
+}
 
+pkg.env$create_full_triangle <- function(cumulative.payments.triangle, lt){
+  
+  J <- dim(lt)[1]
+  J.stop <- dim(lt)[2]
+  out <- cumulative.payments.triangle
+  
+  for(age in 1:J){
+    
+    for(calendar in 1:J.stop){
+      
+      tmp.ix <- J+calendar
+      if(tmp.ix-age+1<=J & age<=J){
+        out[tmp.ix-age+1,age] <- lt[age,calendar]}
+      
+      
+    }
+    
+  }
+  
+  return(out)
+  
+  
+}
 
 
 

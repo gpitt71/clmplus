@@ -1,8 +1,8 @@
-#' Fit Chain Ladder plus to reverse time triangles.
+#' Fit Chain Ladder plus on Run-off Triangles.
 #'
-#' Generic method to fit Chain Ladder plus models.
+#' Method to Estimate Chain Ladder plus models.
 #' 
-#' @param RtTriangle \code{RtTriangle} object, reverse time triangle to be fitted.
+#' @param AggregateDataPP \code{AggregateDataPP} object, reverse time triangle to be fitted.
 #' @param hazard.model \code{character}, hazard model supported from our package. The model can be chosen from:
 #' \itemize{
 #' \item{'a': Age model, this is equivalent to the Mack chain-ladder.}
@@ -15,11 +15,6 @@
 #' \item{'m7': CBD m7 extension.}
 #' \item{'m8': CBD m7 extension.}
 #' }
-#' 
-#' @param gk.fc.model \code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
-#' @param ckj.fc.model \code{character}, model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
-#' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
-#' @param ckj.order \code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
 #' 
 #' 
 #' @param xc \code{integer}, xc constant parameter to be set for the m8 model. Default to NULL.
@@ -54,22 +49,19 @@
 #'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
 #' @param ... parameters to be passed to clmplus.
 #' 
-#' @return No return value, called to pass method \code{clmplus.RtTriangle}. See \code{clmplus.RtTriangle} documentation.
+#' @return No return value, called to pass method \code{clmplus.AggregateDataPP}. See \code{clmplus.AggregateDataPP} documentation.
 #' 
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
 #' 
 #' @references 
 #' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
 #' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
 #' 
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
-#' 
 #' @export
-clmplus <- function(RtTriangle,
+clmplus <- function(AggregateDataPP,
                     hazard.model=NULL,
                     xc = NULL,
                     iter.max=1e+04,
@@ -79,10 +71,10 @@ clmplus <- function(RtTriangle,
                     periodAgeFun = "NP",
                     cohortAgeFun = NULL, 
                     constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                    gk.fc.model='a',
-                    ckj.fc.model='a',
-                    gk.order=c(1,1,0),
-                    ckj.order=c(0,1,0),
+                    # gk.fc.model='a',
+                    # ckj.fc.model='a',
+                    # gk.order=c(1,1,0),
+                    # ckj.order=c(0,1,0),
                     ...){
   
   UseMethod("clmplus")}
@@ -91,7 +83,7 @@ clmplus <- function(RtTriangle,
 #' 
 #' Default method to fit Chain Ladder plus models.
 #' 
-#' @param RtTriangle \code{RtTriangle} object, reverse time triangle to be fitted.
+#' @param AggregateDataPP \code{AggregateDataPP} object, reverse time triangle to be fitted.
 #' @param hazard.model \code{character}, hazard model supported from our package. The model can be chosen from:
 #' \itemize{
 #' \item{'a': Age model, this is equivalent to the Mack chain-ladder.}
@@ -143,7 +135,7 @@ clmplus <- function(RtTriangle,
 #'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
 #' @param ... parameters to be passed to clmplus.
 #' 
-#' @return No return value, called to pass method \code{clmplus.RtTriangle}. See \code{clmplus.RtTriangle} documentation.
+#' @return No return value, called to pass method \code{clmplus.AggregateDataPP}. See \code{clmplus.AggregateDataPP} documentation.
 #' 
 #' @references 
 #' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
@@ -153,7 +145,7 @@ clmplus <- function(RtTriangle,
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-clmplus.default <- function(RtTriangle,
+clmplus.default <- function(AggregateDataPP,
                             hazard.model=NULL,
                             xc = NULL,
                             iter.max=1e+04,
@@ -163,17 +155,17 @@ clmplus.default <- function(RtTriangle,
                             periodAgeFun = "NP",
                             cohortAgeFun = NULL, 
                             constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                            gk.fc.model='a',
-                            ckj.fc.model='a',
-                            gk.order=c(1,1,0),
-                            ckj.order=c(0,1,0),
-                            ...){message('The object provided must be of class RtTriangle')}
+                            # gk.fc.model='a',
+                            # ckj.fc.model='a',
+                            # gk.order=c(1,1,0),
+                            # ckj.order=c(0,1,0),
+                            ...){message('The object provided must be of class AggregateDataPP')}
 
 #' Fit Chain Ladder Plus to reverse time triangles.
 #'
-#' Method to fit Chain Ladder plus models to \code{RtTriangle} objects.
+#' Method to fit Chain Ladder plus models to \code{AggregateDataPP} objects.
 #' 
-#' @param RtTriangle \code{RtTriangle} object, reverse time triangle to be fitted.
+#' @param AggregateDataPP \code{AggregateDataPP} object, reverse time triangle to be fitted.
 #' @param hazard.model \code{character}, hazard model supported from our package. The model can be chosen from:
 #' \itemize{
 #' \item{'a': Age model, this is equivalent to the Mack chain-ladder.}
@@ -186,12 +178,6 @@ clmplus.default <- function(RtTriangle,
 #' \item{'m7': CBD m7 extension.}
 #' \item{'m8': CBD m7 extension.}
 #' }
-#' 
-#' @param gk.fc.model \code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
-#' @param ckj.fc.model \code{character}, model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
-#' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
-#' @param ckj.order \code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
-#' 
 #' 
 #' @param xc \code{integer}, xc constant parameter to be set for the m8 model. Default to NULL.
 #' @param iter.max \code{integer}, maximum number of iterations for the Newton-Rhapson algorithm. It will be ignored for other fitting procedures.
@@ -240,7 +226,7 @@ clmplus.default <- function(RtTriangle,
 #'   
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
 #' 
 #' @references 
@@ -251,7 +237,7 @@ clmplus.default <- function(RtTriangle,
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-clmplus.RtTriangle <- function(RtTriangle,
+clmplus.AggregateDataPP <- function(AggregateDataPP,
                             hazard.model=NULL,
                             xc = NULL,
                             iter.max=1e+04,
@@ -261,11 +247,12 @@ clmplus.RtTriangle <- function(RtTriangle,
                             periodAgeFun = "NP",
                             cohortAgeFun = NULL, 
                             constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                            gk.fc.model='a',
-                            ckj.fc.model='a',
-                            gk.order=c(1,1,0),
-                            ckj.order=c(0,1,0),
+                            # gk.fc.model='a',
+                            # ckj.fc.model='a',
+                            # gk.order=c(1,1,0),
+                            # ckj.order=c(0,1,0),
                             ...){
+  
   
   stopifnot(is.null(hazard.model) | typeof(hazard.model)=="character")
   
@@ -279,25 +266,25 @@ clmplus.RtTriangle <- function(RtTriangle,
                           constFun = constFun)
     
     model <- StMoMo::fit(stmomo.model, 
-                         Dxt = RtTriangle$occurrance, 
-                         Ext = RtTriangle$exposure,
-                         wxt = RtTriangle$fit.w,
+                         Dxt = AggregateDataPP$occurrance, 
+                         Ext = AggregateDataPP$exposure,
+                         wxt = AggregateDataPP$fit.w,
                          iterMax=as.integer(1e+05))
     
     #forecasting horizon
-    J=dim(RtTriangle$cumulative.payments.triangle)[2]
+    J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
     #compute the development factors
     alphaij <- forecast::forecast(model, h = J)
     # fij=(2+alphaij$rates)/(2-alphaij$rates)
-    fij=(1+(1-RtTriangle$k)*alphaij$rates)/(1-(RtTriangle$k*alphaij$rates))
+    fij=(1+(1-AggregateDataPP$k)*alphaij$rates)/(1-(AggregateDataPP$k*alphaij$rates))
     # pick the last diagonal
-    d=RtTriangle$diagonal[1:(J-1)]
+    d=AggregateDataPP$diagonal[1:(J-1)]
     # extrapolate the results
     lt=array(0.,c(J,J))
     lt[,1]=c(0.,d)*fij[,1]
     for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
     
-    ot_=pkg.env$t2c(RtTriangle$cumulative.payments.triangle)
+    ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
     ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
     reserve=rev(ultimate_cost-ot_[,J])
     ultimate_cost=rev(ultimate_cost)
@@ -317,125 +304,135 @@ clmplus.RtTriangle <- function(RtTriangle,
   
   out}
   
-  if(hazard.model=='m8'){
-    pkg.env$models$m8= StMoMo::m8(link = c("log"),xc=xc)
-  }
   
-  if(hazard.model=='lc'){
-    
-    J=dim(RtTriangle$cumulative.payments.triangle)[2]
-    
-    model <- pkg.env$fit.lc.nr(RtTriangle,
-                               iter.max=iter.max,
-                               tolerance.max=tolerance.max)
-    
-    
-    kt.nNA <- max(which(!is.na(model$kt)))
-    
-    if(ckj.fc.model=='a'){
-      
-      kt.model=forecast::Arima(as.vector(model$kt[1:kt.nNA]),c(0,1,0),include.constant = T)
-      kt.f <- forecast::forecast(kt.model,h=J)
-      
-    }else{
-      
-      kt.data=data.frame(y=model$kt[1:kt.nNA],
-                         x=1:kt.nNA)
-      new.kt.data <- data.frame(x=seq(J+1,2*J))
-      
-      kt.model <- stats::lm('y~x', 
-                            data=kt.data)
-      
-      kt.f <- forecast::forecast(kt.model,newdata=new.kt.data)
-      
-    }
-    
-    # model$kt.fcst=kt.f
-    
-    
-    kt.mx = matrix(rep(kt.f$mean,
-                       J),
-                   byrow = T,
-                   nrow=J)
-    
-    bx.mx = matrix(rep(model$bx,
-                       J),
-                   byrow = F,
-                   ncol=J)
-    
-    ax.mx = matrix(rep(model$ax,J),
-                   byrow = F,
-                   ncol=J)
-    
-    alphaij = exp(ax.mx+bx.mx*kt.mx)
-    
-    # fij = (2+alphaij)/(2-alphaij)  
-    fij=(1+(1-RtTriangle$k)*alphaij)/(1-(RtTriangle$k*alphaij))
-    
-    d=RtTriangle$diagonal[1:(J-1)]
-    
-    # extrapolate the results
-    lt=array(0.,c(J,J))
-    lt[,1]=c(0.,d)*fij[,1]
-    for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-    
-    ot_=pkg.env$t2c(RtTriangle$cumulative.payments.triangle)
-    ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-    reserve=rev(ultimate_cost-ot_[,J])
-    ultimate_cost=rev(ultimate_cost)
-    
-    converged=model$converged
-    citer=model$citer
-    
-    alphaij = list(rates=alphaij,
-                   kt.f=kt.f)
-    
-  }
-
   
+  # if(hazard.model=='m8'){
+  #   pkg.env$models$m8= StMoMo::m8(link = c("log"),xc=xc)
+  # }
+  # 
+  # if(hazard.model=='lc'){
+  #   
+  #   J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
+  #   
+  #   model <- pkg.env$fit.lc.nr(AggregateDataPP,
+  #                              iter.max=iter.max,
+  #                              tolerance.max=tolerance.max)
+  #   
+  #   
+  #   kt.nNA <- max(which(!is.na(model$kt)))
+  #   
+  #   if(ckj.fc.model=='a'){
+  #     
+  #     kt.model=forecast::Arima(as.vector(model$kt[1:kt.nNA]),c(0,1,0),include.constant = T)
+  #     kt.f <- forecast::forecast(kt.model,h=J)
+  #     
+  #   }else{
+  #     
+  #     kt.data=data.frame(y=model$kt[1:kt.nNA],
+  #                        x=1:kt.nNA)
+  #     new.kt.data <- data.frame(x=seq(J+1,2*J))
+  #     
+  #     kt.model <- stats::lm('y~x', 
+  #                           data=kt.data)
+  #     
+  #     kt.f <- forecast::forecast(kt.model,newdata=new.kt.data)
+  #     
+  #   }
+  #   
+  #   # model$kt.fcst=kt.f
+  #   
+  #   
+  #   kt.mx = matrix(rep(kt.f$mean,
+  #                      J),
+  #                  byrow = T,
+  #                  nrow=J)
+  #   
+  #   bx.mx = matrix(rep(model$bx,
+  #                      J),
+  #                  byrow = F,
+  #                  ncol=J)
+  #   
+  #   ax.mx = matrix(rep(model$ax,J),
+  #                  byrow = F,
+  #                  ncol=J)
+  #   
+  #   alphaij = exp(ax.mx+bx.mx*kt.mx)
+  #   
+  #   # fij = (2+alphaij)/(2-alphaij)  
+  #   fij=(1+(1-AggregateDataPP$k)*alphaij)/(1-(AggregateDataPP$k*alphaij))
+  #   
+  #   d=AggregateDataPP$diagonal[1:(J-1)]
+  #   
+  #   # extrapolate the results
+  #   lt=array(0.,c(J,J))
+  #   lt[,1]=c(0.,d)*fij[,1]
+  #   for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
+  #   
+  #   ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
+  #   ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
+  #   reserve=rev(ultimate_cost-ot_[,J])
+  #   ultimate_cost=rev(ultimate_cost)
+  #   
+  #   converged=model$converged
+  #   citer=model$citer
+  #   
+  #   alphaij = list(rates=alphaij,
+  #                  kt.f=kt.f)
+  #   
+  # }
+  # 
+  # 
   if(hazard.model %in% names(pkg.env$models)){
+    # browser()
   model <- StMoMo::fit(pkg.env$models[[hazard.model]], 
-                       Dxt = RtTriangle$occurrance, 
-                       Ext = RtTriangle$exposure,
-                       wxt=RtTriangle$fit.w,
+                       Dxt = AggregateDataPP$occurrance, 
+                       Ext = AggregateDataPP$exposure,
+                       wxt=AggregateDataPP$fit.w,
                        iterMax=as.integer(1e+05))
   
   #forecasting horizon
-  J=dim(RtTriangle$cumulative.payments.triangle)[2]
+  J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
   #compute the development factors
   # with stmomo:
-  # alphaij <- forecast::forecast(model, h = J)
-  alphaij <- pkg.env$fcst(model, 
-                          hazard.model = hazard.model,
-                          gk.fc.model=gk.fc.model,
-                          ckj.fc.model=ckj.fc.model,
-                          gk.order=gk.order,
-                          ckj.order=ckj.order
-                          )
-  # fij=(2+alphaij$rates)/(2-alphaij$rates)
-  fij=(1+(1-RtTriangle$k)*alphaij$rates)/(1-(RtTriangle$k*alphaij$rates))
-  # pick the last diagonal
-  d=RtTriangle$diagonal[1:(J-1)]
+ 
+  # alphaij <- pkg.env$fcst(model, 
+  #                         hazard.model = hazard.model,
+  #                         gk.fc.model=gk.fc.model,
+  #                         ckj.fc.model=ckj.fc.model,
+  #                         gk.order=gk.order,
+  #                         ckj.order=ckj.order
+  #                         )
+
+  # fij=(1+(1-AggregateDataPP$k)*alphaij$rates)/(1-(AggregateDataPP$k*alphaij$rates))
+ 
+   # pick the last diagonal
+  # d=AggregateDataPP$diagonal[1:(J-1)]
   # extrapolate the results
-  lt=array(0.,c(J,J))
-  lt[,1]=c(0.,d)*fij[,1]
-  for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  
-  ot_=pkg.env$t2c(RtTriangle$cumulative.payments.triangle)
-  ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-  reserve=rev(ultimate_cost-ot_[,J])
-  ultimate_cost=rev(ultimate_cost)
+  # lt=array(0.,c(J,J))
+  # lt[,1]=c(0.,d)*fij[,1]
+  # for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
+  # 
+  # ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
+  # ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
+  # reserve=rev(ultimate_cost-ot_[,J])
+  # ultimate_cost=rev(ultimate_cost)
   converged=TRUE
   citer=NULL
   }
   
   out <- list(model.fit=model,
-             hazard.model=hazard.model,
-             ultimate.cost=ultimate_cost,
-             reserve=reserve,
-             model.fcst = alphaij,
-             converged=converged,
-             citer=citer)
+              apc_input=list(J=J,
+                              eta=AggregateDataPP$k,
+                              hazard.model=hazard.model,
+                              diagonal=AggregateDataPP$diagonal,
+                              cumulative.payments.triangle=AggregateDataPP$cumulative.payments.triangle
+                              ),
+                                
+              # ultimate.cost=ultimate_cost,
+              # reserve=reserve,
+              # model.fcst = alphaij,
+              converged=converged,
+              citer=citer)
   
   class(out) <- c('clmplusmodel')
     

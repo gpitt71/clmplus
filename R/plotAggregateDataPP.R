@@ -2,11 +2,11 @@
 #'
 #' This function allows to define the behavior of the triangle payments.
 #' 
-#' @param x RtTriangle to be plotted.
+#' @param x AggregateDataPP to be plotted.
 #' @param ... Arguments to be passed to plot.
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' plot(sifa.mtpl.rtt)
 #' 
 #' @return No return value, plots the run-off triangle cumulative payments and incremental payments.
@@ -19,7 +19,7 @@
 #' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 #' 
 #' @export
-plot.RtTriangle <- function(x, ...){
+plot.AggregateDataPP <- function(x, ...){
   
   temp=x$incremental.payments.triangle
   colnames(temp)<-seq(0,dim(temp)[1]-1)

@@ -1,12 +1,13 @@
-#' Reverse time triangles
+#' Pre-process Run-Off Triangles
 #'
-#' This function allows to define the class of triangles for reverse time models.
+#' Pre-process Run-Off Triangles.
 #' @param cumulative.payments.triangle \code{triangle matrix} or \code{matrix array} object, input triangle of cumulative payments.
+#' @param entries.weights \code{triangle matrix} or \code{matrix array} model entries weights.
 #' @param k \code{numeric}, individual claims exposure in the cell, also known as lost exposure. It must be in the interval (0,1].
 #' 
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' 
 #' @return An object of class \code{RtTriangle}. Lists the following elements:
 #'   \item{cumulative.payments.triangle}{\code{triangle matrix} object, input triangle of cumulative payments.}
@@ -23,11 +24,10 @@
 #'  
 #'   
 #' @references 
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' Pittarello, G., Hiabu, M., & Villegas, A. M. (2023). Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle. arXiv preprint arXiv:2301.03858.
 #' 
 #' @export
-RtTriangle <- function(cumulative.payments.triangle, k=1/2)
+AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, k=1/2)
 {
   
   rtt.input.env$properties.cpt(cumulative.payments.triangle)
@@ -44,10 +44,24 @@ RtTriangle <- function(cumulative.payments.triangle, k=1/2)
   # exposure[is.na(occurrance)]=c(0.)
   
   # find out the weights
-  fit.w <- matrix(1,nrow=J,ncol = J) 
+  if(is.null(entries.weights)){
+    
+    fit.w <- matrix(1,nrow=J,ncol = J) 
+    # fit.w[,1]=0
+    # fit.w=pkg.env$t2c(fit.w)
+    # fit.w[is.na(fit.w)]=0
+    
+    }
+  else{
+    
+    fit.w <- entries.weights
+    
+  }
+  
   fit.w[,1]=0
   fit.w=pkg.env$t2c(fit.w)
   fit.w[is.na(fit.w)]=0
+  
   
   tr <- list(
     cumulative.payments.triangle = cumulative.payments.triangle,
@@ -61,7 +75,7 @@ RtTriangle <- function(cumulative.payments.triangle, k=1/2)
   )
   
   ## Set the name for the class
-  class(tr) <- "RtTriangle"
+  class(tr) <- "AggregateDataPP"
   tr
   
 }
