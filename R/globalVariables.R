@@ -632,6 +632,8 @@ pkg.env$find.development.factors <- function(J,
                                              period.eff,
                                              cohort.eff,
                                              eta){
+
+  # Function that finds the development factors on the upper triangle.
   
   out <- array(NA,dim=c(J,J))
   
