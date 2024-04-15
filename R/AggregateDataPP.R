@@ -3,7 +3,7 @@
 #' Pre-process Run-Off Triangles.
 #' @param cumulative.payments.triangle \code{triangle matrix} or \code{matrix array} object, input triangle of cumulative payments.
 #' @param entries.weights \code{triangle matrix} or \code{matrix array} model entries weights.
-#' @param k \code{numeric}, individual claims exposure in the cell, also known as lost exposure. It must be in the interval (0,1].
+#' @param eta \code{numeric}, individual claims exposure in the cell, also known as lost exposure. It must be in the interval (0,1].
 #' 
 #' @examples
 #' data(sifa.mtpl)
@@ -27,7 +27,7 @@
 #' Pittarello, G., Hiabu, M., & Villegas, A. M. (2023). Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle. arXiv preprint arXiv:2301.03858.
 #' 
 #' @export
-AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, k=1/2)
+AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, eta=1/2)
 {
   
   rtt.input.env$properties.cpt(cumulative.payments.triangle)
@@ -37,19 +37,15 @@ AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, 
   
   # find out occurrance and exposure
   occurrance=pkg.env$t2c(incrementals)
-  drop=1-k
+  drop=1-eta
   exposure=pkg.env$t2c(cumulative.payments.triangle-drop*incrementals)
   
-  # occurrance[is.na(occurrance)]=c(0.)
-  # exposure[is.na(occurrance)]=c(0.)
   
   # find out the weights
   if(is.null(entries.weights)){
     
     fit.w <- matrix(1,nrow=J,ncol = J) 
-    # fit.w[,1]=0
-    # fit.w=pkg.env$t2c(fit.w)
-    # fit.w[is.na(fit.w)]=0
+
     
     }
   else{
@@ -71,7 +67,7 @@ AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, 
     incremental.payments.triangle = incrementals,
     J=J,
     diagonal=pkg.env$t2c(cumulative.payments.triangle)[,J],
-    k=k
+    eta=eta
   )
   
   ## Set the name for the class

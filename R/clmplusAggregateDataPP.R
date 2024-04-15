@@ -9,11 +9,6 @@
 #' \item{'ac': Age and cohort effects.}
 #' \item{'ap': Age and cohort effects.}
 #' \item{'apc': Age cohort and period effects.}
-#' \item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
-#' \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
-#' \item{'m6': CBD with cohorts.}
-#' \item{'m7': CBD m7 extension.}
-#' \item{'m8': CBD m7 extension.}
 #' }
 #' 
 #' 
@@ -90,11 +85,6 @@ clmplus <- function(AggregateDataPP,
 #' \item{'ac': Age and cohort effects.}
 #' \item{'ap': Age and cohort effects.}
 #' \item{'apc': Age cohort and period effects.}
-#' \item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
-#' \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
-#' \item{'m6': CBD with cohorts.}
-#' \item{'m7': CBD m7 extension.}
-#' \item{'m8': CBD m7 extension.}
 #' }
 #' 
 #' @param gk.fc.model \code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
@@ -172,11 +162,6 @@ clmplus.default <- function(AggregateDataPP,
 #' \item{'ac': Age and cohort effects.}
 #' \item{'ap': Age and cohort effects.}
 #' \item{'apc': Age cohort and period effects.}
-#' \item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
-#' \item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
-#' \item{'m6': CBD with cohorts.}
-#' \item{'m7': CBD m7 extension.}
-#' \item{'m8': CBD m7 extension.}
 #' }
 #' 
 #' @param xc \code{integer}, xc constant parameter to be set for the m8 model. Default to NULL.
@@ -247,10 +232,6 @@ clmplus.AggregateDataPP <- function(AggregateDataPP,
                             periodAgeFun = "NP",
                             cohortAgeFun = NULL, 
                             constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                            # gk.fc.model='a',
-                            # ckj.fc.model='a',
-                            # gk.order=c(1,1,0),
-                            # ckj.order=c(0,1,0),
                             ...){
   
   
@@ -276,7 +257,7 @@ clmplus.AggregateDataPP <- function(AggregateDataPP,
     #compute the development factors
     alphaij <- forecast::forecast(model, h = J)
     # fij=(2+alphaij$rates)/(2-alphaij$rates)
-    fij=(1+(1-AggregateDataPP$k)*alphaij$rates)/(1-(AggregateDataPP$k*alphaij$rates))
+    fij=(1+(1-AggregateDataPP$eta)*alphaij$rates)/(1-(AggregateDataPP$eta*alphaij$rates))
     # pick the last diagonal
     d=AggregateDataPP$diagonal[1:(J-1)]
     # extrapolate the results
@@ -304,130 +285,41 @@ clmplus.AggregateDataPP <- function(AggregateDataPP,
   
   out}
   
-  
-  
-  # if(hazard.model=='m8'){
-  #   pkg.env$models$m8= StMoMo::m8(link = c("log"),xc=xc)
-  # }
-  # 
-  # if(hazard.model=='lc'){
-  #   
-  #   J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
-  #   
-  #   model <- pkg.env$fit.lc.nr(AggregateDataPP,
-  #                              iter.max=iter.max,
-  #                              tolerance.max=tolerance.max)
-  #   
-  #   
-  #   kt.nNA <- max(which(!is.na(model$kt)))
-  #   
-  #   if(ckj.fc.model=='a'){
-  #     
-  #     kt.model=forecast::Arima(as.vector(model$kt[1:kt.nNA]),c(0,1,0),include.constant = T)
-  #     kt.f <- forecast::forecast(kt.model,h=J)
-  #     
-  #   }else{
-  #     
-  #     kt.data=data.frame(y=model$kt[1:kt.nNA],
-  #                        x=1:kt.nNA)
-  #     new.kt.data <- data.frame(x=seq(J+1,2*J))
-  #     
-  #     kt.model <- stats::lm('y~x', 
-  #                           data=kt.data)
-  #     
-  #     kt.f <- forecast::forecast(kt.model,newdata=new.kt.data)
-  #     
-  #   }
-  #   
-  #   # model$kt.fcst=kt.f
-  #   
-  #   
-  #   kt.mx = matrix(rep(kt.f$mean,
-  #                      J),
-  #                  byrow = T,
-  #                  nrow=J)
-  #   
-  #   bx.mx = matrix(rep(model$bx,
-  #                      J),
-  #                  byrow = F,
-  #                  ncol=J)
-  #   
-  #   ax.mx = matrix(rep(model$ax,J),
-  #                  byrow = F,
-  #                  ncol=J)
-  #   
-  #   alphaij = exp(ax.mx+bx.mx*kt.mx)
-  #   
-  #   # fij = (2+alphaij)/(2-alphaij)  
-  #   fij=(1+(1-AggregateDataPP$k)*alphaij)/(1-(AggregateDataPP$k*alphaij))
-  #   
-  #   d=AggregateDataPP$diagonal[1:(J-1)]
-  #   
-  #   # extrapolate the results
-  #   lt=array(0.,c(J,J))
-  #   lt[,1]=c(0.,d)*fij[,1]
-  #   for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  #   
-  #   ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
-  #   ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-  #   reserve=rev(ultimate_cost-ot_[,J])
-  #   ultimate_cost=rev(ultimate_cost)
-  #   
-  #   converged=model$converged
-  #   citer=model$citer
-  #   
-  #   alphaij = list(rates=alphaij,
-  #                  kt.f=kt.f)
-  #   
-  # }
-  # 
-  # 
   if(hazard.model %in% names(pkg.env$models)){
-    # browser()
+    
   model <- StMoMo::fit(pkg.env$models[[hazard.model]], 
                        Dxt = AggregateDataPP$occurrance, 
                        Ext = AggregateDataPP$exposure,
                        wxt=AggregateDataPP$fit.w,
                        iterMax=as.integer(1e+05))
   
+
+  
   #forecasting horizon
   J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
-  #compute the development factors
-  # with stmomo:
- 
-  # alphaij <- pkg.env$fcst(model, 
-  #                         hazard.model = hazard.model,
-  #                         gk.fc.model=gk.fc.model,
-  #                         ckj.fc.model=ckj.fc.model,
-  #                         gk.order=gk.order,
-  #                         ckj.order=ckj.order
-  #                         )
-
-  # fij=(1+(1-AggregateDataPP$k)*alphaij$rates)/(1-(AggregateDataPP$k*alphaij$rates))
- 
-   # pick the last diagonal
-  # d=AggregateDataPP$diagonal[1:(J-1)]
-  # extrapolate the results
-  # lt=array(0.,c(J,J))
-  # lt[,1]=c(0.,d)*fij[,1]
-  # for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  # 
-  # ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
-  # ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-  # reserve=rev(ultimate_cost-ot_[,J])
-  # ultimate_cost=rev(ultimate_cost)
+  
+  # Find fitted development factors
+  fij.fit <- pkg.env$find.development.factors(J,
+                                       age.eff= model$ax,
+                                       cohort.eff= model$gc,
+                                       period.eff=model$kt,
+                                       eta=AggregateDataPP$eta)
+  
+  res.m = stats::residuals(model)
+  res.tr=pkg.env$c2t(res.m$residuals)
   converged=TRUE
   citer=NULL
   }
   
   out <- list(model.fit=model,
               apc_input=list(J=J,
-                              eta=AggregateDataPP$k,
+                              eta=AggregateDataPP$eta,
                               hazard.model=hazard.model,
                               diagonal=AggregateDataPP$diagonal,
                               cumulative.payments.triangle=AggregateDataPP$cumulative.payments.triangle
                               ),
-                                
+              hazard_scaled_deviance_residuals=res.tr,
+              fitted_development_factors = fij.fit, 
               # ultimate.cost=ultimate_cost,
               # reserve=reserve,
               # model.fcst = alphaij,

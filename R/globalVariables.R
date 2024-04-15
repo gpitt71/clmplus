@@ -627,6 +627,44 @@ pkg.env$create_full_triangle <- function(cumulative.payments.triangle, lt){
 }
 
 
+pkg.env$find.development.factors <- function(J,
+                                             age.eff,
+                                             period.eff,
+                                             cohort.eff,
+                                             eta){
+  
+  out <- array(NA,dim=c(J,J))
+  
+  ax <- c(NA,age.eff[!is.na(age.eff)])
+  
+  if(!is.null(cohort.eff)){
+   gc <-  c(cohort.eff[!is.na(cohort.eff)],NA) #last cohort effect will be extrapolated
+   
+   
+  }else{gc<-rep(0,J)}
+  
+  if(!is.null(period.eff)){
+    
+    kt <-  c(NA,kt[!is.na(kt)]) #the first period is disregarded
+    
+    
+  }else{kt<-rep(0,J)}
+  
+  
+  for(i in 1:J){
+    for(j in 1:J){
+      
+      if((i+j-1)<=J){out[i,j] <- ax[j]+gc[i]+kt[i+j-1]}
+      
+    }
+    
+  }
+  
+  out <- (1+(1-eta)*exp(out))/(1-(eta*exp(out)))
+  
+  return(out)
+  
+  }
 
 
 
