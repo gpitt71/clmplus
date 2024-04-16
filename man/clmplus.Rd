@@ -28,18 +28,7 @@ clmplus(
 \item{'ac': Age and cohort effects.}
 \item{'ap': Age and cohort effects.}
 \item{'apc': Age cohort and period effects.}
-\item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
-\item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
-\item{'m6': CBD with cohorts.}
-\item{'m7': CBD m7 extension.}
-\item{'m8': CBD m7 extension.}
 }}
-
-\item{xc}{\code{integer}, xc constant parameter to be set for the m8 model. Default to NULL.}
-
-\item{iter.max}{\code{integer}, maximum number of iterations for the Newton-Rhapson algorithm. It will be ignored for other fitting procedures.}
-
-\item{tolerance.max}{\code{integer}, maximum tolerance of parameters difference for convergence for the Newton-Rhapson algorithm implementation.Ignored for other fitting procedures.}
 
 \item{link}{\code{character}, defines the link function and random component associated with 
 the mortality model. \code{"log"} would assume that deaths follow a 

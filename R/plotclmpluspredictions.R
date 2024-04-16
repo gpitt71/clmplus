@@ -2,8 +2,8 @@
 #'
 #' This function allows to define the behavior of the triangle payments.
 #' 
-#' @param x clmplus model to be plotted.
-#' @param cy.type whether to show fitted period effect with or without extrapolatio Default is "fe", standing for fitted and extrapolated. Alternative is to specify "f" for fitted effect.
+#' @param x \code{clmpluspredictions}, Model effects (fitted and extrapolated) to be plotted.
+#' @param cy.type \code{character}, whether to show fitted period effect with or without extrapolatio Default is "fe", standing for fitted and extrapolated. Alternative is to specify "f" for fitted effect.
 #' @param ... Arguments to be passed to plot.
 #' @examples
 #' data(sifa.mtpl)
@@ -14,28 +14,27 @@
 #' @return No return value, plots coefficients of the hazard models.
 #' 
 #' @references 
-#' 
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' Pittarello, G., Hiabu, M., & Villegas, A. M. (2023). Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle. arXiv preprint arXiv:2301.03858.
 #' 
 #' @export
-plot.clmplusmodel <- function(x, 
+plot.clmpluspredictions <- function(x, 
                               cy.type ="fe", 
                               ...){
   
   plot_list=NULL
-  if(!is.null(x$hazard.model)){
+  
+  if(!is.null(x$apc_output$hazard.model)){
     
-    a.tp <- grepl('a',x$hazard.model)
-    c.tp <- grepl('c',x$hazard.model)
-    p.tp <- grepl('p',x$hazard.model)
-    lc.tp <- grepl('lc',x$hazard.model)
+    a.tp <- grepl('a',x$apc_output$hazard.model)
+    c.tp <- grepl('c',x$apc_output$hazard.model)
+    p.tp <- grepl('p',x$apc_output$hazard.model)
+    lc.tp <- grepl('lc',x$apc_output$hazard.model)
     
     if(lc.tp){
       
-      a.df <- data.frame(x=0:(length(x$model.fit$ax)-1),
-                         y=x$model.fit$ax,
-                         y2=x$model.fit$bx)
+      a.df <- data.frame(x=0:(length(x$apc_output$model.fit$ax)-1),
+                         y=x$apc_output$model.fit$ax,
+                         y2=x$apc_output$model.fit$bx)
       
       #age effect
       p1 <- ggplot2::ggplot(a.df,
@@ -56,17 +55,17 @@ plot.clmplusmodel <- function(x,
         ggplot2::ggtitle("Fitted effect")
       
       #calendar effect
-      kt=as.vector(x$model.fit$kt)
-      kt.f=as.vector(x$model.fcst$kt.f$mean)
+      kt=as.vector(x$apc_output$model.fit$kt)
+      kt.f=as.vector(x$apc_output$alphaij$kt.f$mean)
       kt.tot=c(kt,kt.f)
       
-      kt.u80=as.vector(x$model.fcst$kt.f$upper[,1])
+      kt.u80=as.vector(x$apc_output$alphaij$kt.f$upper[,1])
       kt.u80=c(rep(NA,length(kt)),kt.u80)
-      kt.u95=as.vector(x$model.fcst$kt.f$upper[,2])
+      kt.u95=as.vector(x$apc_output$alphaij$kt.f$upper[,2])
       kt.u95=c(rep(NA,length(kt)),kt.u95)
-      kt.l80=as.vector(x$model.fcst$kt.f$lower[,1])
+      kt.l80=as.vector(x$apc_output$alphaij$kt.f$lower[,1])
       kt.l80=c(rep(NA,length(kt)),kt.l80)
-      kt.l95=as.vector(x$model.fcst$kt.f$lower[,2])
+      kt.l95=as.vector(x$apc_output$alphaij$kt.f$lower[,2])
       kt.l95=c(rep(NA,length(kt)),kt.l95)
       
       ckj.df= data.frame(x=0:(length(kt.tot)-1),y=kt.tot,kt.u80,kt.u95,kt.l80,kt.l95)
@@ -108,8 +107,8 @@ plot.clmplusmodel <- function(x,
     
     if(a.tp){
       
-      a.df <- data.frame(x=(x$model.fit$ages-1),
-                         y=x$model.fit$ax)
+      a.df <- data.frame(x=(x$apc_output$model.fit$ages-1),
+                         y=x$apc_output$model.fit$ax)
       p1 <- ggplot2::ggplot(a.df,
                             ggplot2::aes(x=x,y=y))+
         ggplot2::geom_line()+
@@ -125,18 +124,18 @@ plot.clmplusmodel <- function(x,
     
     if(c.tp){
       
-      gc.fitted <- x$model.fit$gc
+      gc.fitted <- x$apc_output$model.fit$gc
       gc.fitted <- gc.fitted[!is.na(gc.fitted)]
-      gc.tot <- c(gc.fitted,x$model.fcst$gc.f$mean[1])
+      gc.tot <- c(gc.fitted,x$apc_output$alphaij$gc.f$mean[1])
       
-      gc.l80 <- as.vector(x$model.fcst$gc.f$lower[1,1])
+      gc.l80 <- as.vector(x$apc_output$alphaij$gc.f$lower[1,1])
       gc.l80 <- c(rep(0,length(gc.fitted)),gc.l80)
-      gc.l95 <- as.vector(x$model.fcst$gc.f$lower[1,2])
+      gc.l95 <- as.vector(x$apc_output$alphaij$gc.f$lower[1,2])
       gc.l95 <- c(rep(0,length(gc.fitted)),gc.l95)
       
-      gc.u80 <- as.vector(x$model.fcst$gc.f$upper[1,1])
+      gc.u80 <- as.vector(x$apc_output$alphaij$gc.f$upper[1,1])
       gc.u80 <- c(rep(0,length(gc.fitted)),gc.u80)
-      gc.u95 <- as.vector(x$model.fcst$gc.f$upper[1,2])
+      gc.u95 <- as.vector(x$apc_output$alphaij$gc.f$upper[1,2])
       gc.u95 <- c(rep(0,length(gc.fitted)),gc.u95)
       
       
@@ -168,17 +167,17 @@ plot.clmplusmodel <- function(x,
     
     if(p.tp){
       
-      kt=as.vector(x$model.fit$kt[1,])
-      kt.f=as.vector(x$model.fcst$kt.f$mean)
+      kt=as.vector(x$apc_output$model.fit$kt[1,])
+      kt.f=as.vector(x$apc_output$alphaij$kt.f$mean)
       kt.tot=c(kt,kt.f)
       
-      kt.u80=as.vector(x$model.fcst$kt.f$upper[,1])
+      kt.u80=as.vector(x$apc_output$alphaij$kt.f$upper[,1])
       kt.u80=c(rep(NA,length(kt)),kt.u80)
-      kt.u95=as.vector(x$model.fcst$kt.f$upper[,2])
+      kt.u95=as.vector(x$apc_output$alphaij$kt.f$upper[,2])
       kt.u95=c(rep(NA,length(kt)),kt.u95)
-      kt.l80=as.vector(x$model.fcst$kt.f$lower[,1])
+      kt.l80=as.vector(x$apc_output$alphaij$kt.f$lower[,1])
       kt.l80=c(rep(NA,length(kt)),kt.l80)
-      kt.l95=as.vector(x$model.fcst$kt.f$lower[,2])
+      kt.l95=as.vector(x$apc_output$alphaij$kt.f$lower[,2])
       kt.l95=c(rep(NA,length(kt)),kt.l95)
       
       ckj.df= data.frame(x=0:(length(kt.tot)-1),y=kt.tot,kt.u80,kt.u95,kt.l80,kt.l95)
@@ -220,7 +219,7 @@ plot.clmplusmodel <- function(x,
   }else{
     
     warning('For non standard models clmplus only shows StMoMo default')
-    plot(x$model.fit)
+    plot(x$apc_output$model.fit)
   }
   
   do.call(getExportedValue("gridExtra","grid.arrange"), c(plot_list, ncol = 1)) 

@@ -1,22 +1,37 @@
 #' Predict the Reserve using Chain Ladder Plus Models
 #'
-#' This function allows to define the behavior of the triangle payments.
+#' Predict the lower triangle with a \code{clmplus} model.
 #' 
-#' @param model clmplus model to be plotted. 
+#' @param clmplusmodel \code{clmplusmodel}, Model to predict from. 
 #' @param gk.fc.model \code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
 #' @param ckj.fc.model \code{character}, model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
 #' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
 #' @param ckj.order \code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
 #' @param forecasting_horizon \code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off. 
 #' 
+#' @return Returns the following output:
+#'   
+#'   \item{reserve}{\code{numeric} The reserve for each accident period. }
+#'   
+#'   \item{ultimate_cost}{\code{numeric} The ultimate cost for each accident period. }
+#'   
+#'   \item{full_triangle}{\code{matrix array} The complete run-off triangle of cumulative payments, it includes the (input) upper triangle and the predicted (output) lower triangle.}
+#'   
+#'   \item{lower_triangle}{\code{matrix array} The predicted lower triangle of cumulative payments.}
+#'   
+#'   \item{development_factors_predicted}{\code{matrix array} The predicted lower triangle of the extrapolated development factors.}
+#'   
+#'   \item{apc_output}{\code{list} The following output from the age-period-cohort representation: \code{model.fit} (\code{fitStMoMo}) age-period-cohort model fit. 
+#'   \code{alphaij} (\code{matrix array}) predicted claim development. 
+#'   \code{lower_triangle_apc} (\code{matrix array}) predicted lower triangle of cumulative payments in age-period-cohort form.
+#'   \code{development_factors_apc} (\code{matrix array}) development factors in age-period-cohort representation.}
 #' 
-#' @return predictions.
 #' 
 #' @references 
-#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
-#' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
+#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
 #'  
 #' @export
+#' 
 predict.clmplusmodel <- function(clmplusmodel,
                                  gk.fc.model='a',
                                  ckj.fc.model='a',
@@ -24,7 +39,6 @@ predict.clmplusmodel <- function(clmplusmodel,
                                  ckj.order=c(0,1,0),
                                  forecasting_horizon=NULL,
                                  ...){
-  
   
   # forecasting horizon
   J <- clmplusmodel$apc_input$J
@@ -109,27 +123,27 @@ predict.clmplusmodel <- function(clmplusmodel,
     }
   
   
+  names(reserve) <- 0:(length(reserve)-1)
+  names(ultimate_cost) <- 0:(length(ultimate_cost)-1)
+  
   out <- list(reserve=reserve,
               ultimate_cost=ultimate_cost,
               full_triangle= pkg.env$create_full_triangle(cumulative.payments.triangle=cumulative.payments.triangle,
                                                           lt),
               lower_triangle = pkg.env$create_lower_triangle(lt),
               development_factors_predicted = pkg.env$create_lower_triangle(fij),
-              apc_output=list(alphaij=alphaij,
+              apc_output=list(model.fit=model,
+                              hazard.model=hazard.model,
+                              alphaij=alphaij,
                               lower_triangle_apc=lt,
                               development_factors_apc=fij))
+  
+  class(out) <- 'clmpluspredictions'
   
   return(out)
   
   
   
   }
-  
-  
-  
-  
-  
-  
-  
-  
 }
+

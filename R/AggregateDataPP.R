@@ -9,18 +9,22 @@
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' 
-#' @return An object of class \code{RtTriangle}. Lists the following elements:
+#' @return An object of class \code{AggregateDataPP}. Lists the following elements:
 #'   \item{cumulative.payments.triangle}{\code{triangle matrix} object, input triangle of cumulative payments.}
 #'   
-#'   \item{occurrance}{\code{matrix array} object, the occurrance derived from the input triangle.}
+#'   \item{occurrance}{\code{matrix array} object, the occurrence derived from the input triangle.}
 #'   
-#'   \item{exposure}{\code{matrix array} object, the exposure derived from the input triangle, under the \code{k} claims arrival assumption.}
+#'   \item{exposure}{\code{matrix array} object, the exposure derived from the input triangle, under the \code{eta} claims arrival assumption.}
 #'   
 #'   \item{incremental.payments.triangle}{\code{triangle matrix} object, incremental payments derived from the input.}
+#'   
+#'   \item{fit.w}{\code{matrix array} object, the weights used during estimation.}
 #'   
 #'   \item{J}{\code{integer}, Run-off triangle dimension.}
 #'   
 #'   \item{diagonal}{ \code{numeric}, cumulative payments last diagonal.}
+#'   
+#'   \item{eta}{ \code{numeric}, Expected time-to-event in the cell. I.e., lost exposure.}
 #'  
 #'   
 #' @references 

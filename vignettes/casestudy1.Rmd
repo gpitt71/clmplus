@@ -129,22 +129,74 @@ Observe that the y axis is now the **development years** (or **age**) component.
 
 `clmplus` is an out-of-the box set of tools to compute the claims reserve.
 We now show how to replicate the chain ladder model.
-Observe the run-off triangle data structure first needs to be initialized to a `RtTriangle` object.
+Observe the run-off triangle data structure first needs to be initialized to a `AggregateDataPP` object.
 
 ```{r rtt data, include=FALSE}
 library(clmplus)
-rtt <- RtTriangle(cumulative.payments.triangle = dataset)
+rtt <- AggregateDataPP(cumulative.payments.triangle = dataset)
 
 ```
 
 Starting from the results in the paper we showed how to replicate the chain ladder with an age model.
-The computation on the `RtTriangle` object is computed with the method `clmplus` specifying an hazard model.
+The computation on the `AggregateDataPP` object is obtained with the method `clmplus` specifying an hazard model. The `clmplus` method, estimates the models parameters.
 
 ```{r amodel, message=FALSE, warning=FALSE}
-a.model=clmplus(RtTriangle =  rtt, 
+a.model.fit=clmplus(AggregateDataPP =  rtt, 
              hazard.model = "a")
 
 ```
+
+Out of the fitted model, it is possible to extract the fitted development factors:
+
+```{r amodeloutput1, message=FALSE}
+
+a.model.fit$fitted_development_factors
+
+```
+It is also possible to extract the fitted effects on the claims development.
+
+```{r amodeloutput2, message=FALSE}
+
+a.model.fit$fitted_effects
+
+```
+Predictions can be computed with the `predict` method.
+
+```{r amodelpredict, message=FALSE}
+
+a.model <- predict(a.model.fit)
+
+```
+
+Out of the predict method, we can extract the predicted development factors, the full and lower triangle of predicted cumulative claims.
+
+```{r amodelpredict, message=FALSE}
+
+a.model$development_factors_predicted
+
+```
+
+```{r amodelpredict, message=FALSE}
+
+a.model$lower_triangle
+
+```
+
+```{r amodelpredict, message=FALSE}
+
+a.model$full_triangle
+
+```
+
+Interestingly we provide predictions for different forecasting horizons. Below predictions for one calendar period. This can be specified with the `forecasting_horizon` argument.
+
+```{r amodelpredict2, message=FALSE}
+
+a.model.2 <- predict(a.model.fit,
+                     forecasting_horizon=1)
+
+```
+
 We show the consistency of our approach by comparing our estimates with those obtained with the Mack chain ladder method as implemented in the `ChainLadder` package.
 
 ```{r mack, message=FALSE, warning=FALSE}
@@ -157,7 +209,7 @@ Estimates are gathered in a `data.frame` to ease the understanding.
 
 ```{r clm replicated}
 data.frame(ultimate.cost.mack=ultimate.chl,
-           ultimate.cost.clmplus=a.model$ultimate.cost,
+           ultimate.cost.clmplus=a.model$ultimate_cost,
            reserve.mack=ultimate.chl-diagonal,
            reserve.clmplus=a.model$reserve
            )
@@ -204,7 +256,8 @@ data.frame(reserve.mack=ultimate.chl-diagonal,
 Our method is able to replicate the chain-ladder results with no need to add the cohort component.
 
 ```{r fitted ax amodel}
-a.model$model.fit$ax
+a.model.fit$fitted_effects
+
 ```
 Further inspection can be performed with the `clmplus` package, which provides the graphical tools to inspect the fitted effects. Observe we model the rate in continuous time, the choice of a line plot is then consistent.
 
@@ -224,17 +277,19 @@ We show these results by inspecting the residuals plots.
 
 ```{r amodel residuals}
 #make it triangular
-plotresiduals(a.model)
+plotresiduals(a.model.fit)
 ```
 
 Clearly, the red and blue areas suggest some trends that the model wasn't able to catch.
 Consider now the age-cohort model and its residuals plot.
 
 ```{r message=FALSE, warning=FALSE}
-ac.model <- clmplus(rtt, 
-                    hazard.model="ac",
+ac.model.fit <- clmplus(rtt, 
+                    hazard.model="ac")
+
+ac.model <- predict(ac.model.fit,
                     gk.fc.model='a')
-plotresiduals(ac.model)
+plotresiduals(ac.model.fit)
 ```
 
 With no need of extrapolating a period component, we were able to improve the fit already.
@@ -251,12 +306,16 @@ plot(ac.model)
 Similarly, it is possible to add a period component and choose an age-period model or an age-period-cohort model.
 
 ```{r apapc models, message=FALSE, warning=FALSE}
-ap.model = clmplus(rtt,
-                   hazard.model = "ap", 
+ap.model.fit = clmplus(rtt,
+                   hazard.model = "ap")
+
+ap.model<-predict(ap.model.fit, 
                    ckj.fc.model='a',
                    ckj.order = c(0,1,0))
 
-apc.model = clmplus(rtt,hazard.model = "apc", 
+apc.model.fit = clmplus(rtt,hazard.model = "apc")
+
+apc.model<-predict(apc.model.fit, 
                    gk.fc.model='a', 
                    ckj.fc.model='a',
                    gk.order = c(1,1,0),
@@ -264,14 +323,14 @@ apc.model = clmplus(rtt,hazard.model = "apc",
 ```
 
 ```{r residuals apmodel}
-plotresiduals(ap.model)
+plotresiduals(ap.model.fit)
 ```
 
 It can be seen that the age-period model does not suggest any serious improvement from the age-cohort model. It is worth noticing one more time that the age-cohort model does not require any extrapolation.
 In a similar fashion, we plot the age-period-cohort model below, which seems to lead us to a small improvement. 
 
 ```{r residuals apcmodel}
-plotresiduals(apc.model)
+plotresiduals(apc.model.fit)
 ```
 
 Below, the effects of the age-period-cohort model.

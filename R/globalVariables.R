@@ -647,7 +647,7 @@ pkg.env$find.development.factors <- function(J,
   
   if(!is.null(period.eff)){
     
-    kt <-  c(NA,kt[!is.na(kt)]) #the first period is disregarded
+    kt <-  c(NA,period.eff[!is.na(period.eff)]) #the first period is disregarded
     
     
   }else{kt<-rep(0,J)}
@@ -669,5 +669,37 @@ pkg.env$find.development.factors <- function(J,
   }
 
 
-
+pkg.env$find.fitted.effects <- function(J,
+                                       age.eff,
+                                       period.eff,
+                                       cohort.eff){
+  
+  # Function that finds the fitted effects.
+  
+  ax <- c(NA,age.eff[!is.na(age.eff)])
+  names(ax) <- c(1:length(ax))
+  
+  if(!is.null(cohort.eff)){
+    gc <-  c(cohort.eff[!is.na(cohort.eff)],NA) #last cohort effect will be extrapolated
+    names(gc) <- c(0:(length(gc)-1))
+    
+  }else{gc<-NULL}
+  
+  if(!is.null(period.eff)){
+    
+    kt <-  c(NA,period.eff[!is.na(period.eff)]) #the first period is disregarded
+    names(kt) <- c(1:length(kt))
+    
+  }else{kt<-NULL}
+  
+  out <- list(
+    fitted_development_effect= ax,
+    fitted_calendar_effect=kt,
+    fitted_accident_effect= gc
+    )
+  
+  return(out)
+  
+  
+  }
 

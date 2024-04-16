@@ -28,18 +28,7 @@
 \item{'ac': Age and cohort effects.}
 \item{'ap': Age and cohort effects.}
 \item{'apc': Age cohort and period effects.}
-\item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
-\item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
-\item{'m6': CBD with cohorts.}
-\item{'m7': CBD m7 extension.}
-\item{'m8': CBD m7 extension.}
 }}
-
-\item{xc}{\code{integer}, xc constant parameter to be set for the m8 model. Default to NULL.}
-
-\item{iter.max}{\code{integer}, maximum number of iterations for the Newton-Rhapson algorithm. It will be ignored for other fitting procedures.}
-
-\item{tolerance.max}{\code{integer}, maximum tolerance of parameters difference for convergence for the Newton-Rhapson algorithm implementation.Ignored for other fitting procedures.}
 
 \item{link}{\code{character}, defines the link function and random component associated with 
 the mortality model. \code{"log"} would assume that deaths follow a 
@@ -79,15 +68,15 @@ To be disregarded unless the practitioner specifies his own hazard model in StMo
 An object of class \code{clmplusmodel}. A list with the following elements:
   \item{model.fit}{\code{fitStMoMo} object, specified hazard model fit from StMoMo.}
   
-  \item{hazard.model}{\code{character}, hazard model specified from the user. Set to \code{user.specific} when a custom model is passed. }
-     
-  \item{ultimate.cost}{\code{numeric}, vector of predicted ultimate costs.}
+  \item{apc_input}{\code{list} object. A list containing the following model inputs in age-period-cohort notation: \code{J} (\code{integer}) Run-off triangle dimension.  \code{eta} (\code{numeric}) Expected time-to-event in the cell. I.e., lost exposure.   
+  \code{diagonal} (\code{numeric}) Cumulative payments last diagonal. \code{hazard.model} (\code{character}), hazard model specified from the user. Set to \code{user.specific} when a custom model is passed. 
+  }   
   
-  \item{model.fcst}{\code{list}, it contains \code{rates} (hazard rates forecasted on each cell of the triangle), \code{kt.f} (forecasted calendar period effect when present) and \code{gc.f} (forecasted cohort effect when present) }
+  \item{hazard_scaled_deviance_residuals}{ \code{matrix array} Triangle of the scaled deviance residuals. }
   
-  \item{converged}{\code{logical}, \code{TRUE} when the model fit converged.}
+  \item{fitted_development_factors}{ \code{matrix array} Triangle of the fitted development factors. }
   
-  \item{citer}{\code{numeric}, Number of Netwon-Rhapson iterations in case a lee-carter hazard-model was chosen.}
+  \item{fitted_effects}{ \code{list} List of the development-accident-calendar effects fitted. }
 }
 \description{
 Method to fit Chain Ladder plus models to \code{AggregateDataPP} objects.
@@ -101,7 +90,4 @@ hz.chl=clmplus(sifa.mtpl.rtt, 'a')
 \references{
 Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
 via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
-
-Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
 }

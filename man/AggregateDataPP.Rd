@@ -4,28 +4,36 @@
 \alias{AggregateDataPP}
 \title{Pre-process Run-Off Triangles}
 \usage{
-AggregateDataPP(cumulative.payments.triangle, entries.weights = NULL, k = 1/2)
+AggregateDataPP(
+  cumulative.payments.triangle,
+  entries.weights = NULL,
+  eta = 1/2
+)
 }
 \arguments{
 \item{cumulative.payments.triangle}{\code{triangle matrix} or \code{matrix array} object, input triangle of cumulative payments.}
 
 \item{entries.weights}{\code{triangle matrix} or \code{matrix array} model entries weights.}
 
-\item{k}{\code{numeric}, individual claims exposure in the cell, also known as lost exposure. It must be in the interval (0,1].}
+\item{eta}{\code{numeric}, individual claims exposure in the cell, also known as lost exposure. It must be in the interval (0,1].}
 }
 \value{
-An object of class \code{RtTriangle}. Lists the following elements:
+An object of class \code{AggregateDataPP}. Lists the following elements:
   \item{cumulative.payments.triangle}{\code{triangle matrix} object, input triangle of cumulative payments.}
   
-  \item{occurrance}{\code{matrix array} object, the occurrance derived from the input triangle.}
+  \item{occurrance}{\code{matrix array} object, the occurrence derived from the input triangle.}
   
-  \item{exposure}{\code{matrix array} object, the exposure derived from the input triangle, under the \code{k} claims arrival assumption.}
+  \item{exposure}{\code{matrix array} object, the exposure derived from the input triangle, under the \code{eta} claims arrival assumption.}
   
   \item{incremental.payments.triangle}{\code{triangle matrix} object, incremental payments derived from the input.}
+  
+  \item{fit.w}{\code{matrix array} object, the weights used during estimation.}
   
   \item{J}{\code{integer}, Run-off triangle dimension.}
   
   \item{diagonal}{ \code{numeric}, cumulative payments last diagonal.}
+  
+  \item{eta}{ \code{numeric}, Expected time-to-event in the cell. I.e., lost exposure.}
 }
 \description{
 Pre-process Run-Off Triangles.

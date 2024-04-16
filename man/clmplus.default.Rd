@@ -7,9 +7,6 @@
 \method{clmplus}{default}(
   AggregateDataPP,
   hazard.model = NULL,
-  xc = NULL,
-  iter.max = 10000,
-  tolerance.max = 1e-06,
   link = c("log", "logit"),
   staticAgeFun = TRUE,
   periodAgeFun = "NP",
@@ -28,18 +25,7 @@
 \item{'ac': Age and cohort effects.}
 \item{'ap': Age and cohort effects.}
 \item{'apc': Age cohort and period effects.}
-\item{'lc': Lee-Carter parameters: age and age-period interaction effects.}
-\item{'cbd': Cairns-Blake-Dowd mortality model (CBD).}
-\item{'m6': CBD with cohorts.}
-\item{'m7': CBD m7 extension.}
-\item{'m8': CBD m7 extension.}
 }}
-
-\item{xc}{\code{integer}, xc constant parameter to be set for the m8 model. Default to NULL.}
-
-\item{iter.max}{\code{integer}, maximum number of iterations for the Newton-Rhapson algorithm. It will be ignored for other fitting procedures.}
-
-\item{tolerance.max}{\code{integer}, maximum tolerance of parameters difference for convergence for the Newton-Rhapson algorithm implementation.Ignored for other fitting procedures.}
 
 \item{link}{\code{character}, defines the link function and random component associated with 
 the mortality model. \code{"log"} would assume that deaths follow a 
@@ -74,14 +60,6 @@ omitted no identifiability constraints are applied to the model.
 To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
 
 \item{...}{parameters to be passed to clmplus.}
-
-\item{gk.fc.model}{\code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.}
-
-\item{ckj.fc.model}{\code{character}, model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.}
-
-\item{gk.order}{\code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).}
-
-\item{ckj.order}{\code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).}
 }
 \value{
 No return value, called to pass method \code{clmplus.AggregateDataPP}. See \code{clmplus.AggregateDataPP} documentation.

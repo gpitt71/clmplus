@@ -15,6 +15,8 @@
 )
 }
 \arguments{
+\item{clmplusmodel}{\code{clmplusmodel}, Model to predict from.}
+
 \item{gk.fc.model}{\code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.}
 
 \item{ckj.fc.model}{\code{character}, model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.}
@@ -24,16 +26,28 @@
 \item{ckj.order}{\code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).}
 
 \item{forecasting_horizon}{\code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off.}
-
-\item{model}{clmplus model to be plotted.}
 }
 \value{
-predictions.
+Returns the following output:
+  
+  \item{reserve}{\code{numeric} The reserve for each accident period. }
+  
+  \item{ultimate_cost}{\code{numeric} The ultimate cost for each accident period. }
+  
+  \item{full_triangle}{\code{matrix array} The complete run-off triangle of cumulative payments, it includes the (input) upper triangle and the predicted (output) lower triangle.}
+  
+  \item{lower_triangle}{\code{matrix array} The predicted lower triangle of cumulative payments.}
+  
+  \item{development_factors_predicted}{\code{matrix array} The predicted lower triangle of the extrapolated development factors.}
+  
+  \item{apc_output}{\code{list} The following output from the age-period-cohort representation: \code{model.fit} (\code{fitStMoMo}) age-period-cohort model fit. 
+  \code{alphaij} (\code{matrix array}) predicted claim development. 
+  \code{lower_triangle_apc} (\code{matrix array}) predicted lower triangle of cumulative payments in age-period-cohort form.
+  \code{development_factors_apc} (\code{matrix array}) development factors in age-period-cohort representation.}
 }
 \description{
-This function allows to define the behavior of the triangle payments.
+Predict the lower triangle with a \code{clmplus} model.
 }
 \references{
-Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
-via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
+Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
 }

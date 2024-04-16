@@ -3,7 +3,7 @@
 S3method(clmplus,AggregateDataPP)
 S3method(clmplus,default)
 S3method(plot,AggregateDataPP)
-S3method(plot,clmplusmodel)
+S3method(plot,clmpluspredictions)
 S3method(plotresiduals,clmplusmodel)
 S3method(plotresiduals,default)
 S3method(predict,clmplusmodel)

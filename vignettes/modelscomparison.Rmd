@@ -380,7 +380,7 @@ modelcomparison.1d <- function(cumulative.payments.triangle){
   
   J <- dim(cumulative.payments.triangle)[2]
   reduced.triangle <- c2t(t2c(cumulative.payments.triangle)[1:(J-leave.out),1:(J-leave.out)])
-  newt.rtt <- RtTriangle(reduced.triangle)
+  newt.rtt <- AggregateDataPP(reduced.triangle)
   
   newt.apc <- apc.data.list(response=newt.rtt$incremental.payments.triangle,
                             data.format="CL")
@@ -836,7 +836,7 @@ modelsranking.1d <- function(data.T){
   triangle <- data.T$cumulative.payments.triangle
   J <- dim(triangle)[2]
   reduced.triangle <- c2t(t2c(triangle)[1:(J-leave.out),1:(J-leave.out)])
-  newt.rtt <- RtTriangle(reduced.triangle)
+  newt.rtt <- AggregateDataPP(reduced.triangle)
   to.project <- t2c(triangle)[1:(J-leave.out-1),J-leave.out]
   true.values <- t2c(triangle)[2:(J-leave.out),J]
   
@@ -982,7 +982,7 @@ modelsranking <- function(list.of.datasets){
   
   for(df.ix in names(list.of.datasets)){
     
-    out.df=modelsranking.1d(RtTriangle(list.of.datasets[[df.ix]]))
+    out.df=modelsranking.1d(AggregateDataPP(list.of.datasets[[df.ix]]))
     out.df$models.ranks[,'data.source']=rep(df.ix,dim(out.df$models.ranks)[1])
     full.ranks=rbind(full.ranks,out.df$models.ranks)  
   }
