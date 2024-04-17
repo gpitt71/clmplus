@@ -1,4 +1,6 @@
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/grand-total/clmplus?color=blue)](https://r-pkg.org/pkg/clmplus)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10987181.svg)](https://doi.org/10.5281/zenodo.10987181)
+
 
 # clmplus
 
