@@ -24,12 +24,21 @@ Examples of model configurations we support:
 
 ## Installation 
 
-It is possible to download `clmplus` from GitHub.
+The developer version of `clmplus` can be installed from GitHub.
 
 ```
 library(devtools)
 devtools::install_github("gpitt71/clmplus")
 
 ```
+The current version of `clmplus` can be installed from CRAN.
+
+```
+install.packages('clmplus')
+
+```
+
+
+
 
 
