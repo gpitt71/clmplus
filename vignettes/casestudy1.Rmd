@@ -170,19 +170,19 @@ a.model <- predict(a.model.fit)
 
 Out of the predict method, we can extract the predicted development factors, the full and lower triangle of predicted cumulative claims.
 
-```{r amodelpredict2, message=FALSE}
+```{r dfpredicted, message=FALSE}
 
 a.model$development_factors_predicted
 
 ```
 
-```{r amodelpredict3, message=FALSE}
+```{r ltpredicted, message=FALSE}
 
 a.model$lower_triangle
 
 ```
 
-```{r amodelpredict4, message=FALSE}
+```{r ftpredicted, message=FALSE}
 
 a.model$full_triangle
 
@@ -190,7 +190,7 @@ a.model$full_triangle
 
 Interestingly we provide predictions for different forecasting horizons. Below predictions for one calendar period. This can be specified with the `forecasting_horizon` argument.
 
-```{r amodelpredict5, message=FALSE}
+```{r predictionsoneyear, message=FALSE}
 
 a.model.2 <- predict(a.model.fit,
                      forecasting_horizon=1)
