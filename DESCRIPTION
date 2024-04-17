@@ -1,7 +1,7 @@
 Package: clmplus
 Type: Package
 Title: Tool-Box of Chain Ladder Plus Models
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     c(person(given = "Gabriele",
              family = "Pittarello",
@@ -17,10 +17,8 @@ Authors@R:
              family = "Villegas",
              role = c("aut", "cph"),
              email="a.villegas@unsw.edu.au"))
-Description: Implementation of the chain ladder model under the reverse time framework
-    introduced in Hiabu (2017) <doi:10.1080/03461238.2016.1240709>.
-    It also implements extensions that add flexibility to the individual development factors modeling
-    by allowing practitioners to set their own hazard rate model.
+Description: Implementation of the age-period-cohort models for the claim development
+    introduced in Pittarello G., Hiabu M., and Villegas A. (2024) <doi:10.48550/arXiv.2301.03858>.
 URL: https://github.com/gpitt71/clmplus
 BugReports: https://github.com/gpitt71/clmplus/issues
 License: GPL (>= 2)
