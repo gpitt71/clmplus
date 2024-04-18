@@ -8,6 +8,7 @@
 #' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
 #' @param ckj.order \code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
 #' @param forecasting_horizon \code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off. 
+#' @param ... Extra arguments to be passed to the predict function.
 #' 
 #' @return Returns the following output:
 #'   

@@ -4,6 +4,8 @@
 #' 
 #' @param clmplusmodel clmplusmodel object to be plotted.
 #' @param heat.lim limits in the residuals plot.
+#' @param ... Extra arguments to be passed to the plot function.
+#' 
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
@@ -19,7 +21,8 @@
 #' 
 #' @export
 plot.clmplusmodel <- function(clmplusmodel,
-                              heat.lim=c(-2.5,2.5)){
+                              heat.lim=c(-2.5,2.5),
+                              ...){
   
   if((clmplusmodel$apc_input$hazard.model %in% names(pkg.env$models))|(clmplusmodel$apc_input$hazard.model=="user.defined")){
     
