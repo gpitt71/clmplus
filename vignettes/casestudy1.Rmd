@@ -277,7 +277,7 @@ We show these results by inspecting the residuals plots.
 
 ```{r amodel residuals}
 #make it triangular
-plotresiduals(a.model.fit)
+plot(a.model.fit)
 ```
 
 Clearly, the red and blue areas suggest some trends that the model wasn't able to catch.
@@ -289,7 +289,7 @@ ac.model.fit <- clmplus(rtt,
 
 ac.model <- predict(ac.model.fit,
                     gk.fc.model='a')
-plotresiduals(ac.model.fit)
+plot(ac.model.fit)
 ```
 
 With no need of extrapolating a period component, we were able to improve the fit already.
@@ -323,14 +323,14 @@ apc.model<-predict(apc.model.fit,
 ```
 
 ```{r residuals apmodel}
-plotresiduals(ap.model.fit)
+plot(ap.model.fit)
 ```
 
 It can be seen that the age-period model does not suggest any serious improvement from the age-cohort model. It is worth noticing one more time that the age-cohort model does not require any extrapolation.
 In a similar fashion, we plot the age-period-cohort model below, which seems to lead us to a small improvement. 
 
 ```{r residuals apcmodel}
-plotresiduals(apc.model.fit)
+plot(apc.model.fit)
 ```
 
 Below, the effects of the age-period-cohort model.

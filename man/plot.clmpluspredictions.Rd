@@ -22,8 +22,9 @@ This function allows to define the behavior of the triangle payments.
 \examples{
 data(sifa.mtpl)
 sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
-plot(hz.chl)
+clm.fit<-clmplus(sifa.mtpl.rtt, 'a')
+clm <- predict(clm.fit)
+plot(clm)
 
 }
 \references{

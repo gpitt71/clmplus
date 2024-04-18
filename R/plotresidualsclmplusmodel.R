@@ -7,67 +7,19 @@
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-#' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
-#' plotresiduals(hz.chl)
-#' 
-#' @return No return value, called to pass method plotresiduals.
-#' 
-#' @references 
-#' 
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
-#' 
-#' @export
-plotresiduals <- function(clmplusmodel,
-                          heat.lim=c(-2.5,2.5)){
-  
-  UseMethod("plotresiduals")}
-
-#' Plot the hazard model residuals 
-#'
-#' This function allows to plot the hazard model residuals on the triangle payments.
-#' 
-#' @param clmplusmodel clmplusmodel object to be plotted.
-#' @param heat.lim limits in the residuals plot.
-#' @examples
-#' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-#' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
-#' plotresiduals(hz.chl)
-#' 
-#' @return No return value, called as plotresiduals method default.
-#' 
-#' @references 
-#' 
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
-#' 
-#' @export
-plotresiduals.default <- function(clmplusmodel,
-                                  heat.lim=c(-2.5,2.5)){message('The object provided must be of class clmplusmodel')}
-
-#' Plot the hazard model residuals 
-#'
-#' This function allows to plot the hazard model residuals on the triangle payments.
-#' 
-#' @param clmplusmodel clmplusmodel object to be plotted.
-#' @param heat.lim limits in the residuals plot.
-#' @examples
-#' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-#' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
-#' plotresiduals(hz.chl)
+#' clm.fit<-clmplus(sifa.mtpl.rtt, 'a')
+#' plot(clm.fit)
 #' 
 #' @return No return value, plots the hazard model residuals in triangular form.
 #' 
 #' @references 
 #' 
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
+#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
+#' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
 #' 
 #' @export
-plotresiduals.clmplusmodel <- function(clmplusmodel,
-                                    heat.lim=c(-2.5,2.5)){
+plot.clmplusmodel <- function(clmplusmodel,
+                              heat.lim=c(-2.5,2.5)){
   
   if((clmplusmodel$apc_input$hazard.model %in% names(pkg.env$models))|(clmplusmodel$apc_input$hazard.model=="user.defined")){
     
