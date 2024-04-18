@@ -19,7 +19,7 @@ This function allows to plot the hazard model residuals on the triangle payments
 }
 \examples{
 data(sifa.mtpl)
-sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 plotresiduals(hz.chl)
 
