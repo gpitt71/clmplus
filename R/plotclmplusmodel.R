@@ -2,7 +2,7 @@
 #'
 #' This function allows to plot the hazard model residuals on the triangle payments.
 #' 
-#' @param clmplusmodel clmplusmodel object to be plotted.
+#' @param x \code{clmplusmodel} object, model fit to plot.
 #' @param heat.lim limits in the residuals plot.
 #' @param ... Extra arguments to be passed to the plot function.
 #' 
@@ -20,37 +20,37 @@
 #' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
 #' 
 #' @export
-plot.clmplusmodel <- function(clmplusmodel,
+plot.clmplusmodel <- function(x,
                               heat.lim=c(-2.5,2.5),
                               ...){
   
-  if((clmplusmodel$apc_input$hazard.model %in% names(pkg.env$models))|(clmplusmodel$apc_input$hazard.model=="user.defined")){
+  if((x$apc_input$hazard.model %in% names(pkg.env$models))|(x$apc_input$hazard.model=="user.defined")){
     
-    res.m = stats::residuals(clmplusmodel$model.fit)
+    res.m = stats::residuals(x$model.fit)
     res.tr=pkg.env$c2t(res.m$residuals)
     colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
     longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
     
   }
   
-  # if(clmplusmodel$apc_input$hazard.model == 'lc'){
+  # if(x$apc_input$hazard.model == 'lc'){
   #   
-  #   data.O= clmplusmodel$model.fit$data.T$occurrance
-  #   data.E= clmplusmodel$model.fit$data.T$exposure
+  #   data.O= x$model.fit$data.T$occurrance
+  #   data.E= x$model.fit$data.T$exposure
   #   ind <- is.na(data.E)
   #   W = matrix(1,nrow=dim(data.O)[1],ncol=dim(data.E)[2])
   #   W[ind]=0
   #   
-  #   ax.mx = matrix(rep(clmplusmodel$model.fit$ax,dim(data.O)[2]),
+  #   ax.mx = matrix(rep(x$model.fit$ax,dim(data.O)[2]),
   #                  byrow = F,
   #                  ncol=dim(data.O)[2])
   #   
-  #   bx.mx = matrix(rep(clmplusmodel$model.fit$bx,
+  #   bx.mx = matrix(rep(x$model.fit$bx,
   #                      dim(data.O)[2]),
   #                  byrow = F,
   #                  ncol=dim(data.O)[2])
   #   
-  #   kt.mx = matrix(rep(clmplusmodel$model.fit$kt,
+  #   kt.mx = matrix(rep(x$model.fit$kt,
   #                      dim(data.O)[1]),
   #                  byrow = T,
   #                  nrow=dim(data.O)[1])
@@ -87,7 +87,7 @@ plot.clmplusmodel <- function(clmplusmodel,
                          limits=heat.lim,
                          guide="colourbar")+
     ggplot2::labs(x="Development year", y="Accident year")+
-    ggplot2::ggtitle(clmplusmodel$modelfamily)+
+    ggplot2::ggtitle(x$modelfamily)+
     ggplot2::theme(axis.title.x = ggplot2::element_text(size=8), axis.text.x  = ggplot2::element_text(size=7))+
     ggplot2::theme(axis.title.y = ggplot2::element_text(size=8), axis.text.y  = ggplot2::element_text(size=7))+
     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "grey", colour = "grey", size = 2, linetype = "solid"),

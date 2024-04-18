@@ -4,10 +4,10 @@
 \alias{plot.clmplusmodel}
 \title{Plot the hazard model residuals}
 \usage{
-\method{plot}{clmplusmodel}(clmplusmodel, heat.lim = c(-2.5, 2.5), ...)
+\method{plot}{clmplusmodel}(x, heat.lim = c(-2.5, 2.5), ...)
 }
 \arguments{
-\item{clmplusmodel}{clmplusmodel object to be plotted.}
+\item{x}{\code{clmplusmodel} object, model fit to plot.}
 
 \item{heat.lim}{limits in the residuals plot.}
 
