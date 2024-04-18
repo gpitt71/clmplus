@@ -6,7 +6,7 @@
 #' @param heat.lim limits in the residuals plot.
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plotresiduals(hz.chl)
 #' 
@@ -31,7 +31,7 @@ plotresiduals <- function(clmplusmodel,
 #' @param heat.lim limits in the residuals plot.
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plotresiduals(hz.chl)
 #' 
@@ -54,7 +54,7 @@ plotresiduals.default <- function(clmplusmodel,
 #' @param heat.lim limits in the residuals plot.
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- RtTriangle(cumulative.payments.triangle=sifa.mtpl)
+#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' hz.chl<-clmplus(sifa.mtpl.rtt, 'a')
 #' plotresiduals(hz.chl)
 #' 
