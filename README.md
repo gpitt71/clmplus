@@ -39,9 +39,9 @@ install.packages('clmplus')
 
 ```
 
-## Example code
+## Get Started
 
-In this example, we work with the `sifa.mtpl` data from the `clmplus` package. The data set of cumulative claim payments is transformed into an `AggregateDataPP` object that pre-processes the data for claim development modelling.
+In this brief example, we work with the `sifa.mtpl` data from the `clmplus` package. Further examples can be found in the [package vignettes](https://github.com/gpitt71/clmplus/tree/main/vignettes). The data set of cumulative claim payments is transformed into an `AggregateDataPP` object that pre-processes the data for claim development modelling.
 
 ```
 library(clmplus)
