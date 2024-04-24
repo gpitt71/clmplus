@@ -39,6 +39,84 @@ install.packages('clmplus')
 
 ```
 
+## Example code
+
+In this example, we work with the `sifa.mtpl` data from the `clmplus` package. The data set of cumulative claim payments is transformed into an `AggregateDataPP` object that pre-processes the data for claim development modelling.
+
+```
+library(clmplus)
+
+data ("sifa.mtpl")
+dataset = sifa.mtpl
+datapp = AggregateDataPP(cumulative.payments.triangle = dataset, eta= 1/2)
+```
+
+Our models can be fit with the `clmplus` function.
+
+
+```
+library(clmplus)
+
+data ("sifa.mtpl")
+dataset = sifa.mtpl
+datapp = AggregateDataPP(cumulative.payments.triangle = dataset, eta= 1/2)
+```
+
+```
+a.model.fit=clmplus(datapp,
+                 hazard.model = "a") # age-model replicates the chain ladder
+ac.model.fit=clmplus(datapp,
+                 hazard.model = "ac")
+
+ap.model.fit=clmplus(datapp,
+                 hazard.model = "ap")
+
+apc.model.fit=clmplus(datapp,
+                  hazard.model = "apc")
+
+```
+
+The `plot` function can be be used to explore the scaled deviance residuals of fitted models. Below, an example for the age-period-cohort (`apc`) model for the claim development. 
+
+```
+plot(apc.model.fit)
+```
+
+Predictions are performed with the `predict` function.
+
+```
+ac.model=predict(ac.model.fit,
+                 gk.fc.model = 'a',
+                 gk.order = c(1,1,0))
+                 
+# clmplus reserve (age-cohort model)
+sum(ac.model$reserve)
+#38126.05
+
+ap.model<- predict(ap.model.fit,
+                 ckj.fc.model = 'a',
+                 ckj.order = c(0,1,0))
+
+# clmplus reserve (age-period model)
+sum(ap.model$reserve)
+#37375.01
+          
+                 
+apc.model<-predict(apc.model.fit,
+                  gk.fc.model = 'a',
+                  ckj.fc.model = 'a',
+                  gk.order = c(1,1,0),
+                  ckj.order = c(0,1,0))
+# clmplus reserve (age-period-cohort model)
+sum(apc.model$reserve)
+#38498.54
+```
+
+The fitted effect (and extrapolated) effects can be inspected with the `plot` function. We continue below the example with the `apc` model.
+
+```
+plot(apc.model)
+```
 
 
 
