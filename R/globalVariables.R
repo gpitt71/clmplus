@@ -672,12 +672,13 @@ pkg.env$find.development.factors <- function(J,
 pkg.env$find.fitted.effects <- function(J,
                                        age.eff,
                                        period.eff,
-                                       cohort.eff){
+                                       cohort.eff,
+                                       effect_log_scale){
   
   # Function that finds the fitted effects.
   
   ax <- c(NA,age.eff[!is.na(age.eff)])
-  names(ax) <- c(1:length(ax))
+  names(ax) <- c(0:(length(ax)-1))
   
   if(!is.null(cohort.eff)){
     gc <-  c(cohort.eff[!is.na(cohort.eff)],NA) #last cohort effect will be extrapolated
@@ -688,7 +689,7 @@ pkg.env$find.fitted.effects <- function(J,
   if(!is.null(period.eff)){
     
     kt <-  c(NA,period.eff[!is.na(period.eff)]) #the first period is disregarded
-    names(kt) <- c(1:length(kt))
+    names(kt) <- c(0:(length(kt)-1))
     
   }else{kt<-NULL}
   
@@ -697,6 +698,8 @@ pkg.env$find.fitted.effects <- function(J,
     fitted_calendar_effect=kt,
     fitted_accident_effect= gc
     )
+  
+  if(effect_log_scale==FALSE){out<-lapply(out,exp)}
   
   return(out)
   

@@ -65,6 +65,7 @@ datapp = AggregateDataPP(cumulative.payments.triangle = dataset, eta= 1/2)
 ```
 a.model.fit=clmplus(datapp,
                  hazard.model = "a") # age-model replicates the chain ladder
+                 
 ac.model.fit=clmplus(datapp,
                  hazard.model = "ac")
 
@@ -85,13 +86,20 @@ plot(apc.model.fit)
 Predictions are performed with the `predict` function.
 
 ```
+a.model=predict(a.model.fit)
+                 
+# clmplus reserve (age model)
+sum(a.model$reserve)
+#226875.5
+
+
 ac.model=predict(ac.model.fit,
                  gk.fc.model = 'a',
                  gk.order = c(1,1,0))
                  
 # clmplus reserve (age-cohort model)
 sum(ac.model$reserve)
-#38126.05
+#205305.7
 
 ap.model<- predict(ap.model.fit,
                  ckj.fc.model = 'a',
@@ -99,7 +107,7 @@ ap.model<- predict(ap.model.fit,
 
 # clmplus reserve (age-period model)
 sum(ap.model$reserve)
-#37375.01
+#215602.8
           
                  
 apc.model<-predict(apc.model.fit,
@@ -109,7 +117,7 @@ apc.model<-predict(apc.model.fit,
                   ckj.order = c(0,1,0))
 # clmplus reserve (age-period-cohort model)
 sum(apc.model$reserve)
-#38498.54
+#213821.6
 ```
 
 The fitted effect (and extrapolated) effects can be inspected with the `plot` function. We continue below the example with the `apc` model.

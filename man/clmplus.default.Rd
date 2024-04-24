@@ -11,6 +11,7 @@
   staticAgeFun = TRUE,
   periodAgeFun = "NP",
   cohortAgeFun = NULL,
+  effect_log_scale = TRUE,
   constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x
     = b0x, gc = gc),
   ...
@@ -49,6 +50,8 @@ To be disregarded unless the practitioner specifies his own hazard model in StMo
 age terms, \code{"1"} for \eqn{\beta_x^{(0)}=1}, a predefined parametric 
 function of age (see details) or \code{NULL} if there is no cohort effect. 
 To be disregarded unless the practitioner specifies his own hazard model in StMoMo.}
+
+\item{effect_log_scale}{\code{logical}, whether effects should be on the logarithmic scale. By default, \code{TRUE}.}
 
 \item{constFun}{\code{function}, it defines the identifiability constraints of the 
 model. It must be a function of the form 
