@@ -53,15 +53,6 @@ datapp = AggregateDataPP(cumulative.payments.triangle = dataset, eta= 1/2)
 
 Our models can be fit with the `clmplus` function.
 
-
-```
-library(clmplus)
-
-data ("sifa.mtpl")
-dataset = sifa.mtpl
-datapp = AggregateDataPP(cumulative.payments.triangle = dataset, eta= 1/2)
-```
-
 ```
 a.model.fit=clmplus(datapp,
                  hazard.model = "a") # age-model replicates the chain ladder
