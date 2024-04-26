@@ -92,7 +92,7 @@ ac.model=predict(ac.model.fit,
 sum(ac.model$reserve)
 #205305.7
 
-ap.model<- predict(ap.model.fit,
+ap.model= predict(ap.model.fit,
                  ckj.fc.model = 'a',
                  ckj.order = c(0,1,0))
 
@@ -101,7 +101,7 @@ sum(ap.model$reserve)
 #215602.8
           
                  
-apc.model<-predict(apc.model.fit,
+apc.model= predict(apc.model.fit,
                   gk.fc.model = 'a',
                   ckj.fc.model = 'a',
                   gk.order = c(1,1,0),
