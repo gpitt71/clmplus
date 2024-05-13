@@ -41,7 +41,6 @@ library(apc)
 library(dplyr)
 library(tidyr)
 
-
 ## global variables to configure : list of the models in the case study
 models=list(
   

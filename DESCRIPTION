@@ -1,7 +1,7 @@
 Package: clmplus
 Type: Package
 Title: Tool-Box of Chain Ladder Plus Models
-Version: 0.2.0
+Version: 1.0.0
 Authors@R:
     c(person(given = "Gabriele",
              family = "Pittarello",
