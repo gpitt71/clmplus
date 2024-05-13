@@ -16,7 +16,7 @@ About `clmplus`:
 * `clmplus` relies on the powerful `StMoMo` package. Practitioners can either use the default models we programmed for them or set their own hazard model.
 Examples of model configurations we support: 
 
-|      Model      | Life insurance                  |Non-life insurance                |
+|      Model      | Lexis dimension                 |Claims reserving                  |
 | :-------------: |:-------------------------------:|---------------------------------:|
 | a               | age                             |development (chain-ladder model)  |
 | ac              | age-cohort                      |development-accident              |
