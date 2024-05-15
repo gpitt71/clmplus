@@ -2,7 +2,7 @@
 #'
 #' Predict the lower triangle with a \code{clmplus} model.
 #' 
-#' @param clmplusmodel \code{clmplusmodel}, Model to predict from. 
+#' @param object \code{clmplusmodel}, Model to predict from. 
 #' @param gk.fc.model \code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.
 #' @param ckj.fc.model \code{character}, model to forecast the calendar period effect. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a period effect.
 #' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
@@ -33,7 +33,7 @@
 #'  
 #' @export
 #' 
-predict.clmplusmodel <- function(clmplusmodel,
+predict.clmplusmodel <- function(object,
                                  gk.fc.model='a',
                                  ckj.fc.model='a',
                                  gk.order=c(1,1,0),
@@ -42,17 +42,17 @@ predict.clmplusmodel <- function(clmplusmodel,
                                  ...){
   
   # forecasting horizon
-  J <- clmplusmodel$apc_input$J
+  J <- object$apc_input$J
   # fitted model
-  model <- clmplusmodel$model.fit
+  model <- object$model.fit
   # occurrences distribution
-  eta <- clmplusmodel$apc_input$eta
+  eta <- object$apc_input$eta
   # hazard model
-  hazard.model <- clmplusmodel$apc_input$hazard.model
+  hazard.model <- object$apc_input$hazard.model
   # diagonal
-  d <- clmplusmodel$apc_input$diagonal[1:J-1]
+  d <- object$apc_input$diagonal[1:J-1]
   # cumulative payments 
-  cumulative.payments.triangle <- clmplusmodel$apc_input$cumulative.payments.triangle
+  cumulative.payments.triangle <- object$apc_input$cumulative.payments.triangle
   
   if(hazard.model %in% names(pkg.env$models)){
     

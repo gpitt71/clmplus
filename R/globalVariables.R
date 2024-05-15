@@ -1,3 +1,7 @@
+#' @importFrom forecast Arima
+#' @importFrom forecast forecast
+
+
 # Create environment ----
 pkg.env <- new.env()
 
@@ -468,6 +472,7 @@ pkg.env$fcst <- function(object,
                          gk.order=c(1,1,0),
                          ckj.order=c(0,1,0)){
   
+  
   J=dim(object$Dxt)[2]
   
   rates=array(.0,dim=c(J,J))
@@ -489,10 +494,10 @@ pkg.env$fcst <- function(object,
     
     if(gk.fc.model=='a'){
       
-      gc.model <- forecast::Arima(object$gc[1:gc.nNA], 
+      gc.model <- Arima(object$gc[1:gc.nNA], 
                                   order = gk.order, 
                                   include.constant = T)
-      gc.f <- forecast::forecast(gc.model,h=(length(object$cohorts)-gc.nNA))
+      gc.f <- forecast(gc.model,h=(length(object$cohorts)-gc.nNA))
       
       
     }else{

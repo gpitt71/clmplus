@@ -5,7 +5,7 @@
 \title{Predict the Reserve using Chain Ladder Plus Models}
 \usage{
 \method{predict}{clmplusmodel}(
-  clmplusmodel,
+  object,
   gk.fc.model = "a",
   ckj.fc.model = "a",
   gk.order = c(1, 1, 0),
@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{clmplusmodel}{\code{clmplusmodel}, Model to predict from.}
+\item{object}{\code{clmplusmodel}, Model to predict from.}
 
 \item{gk.fc.model}{\code{character}, model to forecast the cohort component for the last accident period. It can be either arima ('a') or linear model ('l'). Disregarded for models that do not have a cohort effect.}
 
