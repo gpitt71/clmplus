@@ -1,4 +1,5 @@
 [![R-CMD-check](https://github.com/gpitt71/clmplus/actions/workflows/r-checkrelease.yml/badge.svg)](https://github.com/gpitt71/clmplus/actions/workflows/r-checkrelease.yml)
+[![R-hub](https://github.com/gpitt71/clmplus/actions/workflows/rhub.yaml/badge.svg)](https://github.com/gpitt71/clmplus/actions/workflows/rhub.yaml)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/grand-total/clmplus?color=blue)](https://r-pkg.org/pkg/clmplus)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10987181.svg)](https://doi.org/10.5281/zenodo.10987181)
 
