@@ -69,7 +69,7 @@ c2t <- function(x){
 
 # Introduction
 
-The `clmplus` package provides practitioners with a fast and user friendly implementation of the modeling framework we derived in our paper *Pittarello G., Hiabu M., and Villegas A., Chain ladder Plus: a versatile approach for claims reserving, (pre-print, 2022)*. 
+The `clmplus` package provides practitioners with a fast and user friendly implementation of the modeling framework we derived in our paper *Pittarello G., Hiabu M., and Villegas A., Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle, (pre-print, 2022)*. 
 
 We were able to connect the well-known hazard models developed in life insurance to non-life run-off triangles claims development. 
 The flexibility of this approach goes beyond the methodological novelty: we hope to provide a user-friendly set of tools based on the point of contact between non-life insurance and life insurance in the actuarial science.

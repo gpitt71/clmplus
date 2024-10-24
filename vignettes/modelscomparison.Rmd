@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The `clmplus` package was created to provide actuarial scientists the tool-box that we illustrate in our paper, *Pittarello G., Hiabu M., and Villegas A., Chain ladder Plus: a versatile approach for claims reserving, (pre-print, 2022)*. This vignette is made to make the readers able to recreate the type of analysis we make in the data application section of our paper. **Please observe that the results we obtained in the paper were performed on a larger number of run-off triangles.**
+The `clmplus` package was created to provide actuarial scientists the tool-box that we illustrate in our paper, *Pittarello G., Hiabu M., and Villegas A., Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle, (pre-print, 2023)*. This vignette is made to make the readers able to recreate the type of analysis we make in the data application section of our paper. **Please observe that the results we obtained in the paper were performed on a larger number of run-off triangles.**
 
 We believe it is extremely important to provide this vignette to disclose to the public the code we used to perform our analysis. Our results can be replicated by just running this vignette with the following seed.
 This vignette is organized as follows:

@@ -6,16 +6,12 @@
 
 # clmplus
 
-Repository GitHub that contains the code for the package `clmplus`. 
+`clmplus` is an `R` package for implementing the age-period-cohort models for the claim development presented in the manuscript 'Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle' <doi:10.48550/arXiv.2301.03858>. 
 
-About `clmplus`:
+## Our models
 
-* It adds flexibilty to the chain-ladder model: we provide a new and more versatile framework for claims reserving given the cumulative payments data.
+`clmplus` relies on the powerful `StMoMo` package. Users can either rely on our default models or set their own configuration for the claim development.
 
-* It achieves the ambitious objective of showing the contact point between models often used in life insurance and non-life insurance models for claims reserving.
-
-* `clmplus` relies on the powerful `StMoMo` package. Practitioners can either use the default models we programmed for them or set their own hazard model.
-Examples of model configurations we support: 
 
 |      Model      | Lexis dimension                 |Claims reserving                  |
 | :-------------: |:-------------------------------:|---------------------------------:|
