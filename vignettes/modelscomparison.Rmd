@@ -42,6 +42,7 @@ library(ggplot2)
 library(apc)
 library(dplyr)
 library(tidyr)
+library(viridis)
 
 ## global variables to configure : list of the models in the case study
 models=list(
@@ -1011,7 +1012,7 @@ p3<- ggplot(abs.best,aes(x=package,
                          fill=package,
                          label=data.source)) +
   geom_boxplot(outlier.shape = NA)+
-  viridis::scale_fill_viridis(discrete=T, alpha=0.6) +
+  scale_fill_viridis(discrete=T, alpha=0.6) +
   geom_jitter(color="black", 
               size=1, 
               alpha=0.9, 

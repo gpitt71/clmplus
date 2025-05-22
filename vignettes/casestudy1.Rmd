@@ -5,10 +5,11 @@ date: "`r Sys.Date()`"
 bibliography: '`r system.file("references.bib", package="clmplus")`'
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Case study part 1}
+  %\VignetteIndexEntry{Vignette 1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -311,7 +312,6 @@ plot(apc.model)
 ```
 
 # References
-
 
 
 

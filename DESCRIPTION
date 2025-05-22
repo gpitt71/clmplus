@@ -37,6 +37,7 @@ Suggests:
     rmarkdown,
     apc,
     dplyr,
+    viridis,
     tidyr
 VignetteBuilder: knitr, rmarkdown
 RoxygenNote: 7.3.2
