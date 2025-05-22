@@ -2,6 +2,7 @@
 title: "Models comparison"
 author: "Gabriele Pittarello"
 date: "`r Sys.Date()`"
+bibliography: '`r system.file("references.bib", package="clmplus")`'
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Models comparison}
@@ -18,16 +19,17 @@ knitr::opts_chunk$set(
 )
 ```
 
-The `clmplus` package was created to provide actuarial scientists the tool-box that we illustrate in our paper, *Pittarello G., Hiabu M., and Villegas A., Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle, (pre-print, 2023)*. This vignette is made to make the readers able to recreate the type of analysis we make in the data application section of our paper. **Please observe that the results we obtained in the paper were performed on a larger number of run-off triangles.**
 
-We believe it is extremely important to provide this vignette to disclose to the public the code we used to perform our analysis. Our results can be replicated by just running this vignette with the following seed.
-This vignette is organized as follows:
+In this vignette, we compare the performance of the claim development models implemented in the `clmplus` package with the performance of the claim amount models available in the `apc` package (@apcpackage). The comparison is performed based on the error incidence on the reserve ($\text{EI}_R$, defined below). 
 
-* In the bake-off section we provide numerical results to compare `clmplus` models performances to the `apc` package models performances on the test set.
+The code replicates on a smaller number of datasets the analysis in section *4.3. Benchmarking on Multiple Data Sets* of the manuscript @pittarello25. We will use publicly available datasets from the R packages `clmplus`, `ChainLadder`, and `apc` for this comparison.
 
-* In the rankings section we try to rank `clmplus` models and the `apc` package models based on their performances on the validation set.
+Let us denote with $k,j=0, \ldots, m$ the accident period and the development period respectively. The error incidence on the reserve is defined in the manuscript as the sum of the predicted incremental payments for calendar periods larger than $m$ (the claims reserve, $\sum_{k+j>m} \widehat{X}_{k j}$) to the sum of true incremental payments for calendar periods larger than $m$.
 
-During the analysis we suggest how practitioners should split the data in order to perform the studies we just described.
+\[
+\text{EI}_R = \left|\frac{\sum_{k+j>m} \widehat{X}_{k j}}{\sum_{k+j>m} X_{k j}}-1\right|.
+\]
+
 
 ```{r global variables, include=FALSE}
 # set seed
@@ -76,9 +78,6 @@ models=list(
 
 
 ```
-
-For the case study in the paper we want to make our analysis as close as possible to a real life reserving problem. 
-In order to do so, we decided to select data sets available to the public from the R packages `clmplus`, `ChainLadder`, and `apc`.
 
 ```{r datasets}
 
@@ -304,10 +303,267 @@ fcst.fn <- function(object,
 
 ```
 
-# Bake-off 
+# Code for Section 4.3.1. Models Ranking
 
-Within this section we provide the code to measure the models extrapolation accuracy. 
-In order to do so, we need to coherently split the data set into training, validation and testing. We show an example for a 12x12 run-off triangle.
+We rank the different models based on a cross-validation scheme. The training-validation split we use is represented in the following picture.
+
+```{r models ranking split}
+# models ranking
+
+J=12
+df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
+colnames(df) <- c("origin","dev","value")
+df$value[df$origin+df$dev==(J-1)]=c(2)
+df$value[df$origin+df$dev<(J-1)]=c(1)
+df$value[df$origin+df$dev>=J]=c(NA)
+df[J,3]=c(NA)
+df[J*J-J+1,3]=c(NA)
+
+ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) + 
+  geom_tile(aes(fill = as.factor(value),color="#000000"))+scale_y_reverse()+
+  scale_fill_manual(values=c("royalblue", "darkred", "white"),
+                    na.value = "white",
+                    labels=c("Train","Validation",""))+
+  theme_classic()+
+  labs(x="Development year", y="Accident year",fill="")+
+  theme(axis.title.x = element_text(size=8), axis.text.x  = element_text(size=7))+
+  theme(axis.title.y = element_text(size=8), axis.text.y  = element_text(size=7))+
+  scale_color_brewer(guide = 'none')
+```
+
+
+
+```{r models ranking 1}
+
+modelsranking.1d <- function(data.T){
+  "
+  Function to rank the clmplus package and apc package age-period-cohort models.
+  
+  This function takes a triangle of cumulative payments as input.
+  
+  It returns the ranking on the triangle.
+  "
+  
+  
+  leave.out=1
+  
+  
+  model.name = NULL
+  error.incidence = NULL
+  mre = NULL
+  
+  #pre-processing
+  triangle <- data.T$cumulative.payments.triangle
+  J <- dim(triangle)[2]
+  reduced.triangle <- c2t(t2c(triangle)[1:(J-leave.out),1:(J-leave.out)])
+  newt.rtt <- AggregateDataPP(reduced.triangle)
+  to.project <- t2c(triangle)[1:(J-leave.out-1),J-leave.out]
+  true.values <- t2c(triangle)[2:(J-leave.out),J]
+  
+  
+  for(ix in c('a','ac','ap','apc')){
+    
+    hz.fit <- StMoMo::fit(models[[ix]], 
+                          Dxt = newt.rtt$occurrance, 
+                          Ext = newt.rtt$exposure,
+                          wxt=newt.rtt$fit.w,
+                          iterMax=as.integer(1e+05))
+    hz.rate = fcst.fn(hz.fit,
+                   hazard.model = ix,
+                   gk.fc.model = 'a',
+                   ckj.fc.model= 'a')$rates[,1]
+    
+    fij = (2+hz.rate)/(2-hz.rate)
+    pred.fij = fij[(leave.out+1):length(fij)]
+    pred.v=to.project*pred.fij
+    
+    r.errors = (pred.v-true.values)/true.values
+    error.inc.num = sum(pred.v-true.values,na.rm = T)
+    error.inc.den = sum(true.values)
+    
+    model.name = c(model.name,
+                   paste0('clmplus.',ix))
+    error.incidence = c(error.incidence,error.inc.num/error.inc.den)
+    mre = c(mre,mean(r.errors))
+    
+    
+  }
+  
+  # ix='lc'
+  # hz.fit <- fit.lc.nr(data.T = newt.rtt,
+  #                     iter.max = 3e+04)
+  # if(hz.fit$converged==TRUE){hz.rate = forecast.lc.nr(hz.fit,J=dim(newt.rtt$cumulative.payments.triangle)[2])$rates[,1:leave.out]
+  # fij = (2+hz.rate)/(2-hz.rate)
+  # pred.fij = fij[(leave.out+1):length(fij)]
+  # pred.v=to.project*pred.fij
+  # r.errors = (pred.v-true.values)/true.values
+  # 
+  # error.inc.num = sum(pred.v-true.values,na.rm = T)
+  # error.inc.den = sum(true.values)
+  # 
+  # model.name = c(model.name,
+  #                paste0('clmplus.',ix))
+  # error.incidence = c(error.incidence,error.inc.num/error.inc.den)
+  # mre = c(mre,mean(r.errors))}
+  
+  out1 <- data.frame(
+    model.name,
+    # mre,
+    error.incidence)
+  
+  ## APC package
+  
+  newt.apc <- apc.data.list(response=newt.rtt$incremental.payments.triangle,
+                            data.format="CL")
+  
+  ## apc
+  
+  rmse = NULL
+  mae = NULL
+  error.pc = NULL
+  model.name = NULL
+  error.incidence = NULL
+  model.family = NULL
+  mre = NULL
+  
+  true.inc.values <- t2c(data.T$incremental.payments.triangle)[2:(J-leave.out),(J-leave.out+1):J]
+  
+  
+  for(apc.mods in c("AC","APC")){ #,"AP"
+    
+    fit <- apc.fit.model(newt.apc,
+                         model.family = "od.poisson.response",
+                         model.design = apc.mods)
+    
+    if(apc.mods == "AC"){fcst <- apc.forecast.ac(fit)$trap.response.forecast}
+    # if(apc.mods == "AP"){fcst <- apc.forecast.ap(fit)$trap.response.forecast}
+    if(apc.mods == "APC"){fcst <- apc.forecast.apc(fit)$trap.response.forecast}
+    
+    plogram.hat = t2c.full.square(incr2cum(t(fcst)))
+    pred.v = plogram.hat[,(J-leave.out+1):J]
+    pred.v = pred.v[2:length(pred.v)]
+    
+    
+    r.errors = (pred.v-true.values)/true.values
+    error.inc.num = sum(pred.v-true.values)
+    error.inc.den = sum(true.values)
+    
+    model.name = c(model.name,
+                   paste0('apc.',tolower(apc.mods)))
+    error.incidence = c(error.incidence,error.inc.num/error.inc.den)
+    mre = c(mre,mean(r.errors))
+    
+  }
+  
+  out2 <- data.frame(
+    model.name,
+    # mre,
+    error.incidence)
+  
+  out3 <- rbind(out1,out2)
+  
+  out3 <- out3[order(abs(out3$error.incidence),decreasing = F),]
+  out3[,'ei.rank']=c(1:dim(out3)[1])
+  # out3[,'mre.rank']=order(abs(out3$mre),decreasing = F)
+  #fix it manually
+  r2set=min(out3$ei.rank[out3$model.name=='apc.ac'],
+            out3$ei.rank[out3$model.name=='clmplus.a'])
+  
+  out3$ei.rank[out3$model.name=='apc.ac']=r2set
+  out3$ei.rank[out3$model.name=='clmplus.a']=r2set
+  
+  if( out3$ei.rank[out3$model.name=='apc.ac'] < max(out3$ei.rank)){
+    cond=out3$ei.rank>out3$ei.rank[out3$model.name=='apc.ac']
+    out3$ei.rank[cond]=out3$ei.rank[cond]-1
+  }
+  
+  return(list(models.ranks=out3))
+  
+}
+
+
+```
+
+
+```{r models ranking 2}
+
+modelsranking <- function(list.of.datasets){
+  
+  "
+  This functions returns the datasets to plot in the ranking section of the paper.
+  
+  The input is a list of datasets that constitue the sample. 
+  
+  The output is the rankings across different data sources.
+  "
+  
+  
+  full.ranks=NULL
+  
+  for(df.ix in names(list.of.datasets)){
+    
+    out.df=modelsranking.1d(AggregateDataPP(list.of.datasets[[df.ix]]))
+    out.df$models.ranks[,'data.source']=rep(df.ix,dim(out.df$models.ranks)[1])
+    full.ranks=rbind(full.ranks,out.df$models.ranks)  
+  }
+  
+  return(list(full.ranks=full.ranks))
+}
+```
+
+```{r models ranking 3, message=FALSE, warning=FALSE, include=FALSE}
+full.ranks=modelsranking(list.of.datasets)
+```
+
+```{r ranking plot}
+p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
+   geom_tile(aes(fill = cut(ei.rank, breaks=0:6, labels=1:6)), colour = "grey") +
+   ggtitle(" ") +
+  theme_classic()+
+  geom_text(aes(label = ei.rank))+
+   scale_y_discrete(limits=names(list.of.datasets)) +
+   scale_fill_manual(drop=FALSE, values=colorRampPalette(c("white","#6699CC"))(6), na.value="#EEEEEE", name="Rank") + 
+   xlab("Model") + ylab("Data source")
+p_min_expd0
+```
+
+
+```{r average rank}
+tbl=full.ranks$full.ranks %>%
+  dplyr::group_by(model.name) %>%
+  dplyr::summarise(mean.rank = mean(ei.rank))
+tbl
+
+
+```
+
+
+```{r ranks counts by model}
+library(dplyr)
+temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
+  group_by(model.name, ei.rank) %>% summarise(count = n())
+
+```
+
+
+The following picture was not included in the paper but it shows the models ranks counts for each model.
+
+```{r plot ranks}
+ggplot(temp.df, aes(y=count, x=factor(ei.rank))) + 
+    geom_bar(position="stack", stat="identity",fill='#6699CC') +
+  scale_y_continuous(limits=c(0,15))+
+  facet_wrap(~model.name, scales='free')+
+  theme_classic()+
+  ylab("")+
+  xlab("Rank")
+
+```
+
+
+
+# Code for Section 4.3.2. Model Families Comparison
+
+We evaluate the out-of-sample performance of our models by using a training, validation and testing split.
 
 ```{r bake off split}
 J=12
@@ -682,6 +938,8 @@ bake.off <- function(models.comparison){
   
   "
   
+  # browser()
+  
   p1<- models.comparison$best.fit[,c("rmse","mae","package")] %>%
     tidyr::pivot_longer(-c(package)) %>%
     ggplot(aes(x=package,y=value))+
@@ -698,7 +956,7 @@ bake.off <- function(models.comparison){
     theme_bw()+
     theme(strip.placement = 'outside',strip.background = element_blank())
   
-  abs.best=models.comparison$best.fit[,c("mre","error.incidence","package")]
+   abs.best=models.comparison$best.fit[,c("mre","error.incidence","package")]
   abs.best[,c("mre","error.incidence")]=apply(abs.best[,c("mre","error.incidence")],
                                               MARGIN=2,
                                               FUN=abs)
@@ -732,21 +990,17 @@ bake.off <- function(models.comparison){
 
 ```
 
-The models in the `clmplus` package are compared to those in the `apc` package. Below it can be found the code we used to create the bake-off plot in our paper.
+The models in the `clmplus` package are compared to those in the `apc` package. Below it can be found the code we used to create the box-plot in figure 8 of our paper.
 
-```{r call bake off, message=TRUE, warning=TRUE}
+```{r call bake off, message=FALSE, warning=FALSE, include=FALSE}
 out=modelcomparison(list.of.datasets = list.of.datasets)
 
 cake = bake.off(out)
 ```
 
-```{r show paper plot bo, message=FALSE, warning=FALSE}
-cake$p3
-```
+For each case we are able to pick the best model based on the error incidence.
 
-In detail, having the three set at disposal, for each case we are able to pick the best model based on the error incidence.
-
-```{r detail on ei, eval =FALSE}
+```{r detail on ei, echo=FALSE, message=FALSE, warning=FALSE}
 abs.best=out$best.fit[,c("error.incidence","package")]
 abs.best[,c("error.incidence")]=abs(abs.best[,c("error.incidence")])
 abs.best[,'data.source']=sort(rep(seq(1,dim(abs.best)[1]/3),3))
@@ -782,277 +1036,8 @@ p3
 ```
 
 
-# Rankings 
 
-Within this section we provide practitioners with the code to perform models ranking. Now we have a different training validation split. The training validation split we use is represented in the following picture.
-
-```{r models ranking split}
-# models ranking
-
-J=12
-df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
-colnames(df) <- c("origin","dev","value")
-df$value[df$origin+df$dev==(J-1)]=c(2)
-df$value[df$origin+df$dev<(J-1)]=c(1)
-df$value[df$origin+df$dev>=J]=c(NA)
-df[J,3]=c(NA)
-df[J*J-J+1,3]=c(NA)
-
-ggplot(data=df, aes(x=as.integer(dev), y=as.integer(origin))) + 
-  geom_tile(aes(fill = as.factor(value),color="#000000"))+scale_y_reverse()+
-  scale_fill_manual(values=c("royalblue", "darkred", "white"),
-                    na.value = "white",
-                    labels=c("Train","Validation",""))+
-  theme_classic()+
-  labs(x="Development year", y="Accident year",fill="")+
-  theme(axis.title.x = element_text(size=8), axis.text.x  = element_text(size=7))+
-  theme(axis.title.y = element_text(size=8), axis.text.y  = element_text(size=7))+
-  scale_color_brewer(guide = 'none')
-```
-
-
-
-```{r models ranking 1}
-
-modelsranking.1d <- function(data.T){
-  "
-  Function to rank the clmplus package and apc package age-period-cohort models.
-  
-  This function takes a triangle of cumulative payments as input.
-  
-  It returns the ranking on the triangle.
-  "
-  
-  
-  leave.out=1
-  
-  
-  model.name = NULL
-  error.incidence = NULL
-  mre = NULL
-  
-  #pre-processing
-  triangle <- data.T$cumulative.payments.triangle
-  J <- dim(triangle)[2]
-  reduced.triangle <- c2t(t2c(triangle)[1:(J-leave.out),1:(J-leave.out)])
-  newt.rtt <- AggregateDataPP(reduced.triangle)
-  to.project <- t2c(triangle)[1:(J-leave.out-1),J-leave.out]
-  true.values <- t2c(triangle)[2:(J-leave.out),J]
-  
-  
-  for(ix in c('a','ac','ap','apc')){
-    
-    hz.fit <- StMoMo::fit(models[[ix]], 
-                          Dxt = newt.rtt$occurrance, 
-                          Ext = newt.rtt$exposure,
-                          wxt=newt.rtt$fit.w,
-                          iterMax=as.integer(1e+05))
-    hz.rate = fcst.fn(hz.fit,
-                   hazard.model = ix,
-                   gk.fc.model = 'a',
-                   ckj.fc.model= 'a')$rates[,1]
-    
-    fij = (2+hz.rate)/(2-hz.rate)
-    pred.fij = fij[(leave.out+1):length(fij)]
-    pred.v=to.project*pred.fij
-    
-    r.errors = (pred.v-true.values)/true.values
-    error.inc.num = sum(pred.v-true.values,na.rm = T)
-    error.inc.den = sum(true.values)
-    
-    model.name = c(model.name,
-                   paste0('clmplus.',ix))
-    error.incidence = c(error.incidence,error.inc.num/error.inc.den)
-    mre = c(mre,mean(r.errors))
-    
-    
-  }
-  
-  # ix='lc'
-  # hz.fit <- fit.lc.nr(data.T = newt.rtt,
-  #                     iter.max = 3e+04)
-  # if(hz.fit$converged==TRUE){hz.rate = forecast.lc.nr(hz.fit,J=dim(newt.rtt$cumulative.payments.triangle)[2])$rates[,1:leave.out]
-  # fij = (2+hz.rate)/(2-hz.rate)
-  # pred.fij = fij[(leave.out+1):length(fij)]
-  # pred.v=to.project*pred.fij
-  # r.errors = (pred.v-true.values)/true.values
-  # 
-  # error.inc.num = sum(pred.v-true.values,na.rm = T)
-  # error.inc.den = sum(true.values)
-  # 
-  # model.name = c(model.name,
-  #                paste0('clmplus.',ix))
-  # error.incidence = c(error.incidence,error.inc.num/error.inc.den)
-  # mre = c(mre,mean(r.errors))}
-  
-  out1 <- data.frame(
-    model.name,
-    # mre,
-    error.incidence)
-  
-  ## APC package
-  
-  newt.apc <- apc.data.list(response=newt.rtt$incremental.payments.triangle,
-                            data.format="CL")
-  
-  ## apc
-  
-  rmse = NULL
-  mae = NULL
-  error.pc = NULL
-  model.name = NULL
-  error.incidence = NULL
-  model.family = NULL
-  mre = NULL
-  
-  true.inc.values <- t2c(data.T$incremental.payments.triangle)[2:(J-leave.out),(J-leave.out+1):J]
-  
-  
-  for(apc.mods in c("AC","APC")){ #,"AP"
-    
-    fit <- apc.fit.model(newt.apc,
-                         model.family = "od.poisson.response",
-                         model.design = apc.mods)
-    
-    if(apc.mods == "AC"){fcst <- apc.forecast.ac(fit)$trap.response.forecast}
-    # if(apc.mods == "AP"){fcst <- apc.forecast.ap(fit)$trap.response.forecast}
-    if(apc.mods == "APC"){fcst <- apc.forecast.apc(fit)$trap.response.forecast}
-    
-    plogram.hat = t2c.full.square(incr2cum(t(fcst)))
-    pred.v = plogram.hat[,(J-leave.out+1):J]
-    pred.v = pred.v[2:length(pred.v)]
-    
-    
-    r.errors = (pred.v-true.values)/true.values
-    error.inc.num = sum(pred.v-true.values)
-    error.inc.den = sum(true.values)
-    
-    model.name = c(model.name,
-                   paste0('apc.',tolower(apc.mods)))
-    error.incidence = c(error.incidence,error.inc.num/error.inc.den)
-    mre = c(mre,mean(r.errors))
-    
-  }
-  
-  out2 <- data.frame(
-    model.name,
-    # mre,
-    error.incidence)
-  
-  out3 <- rbind(out1,out2)
-  
-  out3 <- out3[order(abs(out3$error.incidence),decreasing = F),]
-  out3[,'ei.rank']=c(1:dim(out3)[1])
-  # out3[,'mre.rank']=order(abs(out3$mre),decreasing = F)
-  #fix it manually
-  r2set=min(out3$ei.rank[out3$model.name=='apc.ac'],
-            out3$ei.rank[out3$model.name=='clmplus.a'])
-  
-  out3$ei.rank[out3$model.name=='apc.ac']=r2set
-  out3$ei.rank[out3$model.name=='clmplus.a']=r2set
-  
-  if( out3$ei.rank[out3$model.name=='apc.ac'] < max(out3$ei.rank)){
-    cond=out3$ei.rank>out3$ei.rank[out3$model.name=='apc.ac']
-    out3$ei.rank[cond]=out3$ei.rank[cond]-1
-  }
-  
-  return(list(models.ranks=out3))
-  
-}
-
-
-```
-
-
-```{r models ranking 2}
-
-modelsranking <- function(list.of.datasets){
-  
-  "
-  This functions returns the datasets to plot in the ranking section of the paper.
-  
-  The input is a list of datasets that constitue the sample. 
-  
-  The output is the rankings across different data sources.
-  "
-  
-  
-  full.ranks=NULL
-  
-  for(df.ix in names(list.of.datasets)){
-    
-    out.df=modelsranking.1d(AggregateDataPP(list.of.datasets[[df.ix]]))
-    out.df$models.ranks[,'data.source']=rep(df.ix,dim(out.df$models.ranks)[1])
-    full.ranks=rbind(full.ranks,out.df$models.ranks)  
-  }
-  
-  return(list(full.ranks=full.ranks))
-}
-```
-
-```{r models ranking 3}
-full.ranks=modelsranking(list.of.datasets)
-```
-
-The following picture is the models ranks plot we included in the paper.
-
-```{r ranking plot}
-p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
-   geom_tile(aes(fill = cut(ei.rank, breaks=0:6, labels=1:6)), colour = "grey") +
-   ggtitle(" ") +
-  theme_classic()+
-  geom_text(aes(label = ei.rank))+
-   scale_y_discrete(limits=names(list.of.datasets)) +
-   scale_fill_manual(drop=FALSE, values=colorRampPalette(c("white","#6699CC"))(6), na.value="#EEEEEE", name="Rank") + 
-   xlab("Model") + ylab("Data source")
-p_min_expd0
-```
-
-
-
-It can be useful to inspect the average rank of the different models we were comparing.
-
-```{r average rank}
-tbl=full.ranks$full.ranks %>%
-  dplyr::group_by(model.name) %>%
-  dplyr::summarise(mean.rank = mean(ei.rank))
-tbl
-
-
-```
-
-
-```{r ranks counts by model}
-library(dplyr)
-temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
-  group_by(model.name, ei.rank) %>% summarise(count = n())
-
-```
-
-
-The following picture was not included in the paper but it shows the models ranks counts. It provides additional consistency to the results we included in our work.
-
-```{r plot ranks}
-ggplot(temp.df, aes(y=count, x=factor(ei.rank))) + 
-    geom_bar(position="stack", stat="identity",fill='#6699CC') +
-  scale_y_continuous(limits=c(0,15))+
-  facet_wrap(~model.name, scales='free')+
-  theme_classic()+
-  ylab("")+
-  xlab("Rank")
-
-```
-
-
-# Conclusions 
-
-In this vignette we wanted to show how the tool-box of actuarial scientists is enriched thanks to `clmplus`.
-
-* It is important to perform different analysis to validate results. In this work we showed two.
-
-* There is no best model in absolute terms: our purpose is to show that more options can improve claims reserving.
-
-
+# References
 
 
 

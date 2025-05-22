@@ -10,7 +10,7 @@
 
 ## Our models
 
-`clmplus` relies on the powerful `StMoMo` package. Users can either rely on our default models or set their own configuration for the claim development.
+The models for the claim development available in the `clmplus` are based on the models for human mortality implemented in the `StMoMo` package. Users can either rely on our default models or set their own configuration for the claim development.
 
 
 |      Model      | Lexis dimension                 |Claims reserving                  |

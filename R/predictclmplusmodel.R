@@ -32,7 +32,7 @@
 #' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
 #'  
 #' @export
-#' 
+#' @method predict clmplusmodel
 predict.clmplusmodel <- function(object,
                                  gk.fc.model='a',
                                  ckj.fc.model='a',
