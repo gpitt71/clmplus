@@ -6,7 +6,7 @@
 
 # clmplus
 
-`clmplus` is an `R` package for implementing the age-period-cohort models for the claim development presented in the manuscript 'Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle' <doi:10.48550/arXiv.2301.03858>. 
+`clmplus` is an `R` package for implementing the age-period-cohort models for the claim development presented in the manuscript 'Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle' <doi:10.1080/10920277.2025.249672>. 
 
 ## Our models
 
