@@ -1,0 +1,10 @@
+pandoc: '3.4'
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  casestudy1: casestudy1.html
+  modelscomparison: modelscomparison.html
+last_built: 2025-05-22T13:38Z
+urls:
+  reference: https://gpitt71.github.io/clmplus/reference
+  article: https://gpitt71.github.io/clmplus/articles
