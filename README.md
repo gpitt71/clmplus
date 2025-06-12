@@ -6,7 +6,7 @@
 
 # clmplus
 
-`clmplus` is an `R` package for implementing the age-period-cohort models for the claim development presented in the manuscript 'Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle' <doi:10.1080/10920277.2025.249672>. 
+`clmplus` is an `R` package for implementing the age-period-cohort models for the claim development presented in the manuscript 'Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle' <doi:10.1080/10920277.2025.2496725>. 
 
 ## Our models
 
@@ -113,6 +113,29 @@ The fitted effect (and extrapolated) effects can be inspected with the `plot` fu
 ```
 plot(apc.model)
 ```
+
+## Citation
+
+**APA Style**  
+
+Pittarello, G., Hiabu, M., & Villegas, A. M. (2025). Replicating and Extending Chain-Ladder via an Age–Period–Cohort Structure on the Claim Development in a Run-Off Triangle. North American Actuarial Journal, 1-31.
+
+**BibTeX**  
+```bibtex
+@article{ ,
+  title={Replicating and Extending Chain-Ladder via an Age--Period--Cohort Structure on the Claim Development in a Run-Off Triangle},
+  author={Pittarello, Gabriele and Hiabu, Munir and Villegas, Andr{\'e}s M},
+  journal={North American Actuarial Journal},
+  pages={1--31},
+  year={2025},
+  publisher={Taylor \& Francis}
+}oi = {10.1080/10920277.2025.2496725},
+}
+```
+
+
+
+
 
 
 
