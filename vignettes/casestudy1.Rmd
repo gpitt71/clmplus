@@ -239,7 +239,7 @@ a.model.fit$fitted_effects
 
 Further inspection can be performed with the `clmplus` package, which provides the graphical tools to inspect the fitted effects. The fitted effects can be plotted using the `plot` function on the output of the `predict` method.
 
-```{r plot effects ax, message=FALSE, warning=FALSE}
+```{r plot effects ax, message=FALSE, warning=FALSE, fig.alt="Fitted effect by development period, age-model."}
 plot(a.model)
 ```
 
@@ -248,7 +248,7 @@ plot(a.model)
 
 By adding a cohort component to the claim development model, we improve the scaled-deviance residuals. The scaled-deviance residuals can be plotted using the `plot` function on the output of the `clmplus` method.
 
-```{r amodel residuals}
+```{r amodel residuals, fig.alt="Scaled deviance residuals, age-model."}
 #make it triangular
 plot(a.model.fit)
 ```
@@ -256,7 +256,7 @@ plot(a.model.fit)
 The red and blue areas suggest that there are some trends that the age-model wasn't able to catch.
 
 
-```{r message=FALSE, warning=FALSE}
+```{r ac residuals, message=FALSE, warning=FALSE, fig.alt="Scaled deviance residuals, age-cohort model."}
 ac.model.fit <- clmplus(pp_data, 
                     hazard.model="ac")
 
@@ -267,7 +267,7 @@ plot(ac.model.fit)
 The fitted effect are displayed below. The cohort component is extrapolated for the last available accident period as discussed in our paper.
 
 
-```{r message=FALSE, warning=FALSE}
+```{r ac effects, message=FALSE, warning=FALSE, fig.alt="Fitted effects, age-cohort model."}
 
 plot(ac.model)
 
@@ -296,18 +296,18 @@ apc.model<-predict(apc.model.fit,
 
 There is no clear difference between the residuals plot obtained using an age-period model compared to the residuals plot obtained using the age-cohort model. Conversely, the plot seems to improve using an age-period-cohort model. 
 
-```{r residuals apmodel}
+```{r residuals apmodel, fig.alt="Scaled deviance residuals, age-period model."}
 plot(ap.model.fit)
 ```
 
 
-```{r residuals apcmodel}
+```{r residuals apcmodel, fig.alt="Scaled deviance residuals, age-period-cohort model."}
 plot(apc.model.fit)
 ```
 
 Below, the effects of the age-period-cohort model.
 
-```{r apc effects, message=FALSE, warning=FALSE}
+```{r apc effects, message=FALSE, warning=FALSE, fig.alt="Fitted effects, age-period-cohort model."}
 plot(apc.model)
 ```
 

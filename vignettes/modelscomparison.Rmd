@@ -308,7 +308,7 @@ fcst.fn <- function(object,
 
 We rank the different models based on a cross-validation scheme. The training-validation split we use is represented in the following picture.
 
-```{r models ranking split}
+```{r models ranking split, fig.alt="Data split, Train and Validation."}
 # models ranking
 
 J=12
@@ -516,7 +516,7 @@ modelsranking <- function(list.of.datasets){
 full.ranks=modelsranking(list.of.datasets)
 ```
 
-```{r ranking plot}
+```{r ranking plot, fig.alt="Models ranking plot."}
 p_min_expd0 <- ggplot(full.ranks$full.ranks, aes(model.name, data.source)) +
    geom_tile(aes(fill = cut(ei.rank, breaks=0:6, labels=1:6)), colour = "grey") +
    ggtitle(" ") +
@@ -549,7 +549,7 @@ temp.df=full.ranks$full.ranks[,c('model.name','ei.rank')] %>%
 
 The following picture was not included in the paper but it shows the models ranks counts for each model.
 
-```{r plot ranks}
+```{r plot ranks, fig.alt="Model rank count."}
 ggplot(temp.df, aes(y=count, x=factor(ei.rank))) + 
     geom_bar(position="stack", stat="identity",fill='#6699CC') +
   scale_y_continuous(limits=c(0,15))+
@@ -566,7 +566,7 @@ ggplot(temp.df, aes(y=count, x=factor(ei.rank))) +
 
 We evaluate the out-of-sample performance of our models by using a training, validation and testing split.
 
-```{r bake off split}
+```{r bake off split, fig.alt="Data split, Train, Validation, and Test."}
 J=12
 df<-data.frame(expand.grid(c(0:(J-1)),c(0:(J-1))),c(1:(J^2)))
 colnames(df) <- c("origin","dev","value")
@@ -1001,7 +1001,7 @@ cake = bake.off(out)
 
 For each case we are able to pick the best model based on the error incidence.
 
-```{r detail on ei, echo=FALSE, message=FALSE, warning=FALSE}
+```{r detail on ei, echo=FALSE, message=FALSE, warning=FALSE, fig.alt="Error Incidence."}
 abs.best=out$best.fit[,c("error.incidence","package")]
 abs.best[,c("error.incidence")]=abs(abs.best[,c("error.incidence")])
 abs.best[,'data.source']=sort(rep(seq(1,dim(abs.best)[1]/3),3))

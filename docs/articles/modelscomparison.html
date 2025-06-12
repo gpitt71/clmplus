@@ -60,7 +60,7 @@
                         <h4 data-toc-skip class="author">Gabriele
 Pittarello</h4>
             
-            <h4 data-toc-skip class="date">2025-05-22</h4>
+            <h4 data-toc-skip class="date">2025-06-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/gpitt71/clmplus/blob/HEAD/vignettes/modelscomparison.Rmd" class="external-link"><code>vignettes/modelscomparison.Rmd</code></a></small>
       <div class="d-none name"><code>modelscomparison.Rmd</code></div>
@@ -148,7 +148,7 @@ picture.</p>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">8</span><span class="op">)</span>, axis.text.x  <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.y <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">8</span><span class="op">)</span>, axis.text.y  <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>guide <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="modelscomparison_files/figure-html/models%20ranking%20split-1.png" width="576"></p>
+<p><img src="modelscomparison_files/figure-html/models%20ranking%20split-1.png" alt="Data split, Train and Validation." width="576"></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">modelsranking.1d</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data.T</span><span class="op">)</span><span class="op">{</span></span>
@@ -330,7 +330,7 @@ picture.</p>
 <span>   <span class="fu">scale_fill_manual</span><span class="op">(</span>drop<span class="op">=</span><span class="cn">FALSE</span>, values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"white"</span>,<span class="st">"#6699CC"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>, na.value<span class="op">=</span><span class="st">"#EEEEEE"</span>, name<span class="op">=</span><span class="st">"Rank"</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>   <span class="fu">xlab</span><span class="op">(</span><span class="st">"Model"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylab</span><span class="op">(</span><span class="st">"Data source"</span><span class="op">)</span></span>
 <span><span class="va">p_min_expd0</span></span></code></pre></div>
-<p><img src="modelscomparison_files/figure-html/ranking%20plot-1.png" width="576"></p>
+<p><img src="modelscomparison_files/figure-html/ranking%20plot-1.png" alt="Models ranking plot." width="576"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tbl</span><span class="op">=</span><span class="va">full.ranks</span><span class="op">$</span><span class="va">full.ranks</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">model.name</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -361,7 +361,7 @@ models ranks counts for each model.</p>
 <span>  <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">ylab</span><span class="op">(</span><span class="st">""</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">xlab</span><span class="op">(</span><span class="st">"Rank"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="modelscomparison_files/figure-html/plot%20ranks-1.png" width="576"></p>
+<p><img src="modelscomparison_files/figure-html/plot%20ranks-1.png" alt="Model rank count." width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="code-for-section-4-3-2--model-families-comparison">Code for Section 4.3.2. Model Families Comparison<a class="anchor" aria-label="anchor" href="#code-for-section-4-3-2--model-families-comparison"></a>
@@ -396,7 +396,7 @@ training, validation and testing split.</p>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">8</span><span class="op">)</span>, axis.text.x  <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">theme</span><span class="op">(</span>axis.title.y <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">8</span><span class="op">)</span>, axis.text.y  <span class="op">=</span> <span class="fu">element_text</span><span class="op">(</span>size<span class="op">=</span><span class="fl">7</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>guide <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="modelscomparison_files/figure-html/bake%20off%20split-1.png" width="576"></p>
+<p><img src="modelscomparison_files/figure-html/bake%20off%20split-1.png" alt="Data split, Train, Validation, and Test." width="576"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best.of.the.bests</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df1</span>,<span class="va">df2</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="st">"</span></span>
@@ -786,7 +786,7 @@ in the <code>apc</code> package. Below it can be found the code we used
 to create the box-plot in figure 8 of our paper.</p>
 <p>For each case we are able to pick the best model based on the error
 incidence.</p>
-<p><img src="modelscomparison_files/figure-html/detail%20on%20ei-1.png" width="576"></p>
+<p><img src="modelscomparison_files/figure-html/detail%20on%20ei-1.png" alt="Error Incidence." width="576"></p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
