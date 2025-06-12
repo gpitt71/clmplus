@@ -93,7 +93,7 @@ Before proceeding, we summarise in a table the notation of the claim development
 
 # Replicate the chain-ladder with the `clmplus` package
 
-For this tutorial, we use the `AutoBIPaid` run-off triangle available in the `ChainLadder` package (@chainladderpackage).
+For this tutorial, we use the `AutoBIPaid` run-off triangle available in the `ChainLadder` package (@chainladderpackage). Please make sure that the `ChainLadder` package is installed on your computer before executing the following code.
 
 ```{r input data cl package, include= FALSE}
 library(ChainLadder)

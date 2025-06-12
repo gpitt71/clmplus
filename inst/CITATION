@@ -1,0 +1,16 @@
+citHeader("To cite clmplus in publications, please use:")
+
+bibentry(
+  bibtype = "Article",
+  title = "Replicating and Extending Chain-Ladder via an Age--Period--Cohort Structure on the Claim Development in a Run-Off Triangle",
+  author = c(
+    person("Gabriele", "Pittarello"),
+    person("Munir", "Hiabu"),
+    person("Andrés M", "Villegas")
+  ),
+  journal = "North American Actuarial Journal",
+  publisher = "Taylor & Francis",
+  year = 2025,
+  pages = "1--31",
+  doi = "10.1080/10920277.2025.2496725"
+)

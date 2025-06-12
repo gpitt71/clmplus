@@ -129,11 +129,13 @@ Pittarello, G., Hiabu, M., & Villegas, A. M. (2025). Replicating and Extending C
   pages={1--31},
   year={2025},
   publisher={Taylor \& Francis}
-}oi = {10.1080/10920277.2025.2496725},
+  doi = {10.1080/10920277.2025.2496725},
 }
 ```
 
+## Further Resources
 
+The most recent tutorials and replication files associated with the manuscript can be accessed via [our project website](https://gpitt71.github.io/clmplus/).
 
 
 
