@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">clmplus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
                         <h4 data-toc-skip class="author">Gabriele
 Pittarello</h4>
             
-            <h4 data-toc-skip class="date">2025-06-12</h4>
+            <h4 data-toc-skip class="date">2025-07-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/gpitt71/clmplus/blob/main/vignettes/casestudy1.Rmd" class="external-link"><code>vignettes/casestudy1.Rmd</code></a></small>
       <div class="d-none name"><code>casestudy1.Rmd</code></div>
@@ -285,6 +285,8 @@ age-cohort GLM for the claim amounts described in <span class="citation">England
 <span><span class="co">#&gt;  -0.15911660   0.20095088  -0.17521544</span></span>
 <span></span>
 <span><span class="va">ac.fcst.apc</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/apc/man/apc.forecast.ac.html" class="external-link">apc.forecast.ac</a></span><span class="op">(</span><span class="va">ac.model.apc</span><span class="op">)</span></span>
+<span><span class="co">#&gt; WARNING apc.data.list.subset: coordinates changed to "AC"</span></span>
+<span><span class="co">#&gt; WARNING apc.data.list.subset: data.format changed to "trapezoid"</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>reserve.mack<span class="op">=</span><span class="va">ultimate.chl</span><span class="op">-</span><span class="va">diagonal</span>,</span>
 <span>           reserve.apc<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">ac.fcst.apc</span><span class="op">$</span><span class="va">response.forecast.coh</span><span class="op">[</span>,<span class="st">'forecast'</span><span class="op">]</span><span class="op">)</span>,</span>
