@@ -10,13 +10,21 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
+```{r check-apc, echo=FALSE}
+has_apc <- requireNamespace("apc", quietly = TRUE)
+if (!has_apc) {
+  knitr::opts_chunk$set(eval = FALSE)
+  knitr::knit_exit()
+}
+```
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
-
 
 ```{r tailor made functions, include=FALSE}
 t2c <- function(x){
@@ -226,7 +234,6 @@ data.frame(reserve.mack=ultimate.chl-diagonal,
            reserve.clmplus=a.model$reserve
            
            )
-
 
 ```
 
