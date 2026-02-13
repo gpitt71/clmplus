@@ -1,0 +1,178 @@
+# clmplus
+
+`clmplus` is an `R` package for implementing the age-period-cohort
+models for the claim development presented in the manuscript
+‘Replicating and extending chain-ladder via an age-period-cohort
+structure on the claim development in a run-off triangle’
+<doi:10.1080/10920277.2025.2496725>.
+
+## Our models
+
+The models for the claim development available in the `clmplus` are
+based on the models for human mortality implemented in the `StMoMo`
+package. Users can either rely on our default models or set their own
+configuration for the claim development.
+
+| Model |  Lexis dimension  |                 Claims reserving |
+|:-----:|:-----------------:|---------------------------------:|
+|   a   |        age        | development (chain-ladder model) |
+|  ac   |    age-cohort     |             development-accident |
+|  ap   |    age-period     |             development-calendar |
+|  apc  | age-period-cohort |    development-calendar-accident |
+
+## Installation
+
+The developer version of `clmplus` can be installed from GitHub.
+
+    library(devtools)
+    devtools::install_github("gpitt71/clmplus")
+
+The current version of `clmplus` can be installed from CRAN.
+
+    install.packages('clmplus')
+
+## Get Started
+
+In this brief example, we work with the `sifa.mtpl` data from the
+`clmplus` package. Further examples can be found in the [package
+vignettes](https://github.com/gpitt71/clmplus/tree/main/vignettes). The
+data set of cumulative claim payments is transformed into an
+`AggregateDataPP` object that pre-processes the data for claim
+development modelling.
+
+    library(clmplus)
+
+    data ("sifa.mtpl")
+    dataset = sifa.mtpl
+    datapp = AggregateDataPP(cumulative.payments.triangle = dataset, eta= 1/2)
+
+Our models can be fit with the `clmplus` function.
+
+    a.model.fit=clmplus(datapp,
+                     hazard.model = "a") # age-model replicates the chain ladder
+
+    ac.model.fit=clmplus(datapp,
+                     hazard.model = "ac")
+
+    ap.model.fit=clmplus(datapp,
+                     hazard.model = "ap")
+
+    apc.model.fit=clmplus(datapp,
+                      hazard.model = "apc")
+
+The `plot` function can be be used to explore the scaled deviance
+residuals of fitted models. Below, an example for the age-period-cohort
+(`apc`) model for the claim development.
+
+    plot(apc.model.fit)
+
+Predictions are performed with the `predict` function.
+
+    a.model=predict(a.model.fit)
+
+    # clmplus reserve (age model)
+    sum(a.model$reserve)
+    #226875.5
+
+
+    ac.model=predict(ac.model.fit,
+                     gk.fc.model = 'a',
+                     gk.order = c(1,1,0))
+
+    # clmplus reserve (age-cohort model)
+    sum(ac.model$reserve)
+    #205305.7
+
+    ap.model= predict(ap.model.fit,
+                     ckj.fc.model = 'a',
+                     ckj.order = c(0,1,0))
+
+    # clmplus reserve (age-period model)
+    sum(ap.model$reserve)
+    #215602.8
+
+
+    apc.model= predict(apc.model.fit,
+                      gk.fc.model = 'a',
+                      ckj.fc.model = 'a',
+                      gk.order = c(1,1,0),
+                      ckj.order = c(0,1,0))
+    # clmplus reserve (age-period-cohort model)
+    sum(apc.model$reserve)
+    #213821.6
+
+The fitted effect (and extrapolated) effects can be inspected with the
+`plot` function. We continue below the example with the `apc` model.
+
+    plot(apc.model)
+
+## Citation
+
+**APA Style**
+
+Pittarello, G., Hiabu, M., & Villegas, A. M. (2025). Replicating and
+Extending Chain-Ladder via an Age–Period–Cohort Structure on the Claim
+Development in a Run-Off Triangle. North American Actuarial Journal,
+1-31.
+
+**BibTeX**
+
+``` bibtex
+@article{ ,
+  title={Replicating and Extending Chain-Ladder via an Age--Period--Cohort Structure on the Claim Development in a Run-Off Triangle},
+  author={Pittarello, Gabriele and Hiabu, Munir and Villegas, Andr{\'e}s M},
+  journal={North American Actuarial Journal},
+  pages={1--31},
+  year={2025},
+  publisher={Taylor \& Francis}
+  doi = {10.1080/10920277.2025.2496725},
+}
+```
+
+## Further Resources
+
+The most recent tutorials and replication files associated with the
+manuscript can be accessed via [our project
+website](https://gpitt71.github.io/clmplus/).
+
+# Package index
+
+## All functions
+
+- [`AggregateDataPP()`](https://gpitt71.github.io/clmplus/reference/AggregateDataPP.md)
+  : Pre-process Run-Off Triangles
+- [`amases.gtpl`](https://gpitt71.github.io/clmplus/reference/amases.gtpl.md)
+  : Amases GTPL
+- [`amases.mod`](https://gpitt71.github.io/clmplus/reference/amases.mod.md)
+  : Amases MOD
+- [`amases.mtpl`](https://gpitt71.github.io/clmplus/reference/amases.mtpl.md)
+  : Amases MTPL
+- [`clmplus(`*`<AggregateDataPP>`*`)`](https://gpitt71.github.io/clmplus/reference/clmplus.AggregateDataPP.md)
+  : Fit Chain Ladder Plus to reverse time triangles.
+- [`clmplus()`](https://gpitt71.github.io/clmplus/reference/clmplus.md)
+  : Fit Chain Ladder plus on Run-off Triangles.
+- [`clmplus(`*`<default>`*`)`](https://gpitt71.github.io/clmplus/reference/clmplus.default.md)
+  : Fit Chain Ladder Plus to reverse time triangles.
+- [`plot(`*`<AggregateDataPP>`*`)`](https://gpitt71.github.io/clmplus/reference/plot.AggregateDataPP.md)
+  : Plot the payments behavior
+- [`plot(`*`<clmplusmodel>`*`)`](https://gpitt71.github.io/clmplus/reference/plot.clmplusmodel.md)
+  : Plot the hazard model residuals
+- [`plot(`*`<clmpluspredictions>`*`)`](https://gpitt71.github.io/clmplus/reference/plot.clmpluspredictions.md)
+  : Plot the hazard model fitted and forecasted parameters
+- [`predict(`*`<clmplusmodel>`*`)`](https://gpitt71.github.io/clmplus/reference/predict.clmplusmodel.md)
+  : Predict the Reserve using Chain Ladder Plus Models
+- [`sifa.gtpl`](https://gpitt71.github.io/clmplus/reference/sifa.gtpl.md)
+  : Sifa GTPL
+- [`sifa.mod`](https://gpitt71.github.io/clmplus/reference/sifa.mod.md)
+  : Sifa MOD
+- [`sifa.mtpl`](https://gpitt71.github.io/clmplus/reference/sifa.mtpl.md)
+  : Sifa MTPL
+
+# Articles
+
+### All vignettes
+
+- [Vignette
+  1](https://gpitt71.github.io/clmplus/articles/casestudy1.md):
+- [Models
+  comparison](https://gpitt71.github.io/clmplus/articles/modelscomparison.md):
