@@ -11,6 +11,7 @@
   gk.order = c(1, 1, 0),
   ckj.order = c(0, 1, 0),
   forecasting_horizon = NULL,
+  constrained_development_factors = FALSE,
   ...
 )
 }
@@ -28,6 +29,8 @@
 \item{forecasting_horizon}{\code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off.}
 
 \item{...}{Extra arguments to be passed to the predict function.}
+
+\item{constrained_development_factor}{\code{logical}, if \code{TRUE} the predict function will set negative development factors to 1.}
 }
 \value{
 Returns the following output:

@@ -40,4 +40,4 @@ Suggests:
     viridis,
     tidyr
 VignetteBuilder: knitr, rmarkdown
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
