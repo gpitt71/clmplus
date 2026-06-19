@@ -24,6 +24,7 @@ BugReports: https://github.com/gpitt71/clmplus/issues
 License: GPL (>= 2)
 Imports:
     StMoMo,
+    ReSurv,
     ChainLadder,
     stats,
     ggplot2,

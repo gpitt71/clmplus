@@ -1,35 +1,18 @@
-#' Predict reserve cells
-#'
-#' Generic for reserve-cell predictions.
-#'
-#' @param object A fitted reserving model.
-#' @param ... Additional arguments.
-#'
-#' @export
-predictReserve <- function(object, ...) {
-  UseMethod("predictReserve")
-}
-
-
 #' Predict reserve cells from a clmplus model
 #'
-#' Converts a fitted \code{clmplusmodel} or a \code{clmpluspredictions}
-#' object into the reserving interface used by ReSurv:
-#' \code{AP}, \code{DP}, \code{CP}, \code{IBNR}.
+#' Converts a fitted clmplus model, or its prediction object, into the
+#' ReSurv reserving interface: AP, DP, CP, IBNR.
 #'
-#' The returned \code{IBNR} values are incremental lower-triangle predictions.
+#' @param object A clmplusmodel or clmpluspredictions object.
+#' @param granularity Ignored. Included for compatibility with ReSurv.
+#' @param lower_triangle_only Logical. If TRUE, return only predicted lower-triangle cells.
+#' @param ... Passed to predict.clmplusmodel().
 #'
-#' @param object A \code{clmplusmodel} or \code{clmpluspredictions} object.
-#' @param granularity Ignored. Included for compatibility with ReSurv's
-#'   \code{predictReserve()} interface.
-#' @param lower_triangle_only Logical. If \code{TRUE}, return only cells in the
-#'   predicted lower triangle.
-#' @param ... Arguments passed to \code{predict.clmplusmodel()} when
-#'   \code{object} is a fitted \code{clmplusmodel}.
+#' @return A data.frame with AP, DP, CP, IBNR.
 #'
-#' @return A data frame with columns \code{AP}, \code{DP}, \code{CP}, \code{IBNR}.
-#'
+#' @importFrom ReSurv predictReserve
 #' @export
+#' @method predictReserve clmplusmodel
 predictReserve.clmplusmodel <- function(object,
                                         granularity = NULL,
                                         lower_triangle_only = TRUE,
@@ -51,6 +34,7 @@ predictReserve.clmplusmodel <- function(object,
 
 #' @rdname predictReserve.clmplusmodel
 #' @export
+#' @method predictReserve clmpluspredictions
 predictReserve.clmpluspredictions <- function(object,
                                               granularity = NULL,
                                               lower_triangle_only = TRUE,
@@ -81,18 +65,12 @@ predictReserve.clmpluspredictions <- function(object,
   J <- nrow(full_triangle)
   
   if (ncol(full_triangle) != J) {
-    stop(
-      "`full_triangle` must be a square cumulative triangle.",
-      call. = FALSE
-    )
+    stop("`full_triangle` must be square.", call. = FALSE)
   }
   
-  ## Convert cumulative full triangle to incremental full triangle.
   incremental_full <- full_triangle
   
-  if (J >= 1L) {
-    incremental_full[, 1L] <- full_triangle[, 1L]
-  }
+  incremental_full[, 1L] <- full_triangle[, 1L]
   
   if (J >= 2L) {
     for (jj in 2:J) {
@@ -100,8 +78,6 @@ predictReserve.clmpluspredictions <- function(object,
     }
   }
   
-  ## The clmplus lower triangle is cumulative. Its non-NA cells identify
-  ## the predicted lower-triangle cells, also when forecasting_horizon is used.
   lower_mask <- !is.na(lower_triangle)
   
   if (!isTRUE(lower_triangle_only)) {
@@ -120,14 +96,15 @@ predictReserve.clmpluspredictions <- function(object,
   
   out <- out[as.vector(lower_mask), , drop = FALSE]
   
-  out <- out[order(out$AP, out$DP), , drop = FALSE]
-  
-  rownames(out) <- NULL
-  
   out$AP <- as.integer(out$AP)
   out$DP <- as.integer(out$DP)
   out$CP <- as.integer(out$CP)
   out$IBNR <- as.numeric(out$IBNR)
+  
+  out <- out[is.finite(out$IBNR), , drop = FALSE]
+  out <- out[order(out$AP, out$DP), , drop = FALSE]
+  
+  rownames(out) <- NULL
   
   out
 }
