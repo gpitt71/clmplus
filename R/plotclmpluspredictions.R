@@ -26,10 +26,11 @@ plot.clmpluspredictions <- function(x,
   
   if(!is.null(x$apc_output$hazard.model)){
     
-    a.tp <- grepl('a',x$apc_output$hazard.model)
-    c.tp <- grepl('c',x$apc_output$hazard.model)
-    p.tp <- grepl('p',x$apc_output$hazard.model)
-    lc.tp <- grepl('lc',x$apc_output$hazard.model)
+    components <- model_components[[x$apc_output$hazard.model]]
+    a.tp <- isTRUE(components[["age"]])
+    c.tp <- isTRUE(components[["cohort"]])
+    p.tp <- isTRUE(components[["period"]])
+    lc.tp <- FALSE
     
     if(lc.tp){
       

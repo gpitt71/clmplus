@@ -2,15 +2,15 @@
 % Please edit documentation in R/predictReserve.R
 \name{predictReserve}
 \alias{predictReserve}
-\title{Predict reserve cells}
+\title{Predict reserves}
 \usage{
 predictReserve(object, ...)
 }
 \arguments{
-\item{object}{A fitted reserving model.}
+\item{object}{A fitted model or prediction object.}
 
-\item{...}{Additional arguments.}
+\item{...}{Additional arguments passed to a method.}
 }
 \description{
-Generic for reserve-cell predictions.
+Re-export of [ReSurv::predictReserve()].
 }

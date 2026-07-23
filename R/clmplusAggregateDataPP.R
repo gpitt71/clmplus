@@ -127,7 +127,7 @@ clmplus.default <- function(AggregateDataPP,
                             cohortAgeFun = NULL, 
                             effect_log_scale=TRUE,
                             constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                            ...){message('The object provided must be of class AggregateDataPP')}
+                            ...){stop("`AggregateDataPP` must inherit from class \"AggregateDataPP\".", call. = FALSE)}
 
 #' Fit Chain Ladder Plus to reverse time triangles.
 #'
@@ -207,60 +207,11 @@ clmplus.AggregateDataPP <- function(AggregateDataPP,
                             ...){
   
   
-  stopifnot(is.null(hazard.model) | typeof(hazard.model)=="character")
-  # 
-  # if(is.null(hazard.model)){
-  #   
-  # 
-  #   stmomo.model = StMoMo::StMoMo(link = link, 
-  #                         staticAgeFun = staticAgeFun, 
-  #                         periodAgeFun = periodAgeFun,
-  #                         cohortAgeFun = cohortAgeFun, 
-  #                         constFun = constFun)
-  #   
-  #   model <- StMoMo::fit(stmomo.model, 
-  #                        Dxt = AggregateDataPP$occurrance, 
-  #                        Ext = AggregateDataPP$exposure,
-  #                        wxt = AggregateDataPP$fit.w,
-  #                        iterMax=as.integer(1e+05))
-  #   
-  #   #forecasting horizon
-  #   J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
-  #   #compute the development factors
-  #   alphaij <- forecast::forecast(model, h = J)
-  #   # fij=(2+alphaij$rates)/(2-alphaij$rates)
-  #   fij=(1+(1-AggregateDataPP$eta)*alphaij$rates)/(1-(AggregateDataPP$eta*alphaij$rates))
-  #   # pick the last diagonal
-  #   d=AggregateDataPP$diagonal[1:(J-1)]
-  #   # extrapolate the results
-  #   lt=array(0.,c(J,J))
-  #   lt[,1]=c(0.,d)*fij[,1]
-  #   for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  #   
-  #   ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
-  #   ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-  #   reserve=rev(ultimate_cost-ot_[,J])
-  #   ultimate_cost=rev(ultimate_cost)
-  #   converged=TRUE
-  #   citer=NULL
-  #   
-  # 
-  #  out <- list(model.fit=model,
-  #             hazard.model='user.defined',
-  #             ultimate.cost=ultimate_cost,
-  #             reserve=reserve,
-  #             model.fcst = alphaij,
-  #             converged=converged,
-  #             citer=citer)
-  # 
-  # class(out) <- c('clmplusmodel')
-  # 
-  # out}
-  # 
-  
-  if(hazard.model %in% names(pkg.env$models)){
-    
-  model <- StMoMo::fit(pkg.env$models[[hazard.model]], 
+  if (length(hazard.model) != 1L || !is.character(hazard.model) ||
+      !hazard.model %in% names(supported_models)) {
+    stop("`hazard.model` must be one of: ", paste(names(supported_models), collapse = ", "), ".", call. = FALSE)
+  }
+  model <- StMoMo::fit(supported_models[[hazard.model]],
                        Dxt = AggregateDataPP$occurrance, 
                        Ext = AggregateDataPP$exposure,
                        wxt=AggregateDataPP$fit.w,
@@ -272,22 +223,18 @@ clmplus.AggregateDataPP <- function(AggregateDataPP,
   J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
   
   # Find fitted development factors
-  fij.fit <- pkg.env$find.development.factors(J,
-                                       age.eff= model$ax,
-                                       cohort.eff= model$gc,
-                                       period.eff=model$kt,
-                                       eta=AggregateDataPP$eta)
+  fij.fit <- fitted_development_factors(
+    J, age = model$ax, cohort = model$gc, period = model$kt,
+    eta = AggregateDataPP$eta
+  )
   
-  res.m = stats::residuals(model)
-  res.tr=pkg.env$c2t(res.m$residuals)
+  res.m <- stats::residuals(model)
+  res.tr <- calendar_to_triangle(res.m$residuals)
   
-  fitted_effects <- pkg.env$find.fitted.effects(J,
-                                                age.eff= model$ax,
-                                                cohort.eff= model$gc,
-                                                period.eff=model$kt,
-                                                effect_log_scale=effect_log_scale)
-  
-  }
+  fitted_effects <- extract_fitted_effects(
+    age = model$ax, cohort = model$gc, period = model$kt,
+    log_scale = effect_log_scale
+  )
   
   
   

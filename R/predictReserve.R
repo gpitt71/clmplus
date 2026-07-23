@@ -1,110 +1,57 @@
-#' Predict reserve cells from a clmplus model
+#' Predict reserves
 #'
-#' Converts a fitted clmplus model, or its prediction object, into the
-#' ReSurv reserving interface: AP, DP, CP, IBNR.
+#' Re-export of [ReSurv::predictReserve()].
+#' @param object A fitted model or prediction object.
+#' @param ... Additional arguments passed to a method.
+#' @export
+predictReserve <- ReSurv::predictReserve
+
+#' Convert clmplus predictions to the ReSurv reserving interface
 #'
-#' @param object A clmplusmodel or clmpluspredictions object.
-#' @param granularity Ignored. Included for compatibility with ReSurv.
-#' @param lower_triangle_only Logical. If TRUE, return only predicted lower-triangle cells.
-#' @param ... Passed to predict.clmplusmodel().
-#'
-#' @return A data.frame with AP, DP, CP, IBNR.
-#'
+#' @param object A `clmplusmodel` or `clmpluspredictions` object.
+#' @param granularity Ignored; retained for ReSurv compatibility.
+#' @param lower_triangle_only Return only forecast lower-triangle cells.
+#' @param ... Arguments passed to [predict.clmplusmodel()].
+#' @return A data frame containing `AP`, `DP`, `CP`, and `IBNR`.
 #' @importFrom ReSurv predictReserve
 #' @export
 #' @method predictReserve clmplusmodel
-predictReserve.clmplusmodel <- function(object,
-                                        granularity = NULL,
-                                        lower_triangle_only = TRUE,
-                                        ...) {
-  
+predictReserve.clmplusmodel <- function(object, granularity = NULL,
+                                        lower_triangle_only = TRUE, ...) {
   if (!inherits(object, "clmplusmodel")) {
     stop("`object` must be a `clmplusmodel` object.", call. = FALSE)
   }
-  
-  pred <- predict(object, ...)
-  
   predictReserve.clmpluspredictions(
-    object = pred,
-    granularity = granularity,
+    stats::predict(object, ...), granularity = granularity,
     lower_triangle_only = lower_triangle_only
   )
 }
 
-
 #' @rdname predictReserve.clmplusmodel
 #' @export
 #' @method predictReserve clmpluspredictions
-predictReserve.clmpluspredictions <- function(object,
-                                              granularity = NULL,
-                                              lower_triangle_only = TRUE,
-                                              ...) {
-  
+predictReserve.clmpluspredictions <- function(object, granularity = NULL,
+                                              lower_triangle_only = TRUE, ...) {
   if (!inherits(object, "clmpluspredictions")) {
     stop("`object` must be a `clmpluspredictions` object.", call. = FALSE)
   }
-  
-  if (is.null(object$full_triangle)) {
-    stop("`object$full_triangle` is missing.", call. = FALSE)
+  full <- as.matrix(object$full_triangle)
+  lower <- as.matrix(object$lower_triangle)
+  if (!identical(dim(full), dim(lower)) || nrow(full) != ncol(full)) {
+    stop("Prediction triangles must be square matrices of equal dimensions.", call. = FALSE)
   }
-  
-  if (is.null(object$lower_triangle)) {
-    stop("`object$lower_triangle` is missing.", call. = FALSE)
-  }
-  
-  full_triangle <- as.matrix(object$full_triangle)
-  lower_triangle <- as.matrix(object$lower_triangle)
-  
-  if (!all(dim(full_triangle) == dim(lower_triangle))) {
-    stop(
-      "`full_triangle` and `lower_triangle` must have the same dimensions.",
-      call. = FALSE
-    )
-  }
-  
-  J <- nrow(full_triangle)
-  
-  if (ncol(full_triangle) != J) {
-    stop("`full_triangle` must be square.", call. = FALSE)
-  }
-  
-  incremental_full <- full_triangle
-  
-  incremental_full[, 1L] <- full_triangle[, 1L]
-  
-  if (J >= 2L) {
-    for (jj in 2:J) {
-      incremental_full[, jj] <- full_triangle[, jj] - full_triangle[, jj - 1L]
-    }
-  }
-  
-  lower_mask <- !is.na(lower_triangle)
-  
-  if (!isTRUE(lower_triangle_only)) {
-    lower_mask <- matrix(TRUE, nrow = J, ncol = J)
-  }
-  
-  AP <- rep(seq_len(J), times = J)
-  DP <- rep(seq_len(J), each = J)
-  
+  incremental <- full
+  incremental[, -1L] <- full[, -1L, drop = FALSE] - full[, -ncol(full), drop = FALSE]
+  index <- which(if (isTRUE(lower_triangle_only)) !is.na(lower) else !is.na(incremental),
+                 arr.ind = TRUE)
   out <- data.frame(
-    AP = AP,
-    DP = DP,
-    CP = AP + DP - 1L,
-    IBNR = as.numeric(incremental_full[cbind(AP, DP)])
+    AP = as.integer(index[, 1L]),
+    DP = as.integer(index[, 2L]),
+    CP = as.integer(rowSums(index) - 1L),
+    IBNR = as.numeric(incremental[index])
   )
-  
-  out <- out[as.vector(lower_mask), , drop = FALSE]
-  
-  out$AP <- as.integer(out$AP)
-  out$DP <- as.integer(out$DP)
-  out$CP <- as.integer(out$CP)
-  out$IBNR <- as.numeric(out$IBNR)
-  
   out <- out[is.finite(out$IBNR), , drop = FALSE]
   out <- out[order(out$AP, out$DP), , drop = FALSE]
-  
   rownames(out) <- NULL
-  
   out
 }

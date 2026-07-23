@@ -23,8 +23,19 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck, any::testthat, any::devtools, any::viridis, github::cran/apc
           needs: check
+
+      - name: Run testthat suite
+        run: testthat::test_local(stop_on_failure = TRUE)
+        shell: Rscript {0}
+
+      - name: Render vignettes
+        run: devtools::build_vignettes()
+        shell: Rscript {0}
+
+      - name: Build source package
+        run: R CMD build --no-manual .
 
       - uses: r-lib/actions/check-r-package@v2
         with:

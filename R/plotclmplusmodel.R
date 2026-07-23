@@ -24,57 +24,13 @@ plot.clmplusmodel <- function(x,
                               heat.lim=c(-2.5,2.5),
                               ...){
   
-  if((x$apc_input$hazard.model %in% names(pkg.env$models))|(x$apc_input$hazard.model=="user.defined")){
-    
-    res.m = stats::residuals(x$model.fit)
-    res.tr=pkg.env$c2t(res.m$residuals)
+  if (x$apc_input$hazard.model %in% names(supported_models)) {
+    res.tr <- x$hazard_scaled_deviance_residuals
     colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
     longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
     
   }
   
-  # if(x$apc_input$hazard.model == 'lc'){
-  #   
-  #   data.O= x$model.fit$data.T$occurrance
-  #   data.E= x$model.fit$data.T$exposure
-  #   ind <- is.na(data.E)
-  #   W = matrix(1,nrow=dim(data.O)[1],ncol=dim(data.E)[2])
-  #   W[ind]=0
-  #   
-  #   ax.mx = matrix(rep(x$model.fit$ax,dim(data.O)[2]),
-  #                  byrow = F,
-  #                  ncol=dim(data.O)[2])
-  #   
-  #   bx.mx = matrix(rep(x$model.fit$bx,
-  #                      dim(data.O)[2]),
-  #                  byrow = F,
-  #                  ncol=dim(data.O)[2])
-  #   
-  #   kt.mx = matrix(rep(x$model.fit$kt,
-  #                      dim(data.O)[1]),
-  #                  byrow = T,
-  #                  nrow=dim(data.O)[1])
-  #   
-  #   
-  #   mu.mx = exp(ax.mx+bx.mx*kt.mx)
-  #   
-  #   data.O.h = data.E*mu.mx
-  #   
-  #   res <- array(NA, dim(W))
-  #   
-  #   res[!ind] <- 2 * W[!ind] * (data.O[!ind] * log(data.O[!ind] / data.O.h[!ind]) - (data.O[!ind] - data.O.h[!ind]))
-  #   signRes <- sign(data.O - data.O.h)
-  #   
-  #   phi <- sum(res[!ind]) / ((dim(data.O)[1]*(dim(data.O)[1]+1))/2 - 3*dim(data.O)[1])
-  #   res.m <- signRes * sqrt(abs(res) / phi) 
-  #   
-  #   res.tr=pkg.env$c2t(res.m)
-  #   colnames(res.tr) <- rownames(res.tr) <- c(0:(dim(res.tr)[2]-1))
-  #   longdf.no.0 = ChainLadder::as.LongTriangle(res.tr)
-  # 
-  # }
-  # 
-  # 
   p_hm <- ggplot2::ggplot(data=longdf.no.0, ggplot2::aes(x=as.integer(dev)-1, y=as.integer(origin)-1)) + 
     ggplot2::geom_tile(ggplot2::aes(fill = value))+ggplot2::scale_y_reverse()+
     ggplot2::scale_fill_gradient2(name="model residuals", 

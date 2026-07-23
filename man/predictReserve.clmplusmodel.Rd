@@ -3,32 +3,24 @@
 \name{predictReserve.clmplusmodel}
 \alias{predictReserve.clmplusmodel}
 \alias{predictReserve.clmpluspredictions}
-\title{Predict reserve cells from a clmplus model}
+\title{Convert clmplus predictions to the ReSurv reserving interface}
 \usage{
 \method{predictReserve}{clmplusmodel}(object, granularity = NULL, lower_triangle_only = TRUE, ...)
 
 \method{predictReserve}{clmpluspredictions}(object, granularity = NULL, lower_triangle_only = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{clmplusmodel} or \code{clmpluspredictions} object.}
+\item{object}{A `clmplusmodel` or `clmpluspredictions` object.}
 
-\item{granularity}{Ignored. Included for compatibility with ReSurv's
-\code{predictReserve()} interface.}
+\item{granularity}{Ignored; retained for ReSurv compatibility.}
 
-\item{lower_triangle_only}{Logical. If \code{TRUE}, return only cells in the
-predicted lower triangle.}
+\item{lower_triangle_only}{Return only forecast lower-triangle cells.}
 
-\item{...}{Arguments passed to \code{predict.clmplusmodel()} when
-\code{object} is a fitted \code{clmplusmodel}.}
+\item{...}{Arguments passed to [predict.clmplusmodel()].}
 }
 \value{
-A data frame with columns \code{AP}, \code{DP}, \code{CP}, \code{IBNR}.
+A data frame containing `AP`, `DP`, `CP`, and `IBNR`.
 }
 \description{
-Converts a fitted \code{clmplusmodel} or a \code{clmpluspredictions}
-object into the reserving interface used by ReSurv:
-\code{AP}, \code{DP}, \code{CP}, \code{IBNR}.
-}
-\details{
-The returned \code{IBNR} values are incremental lower-triangle predictions.
+Convert clmplus predictions to the ReSurv reserving interface
 }

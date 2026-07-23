@@ -33,16 +33,13 @@
 #' @export
 AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, eta=1/2)
 {
-  
-  rtt.input.env$properties.cpt(cumulative.payments.triangle)
-  
-  incrementals = ChainLadder::cum2incr(cumulative.payments.triangle)
-  J=dim(cumulative.payments.triangle)[2]
+  incrementals <- validate_triangle(cumulative.payments.triangle, entries.weights, eta)
+  J <- ncol(cumulative.payments.triangle)
   
   # find out occurrance and exposure
-  occurrance=pkg.env$t2c(incrementals)
-  drop=1-eta
-  exposure=pkg.env$t2c(cumulative.payments.triangle-drop*incrementals)
+  occurrance <- triangle_to_calendar(incrementals)
+  calendar_cumulative <- triangle_to_calendar(cumulative.payments.triangle)
+  exposure <- calendar_cumulative - (1 - eta) * occurrance
   
   
   # find out the weights
@@ -59,7 +56,7 @@ AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, 
   }
   
   fit.w[,1]=0
-  fit.w=pkg.env$t2c(fit.w)
+  fit.w=triangle_to_calendar(fit.w)
   fit.w[is.na(fit.w)]=0
   
   
@@ -70,7 +67,7 @@ AggregateDataPP <- function(cumulative.payments.triangle, entries.weights=NULL, 
     fit.w=fit.w,
     incremental.payments.triangle = incrementals,
     J=J,
-    diagonal=pkg.env$t2c(cumulative.payments.triangle)[,J],
+    diagonal=calendar_cumulative[,J],
     eta=eta
   )
   
