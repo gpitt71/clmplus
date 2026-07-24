@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   casestudy1: casestudy1.html
   modelscomparison: modelscomparison.html
-last_built: 2026-07-24T09:15Z
+last_built: 2026-07-24T09:18Z
 urls:
   reference: https://gpitt71.github.io/clmplus/reference
   article: https://gpitt71.github.io/clmplus/articles
