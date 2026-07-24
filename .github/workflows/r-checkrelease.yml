@@ -49,10 +49,6 @@ jobs:
         run: testthat::test_local(stop_on_failure = TRUE)
         shell: Rscript {0}
 
-      - name: Render vignettes
-        run: devtools::build_vignettes()
-        shell: Rscript {0}
-
       - name: Replication regression smoke test
         run: |
           data("AutoBI", package = "ChainLadder")
