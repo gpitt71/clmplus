@@ -3,7 +3,7 @@ Type: Package
 Depends:
     R (>= 3.5.0)
 Title: Tool-Box of Chain Ladder Plus Models
-Version: 1.0.2
+Version: 1.1.0
 Authors@R:
     c(person(given = "Gabriele",
              family = "Pittarello",
