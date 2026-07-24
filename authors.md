@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/gpitt71/clmplus/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/gpitt71/clmplus/blob/v1.1.0/inst/CITATION)
 
 Pittarello G, Hiabu M, Villegas A (2025). “Replicating and Extending
 Chain-Ladder via an Age–Period–Cohort Structure on the Claim Development
