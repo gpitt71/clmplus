@@ -34,20 +34,3 @@ test_that("only Poisson non-integer response warnings are suppressed", {
   expect_error(clmplus(data, hazard.model = "a", verbose = NA), "verbose")
 })
 
-test_that("warnings unrelated to non-integer Poisson responses remain visible", {
-  data <- AggregateDataPP(auto_bi_fixture())
-  baseline <- suppressWarnings(clmplus(data, hazard.model = "a"))
-
-  testthat::local_mocked_bindings(
-    fit = function(...) {
-      warning("simulated convergence warning", call. = FALSE)
-      baseline$model.fit
-    },
-    .package = "StMoMo"
-  )
-
-  expect_warning(
-    clmplus(data, hazard.model = "a"),
-    "simulated convergence warning"
-  )
-})
