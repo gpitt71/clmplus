@@ -184,6 +184,12 @@ jobs:
 
       - uses: r-lib/actions/setup-tinytex@v2
 
+      - name: Install HTML Tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes tidy
+          tidy --version
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
