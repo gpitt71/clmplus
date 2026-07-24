@@ -7,12 +7,13 @@
 \method{plot}{AggregateDataPP}(x, ...)
 }
 \arguments{
-\item{x}{AggregateDataPP to be plotted.}
+\item{x}{An `AggregateDataPP` object.}
 
-\item{...}{Arguments to be passed to plot.}
+\item{...}{Reserved; currently ignored.}
 }
 \value{
-No return value, plots the run-off triangle cumulative payments and incremental payments.
+A `gtable` containing two ggplot panels (incremental and cumulative
+  paid amounts), returned visibly after being drawn.
 }
 \description{
 This function allows to define the behavior of the triangle payments.

@@ -2,9 +2,10 @@
 #'
 #' This function allows to plot the hazard model residuals on the triangle payments.
 #' 
-#' @param x \code{clmplusmodel} object, model fit to plot.
-#' @param heat.lim limits in the residuals plot.
-#' @param ... Extra arguments to be passed to the plot function.
+#' @param x A fitted `clmplusmodel` object.
+#' @param heat.lim A length-two numeric vector giving the lower and upper fill
+#'   scale limits for scaled deviance residuals.
+#' @param ... Reserved; currently ignored.
 #' 
 #' @examples
 #' data(sifa.mtpl)
@@ -12,7 +13,8 @@
 #' clm.fit<-clmplus(sifa.mtpl.rtt, 'a')
 #' plot(clm.fit)
 #' 
-#' @return No return value, plots the hazard model residuals in triangular form.
+#' @return A `ggplot` object showing scaled deviance residuals in
+#'   accident-year by development-year triangle form.
 #' 
 #' @references 
 #' 
@@ -46,7 +48,7 @@ plot.clmplusmodel <- function(x,
     ggplot2::ggtitle(x$modelfamily)+
     ggplot2::theme(axis.title.x = ggplot2::element_text(size=8), axis.text.x  = ggplot2::element_text(size=7))+
     ggplot2::theme(axis.title.y = ggplot2::element_text(size=8), axis.text.y  = ggplot2::element_text(size=7))+
-    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "grey", colour = "grey", size = 2, linetype = "solid"),
+    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "grey", colour = "grey", linewidth = 2, linetype = "solid"),
           panel.grid = ggplot2::element_line(colour="grey")) + 
     NULL
   

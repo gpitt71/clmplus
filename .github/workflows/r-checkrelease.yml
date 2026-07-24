@@ -23,8 +23,27 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::testthat, any::devtools, any::viridis, github::cran/apc
+          extra-packages: any::rcmdcheck, any::testthat, any::devtools
           needs: check
+
+      - name: Verify no active apc package dependency remains
+        shell: bash
+        run: |
+          if grep -RInE \
+            --exclude-dir=.git --exclude-dir=docs \
+            --exclude=test-no-apc-dependency.R \
+            --exclude=r-checkrelease.yml \
+            'library[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|require[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|requireNamespace[[:space:]]*\([[:space:]]*["'\'']apc["'\'']|apc::|apc\.(data|fit|forecast)|github::cran/apc' \
+            DESCRIPTION NAMESPACE R tests vignettes README.md .github; then
+            exit 1
+          fi
+
+      - name: Regenerate and verify documentation
+        run: |
+          devtools::document()
+          changes <- system2("git", c("status", "--short", "--", "NAMESPACE", "man"), stdout = TRUE)
+          if (length(changes)) stop("Generated documentation is stale:\n", paste(changes, collapse = "\n"))
+        shell: Rscript {0}
 
       - name: Run testthat suite
         run: testthat::test_local(stop_on_failure = TRUE)
@@ -32,6 +51,16 @@ jobs:
 
       - name: Render vignettes
         run: devtools::build_vignettes()
+        shell: Rscript {0}
+
+      - name: Replication regression smoke test
+        run: |
+          data("AutoBI", package = "ChainLadder")
+          triangle <- ChainLadder::incr2cum(AutoBI$AutoBIPaid)
+          fit <- clmplus::clmplus(clmplus::AggregateDataPP(triangle), "a")
+          prediction <- predict(fit)
+          reference <- ChainLadder::MackChainLadder(triangle)$FullTriangle
+          stopifnot(isTRUE(all.equal(unname(prediction$full_triangle), unname(reference), tolerance = 1e-10)))
         shell: Rscript {0}
 
       - name: Build source package

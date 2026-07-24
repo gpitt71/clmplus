@@ -11,14 +11,6 @@ vignette: >
 ---
 
 
-```{r check-apc, echo=FALSE}
-has_apc <- requireNamespace("apc", quietly = TRUE)
-if (!has_apc) {
-  knitr::opts_chunk$set(eval = FALSE)
-  knitr::knit_exit()
-}
-```
-
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -205,36 +197,24 @@ cat('\n Total reserve:',
 
 ```
 
-## Claims reserving with GLMs compared to hazard models
+## Reproducible chain-ladder comparison
 
-We fit the stochastic model replicating the chain-ladder with an age-cohort GLM for the claim amounts described in @england99 using the `apc`package @apcpackage. 
-
-```{r apc clm}
-library(apc)
-
-ds.apc = apc.data.list(cum2incr(dataset),
-                       data.format = "CL")
-
-ac.model.apc = apc.fit.model(ds.apc,
-                         model.family = "od.poisson.response",
-                         model.design = "AC")
-
-```
-
-Inspect the model coefficients derived from the output:
+The original replication workflow used the `apc` package, which has been
+removed from CRAN. The revised workflow no longer depends on `apc` and uses the
+current `clmplus` implementation instead. This keeps the analysis reproducible
+with currently available software and is intended to preserve the original
+numerical results.
 
 ```{r show comparison}
-
-ac.model.apc$coefficients.canonical[,'Estimate']
-
-ac.fcst.apc = apc.forecast.ac(ac.model.apc)
-
-data.frame(reserve.mack=ultimate.chl-diagonal,
-           reserve.apc=c(0,ac.fcst.apc$response.forecast.coh[,'forecast']),
-           reserve.clmplus=a.model$reserve
-           
-           )
-
+data.frame(
+  reserve.mack = ultimate.chl - diagonal,
+  reserve.clmplus = a.model$reserve
+)
+stopifnot(isTRUE(all.equal(
+  unname(mck.chl$FullTriangle),
+  unname(a.model$full_triangle),
+  tolerance = 1e-10
+)))
 ```
 
 Our method is able to replicate the chain-ladder results without adding the cohort component.

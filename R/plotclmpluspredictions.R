@@ -2,9 +2,11 @@
 #'
 #' This function allows to define the behavior of the triangle payments.
 #' 
-#' @param x \code{clmpluspredictions}, Model effects (fitted and extrapolated) to be plotted.
-#' @param cy.type \code{character}, whether to show fitted period effect with or without extrapolatio Default is "fe", standing for fitted and extrapolated. Alternative is to specify "f" for fitted effect.
-#' @param ... Arguments to be passed to plot.
+#' @param x A `clmpluspredictions` object returned by
+#'   [predict.clmplusmodel()].
+#' @param cy.type Either `"fe"` (the default) to include extrapolated calendar
+#'   effects or `"f"` to show only fitted calendar effects.
+#' @param ... Reserved; currently ignored.
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
@@ -12,7 +14,8 @@
 #' clm <- predict(clm.fit)
 #' plot(clm)
 #' 
-#' @return No return value, plots coefficients of the hazard models.
+#' @return A `gtable` containing one ggplot panel for each effect included in
+#'   the fitted model. The table is returned visibly after being drawn.
 #' 
 #' @references 
 #' Pittarello, G., Hiabu, M., & Villegas, A. M. (2023). Replicating and extending chain-ladder via an age-period-cohort structure on the claim development in a run-off triangle. arXiv preprint arXiv:2301.03858.
@@ -41,7 +44,7 @@ plot.clmpluspredictions <- function(x,
       #age effect
       p1 <- ggplot2::ggplot(a.df,
                             ggplot2::aes(x=x,y=y))+
-        ggplot2::geom_line()+
+        ggplot2::geom_line(na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Development period')+
         ggplot2::ylab(expression(a[j])) + 
@@ -50,7 +53,7 @@ plot.clmpluspredictions <- function(x,
       #age deviation from calendar
       p2 <- ggplot2::ggplot(a.df,
                             ggplot2::aes(x=x,y=y2))+
-        ggplot2::geom_line()+
+        ggplot2::geom_line(na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Development period')+
         ggplot2::ylab(expression(b[j])) + 
@@ -76,16 +79,16 @@ plot.clmpluspredictions <- function(x,
       p3 <- ggplot2::ggplot(data=ckj.df[1:length(kt),],
                             ggplot2::aes(x=x,
                                          y=y))+
-        ggplot2::geom_line()+
+        ggplot2::geom_line(na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Calendar period')+
         ggplot2::ylab(expression(c[k+j]))+
         ggplot2::ggtitle('Fitted effect')
       
       p3.f <- ggplot2::ggplot(data=ckj.df[-1,],ggplot2::aes(x=x,y=y))+
-        ggplot2::geom_line()+
-        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2)+
-        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
+        ggplot2::geom_line(na.rm = TRUE)+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2, na.rm = TRUE)+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1, na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Calendar period')+
         ggplot2::ylab(expression(c[k+j]))+
@@ -113,7 +116,7 @@ plot.clmpluspredictions <- function(x,
                          y=x$apc_output$model.fit$ax)
       p1 <- ggplot2::ggplot(a.df,
                             ggplot2::aes(x=x,y=y))+
-        ggplot2::geom_line()+
+        ggplot2::geom_line(na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Development period')+
         ggplot2::ylab(expression(a[j])) + 
@@ -152,8 +155,9 @@ plot.clmpluspredictions <- function(x,
       p2 <- ggplot2::ggplot(data=c.df[1:(dim(c.df)[1]-1),],
                             ggplot2::aes(x=x,
                                          y=y))+
-        ggplot2::geom_point(ggplot2::aes(x=c.df[dim(c.df)[1],'x'],y=c.df[dim(c.df)[1],'y']),colour="red")+
-        ggplot2::geom_line()+
+        ggplot2::annotate("point", x = c.df[nrow(c.df), "x"],
+                          y = c.df[nrow(c.df), "y"], colour = "red")+
+        ggplot2::geom_line(na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Accident period')+
         ggplot2::ylab(expression(g[k]))+
@@ -188,16 +192,16 @@ plot.clmpluspredictions <- function(x,
       p3 <- ggplot2::ggplot(data=ckj.df[1:length(kt),],
                             ggplot2::aes(x=x,
                                          y=y))+
-        ggplot2::geom_line()+
+        ggplot2::geom_line(na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Calendar period')+
         ggplot2::ylab(expression(c[k+j]))+
         ggplot2::ggtitle('Fitted effect')
       
       p3.f <- ggplot2::ggplot(data=ckj.df[-1,],ggplot2::aes(x=x,y=y))+
-        ggplot2::geom_line()+
-        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2)+
-        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1)+
+        ggplot2::geom_line(na.rm = TRUE)+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l80, ymax = kt.u80), alpha = 0.2, na.rm = TRUE)+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = kt.l95, ymax = kt.u95), alpha = 0.1, na.rm = TRUE)+
         ggplot2::theme_classic()+
         ggplot2::xlab('Calendar period')+
         ggplot2::ylab(expression(c[k+j]))+

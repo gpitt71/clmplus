@@ -1,6 +1,9 @@
 #' @title Sifa MTPL
 #' @description Dataset of cumulative paid claims for a medium italian company in the line of business: motor third party liability.
-#' @format Run-off triangle with 12 development periods.
+#' @format A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+#'   accident years and columns index development years; cells below the
+#'   observed run-off triangle are `NA`. Amounts are in the source's recorded
+#'   monetary units. No additional preprocessing has been applied.
 #' @references 
 #' Savelli, Nino, and Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 #' 
@@ -8,7 +11,10 @@
 
 #' @title Amases MTPL
 #' @description Dataset of cumulative paid claims for a small italian company in the line of business: motor third party liability.
-#' @format Run-off triangle with 12 development periods.
+#' @format A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+#'   accident years and columns index development years; cells below the
+#'   observed run-off triangle are `NA`. Amounts are in the source's recorded
+#'   monetary units. No additional preprocessing has been applied.
 #' @references 
 #' Savelli, Nino, and Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 #' 
@@ -16,7 +22,10 @@
 
 #' @title Sifa GTPL
 #' @description Dataset of cumulative paid claims for a medium italian company in the line of business: general third party liability.
-#' @format Run-off triangle with 12 development periods.
+#' @format A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+#'   accident years and columns index development years; cells below the
+#'   observed run-off triangle are `NA`. Amounts are in the source's recorded
+#'   monetary units. No additional preprocessing has been applied.
 #' @references 
 #' Savelli, Nino, and  Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 #' 
@@ -24,7 +33,10 @@
 
 #' @title Amases GTPL
 #' @description Dataset of cumulative paid claims for a small italian company in the line of business: general third party liability.
-#' @format Run-off triangle with 12 development periods.
+#' @format A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+#'   accident years and columns index development years; cells below the
+#'   observed run-off triangle are `NA`. Amounts are in the source's recorded
+#'   monetary units. No additional preprocessing has been applied.
 #' @references 
 #' Savelli, Nino, and  Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 #' 
@@ -33,7 +45,10 @@
 
 #' @title Sifa MOD
 #' @description Dataset of cumulative paid claims for a medium italian company in the line of business: motor or damage.
-#' @format Run-off triangle with 12 development periods.
+#' @format A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+#'   accident years and columns index development years; cells below the
+#'   observed run-off triangle are `NA`. Amounts are in the source's recorded
+#'   monetary units. No additional preprocessing has been applied.
 #' @references 
 #' Savelli, Nino, and Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 #' 
@@ -41,7 +56,10 @@
 
 #' @title Amases MOD
 #' @description Dataset of cumulative paid claims for a small italian company in the line of business: motor or damage.
-#' @format Run-off triangle with 12 development periods.
+#' @format A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+#'   accident years and columns index development years; cells below the
+#'   observed run-off triangle are `NA`. Amounts are in the source's recorded
+#'   monetary units. No additional preprocessing has been applied.
 #' @references 
 #' Savelli, Nino, and Clemente, Gian Paolo. "Lezioni di matematica attuariale delle assicurazioni danni." EDUCatt-Ente per il diritto allo studio universitario dell'Università Cattolica, 2014
 #' 

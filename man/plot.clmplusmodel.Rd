@@ -7,14 +7,16 @@
 \method{plot}{clmplusmodel}(x, heat.lim = c(-2.5, 2.5), ...)
 }
 \arguments{
-\item{x}{\code{clmplusmodel} object, model fit to plot.}
+\item{x}{A fitted `clmplusmodel` object.}
 
-\item{heat.lim}{limits in the residuals plot.}
+\item{heat.lim}{A length-two numeric vector giving the lower and upper fill
+scale limits for scaled deviance residuals.}
 
-\item{...}{Extra arguments to be passed to the plot function.}
+\item{...}{Reserved; currently ignored.}
 }
 \value{
-No return value, plots the hazard model residuals in triangular form.
+A `ggplot` object showing scaled deviance residuals in
+  accident-year by development-year triangle form.
 }
 \description{
 This function allows to plot the hazard model residuals on the triangle payments.
