@@ -1,48 +1,100 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+# CRAN-oriented package checks.
+# Based on the current r-lib/actions v2 standard workflow, with additional
+# package-specific audits and a strict full-manual release check.
+
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
 
-name: R-CMD-check
+name: CRAN-ready checks
+
+permissions: read-all
+
+concurrency:
+  group: cran-ready-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  R-CMD-check:
+  package-audit:
+    name: Package-specific audit
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-r@v2
         with:
+          r-version: release
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck, any::testthat, any::devtools
-          needs: check
+      - name: Verify apc is not declared as a dependency
+        run: |
+          description <- read.dcf("DESCRIPTION")
+          dependency_fields <- intersect(
+            c("Depends", "Imports", "Suggests", "Enhances", "LinkingTo"),
+            colnames(description)
+          )
+          entries <- unlist(
+            strsplit(
+              paste(description[1L, dependency_fields], collapse = ","),
+              ",",
+              fixed = TRUE
+            )
+          )
+          packages <- sub("[[:space:]]*\\(.*$", "", trimws(entries))
+          if ("apc" %in% packages) {
+            stop("The retired package 'apc' is still declared in DESCRIPTION.")
+          }
+        shell: Rscript {0}
 
-      - name: Verify no active apc package dependency remains
+      - name: Verify no active apc usage remains
         shell: bash
         run: |
           if grep -RInE \
-            --exclude-dir=.git --exclude-dir=docs \
+            --exclude-dir=.git \
+            --exclude-dir=docs \
             --exclude=test-no-apc-dependency.R \
             --exclude=r-checkrelease.yml \
-            'library[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|require[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|requireNamespace[[:space:]]*\([[:space:]]*["'\'']apc["'\'']|apc::|apc\.(data|fit|forecast)|github::cran/apc' \
+            --exclude=r-checkrelease-cran-ready.yml \
+            'library[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|require[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|requireNamespace[[:space:]]*\([[:space:]]*["'\'' ]*apc["'\'' ]*|import[[:space:]]*\([[:space:]]*apc[[:space:]]*\)|importFrom[[:space:]]*\([[:space:]]*apc[[:space:]]*,|apc::|apc\.(data|fit|forecast)|github::cran/apc' \
             DESCRIPTION NAMESPACE R tests vignettes README.md .github; then
+            echo "Active use of the retired 'apc' package was found."
             exit 1
           fi
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::devtools
+            any::rcmdcheck
+            any::testthat
+            any::urlchecker
+            local::.
+          needs: check
 
       - name: Regenerate and verify documentation
         run: |
           devtools::document()
-          changes <- system2("git", c("status", "--short", "--", "NAMESPACE", "man"), stdout = TRUE)
-          if (length(changes)) stop("Generated documentation is stale:\n", paste(changes, collapse = "\n"))
+          changes <- system2(
+            "git",
+            c("status", "--short", "--", "NAMESPACE", "man"),
+            stdout = TRUE
+          )
+          if (length(changes)) {
+            stop(
+              "Generated documentation is stale:\n",
+              paste(changes, collapse = "\n")
+            )
+          }
         shell: Rscript {0}
 
       - name: Run testthat suite
@@ -56,13 +108,92 @@ jobs:
           fit <- clmplus::clmplus(clmplus::AggregateDataPP(triangle), "a")
           prediction <- predict(fit)
           reference <- ChainLadder::MackChainLadder(triangle)$FullTriangle
-          stopifnot(isTRUE(all.equal(unname(prediction$full_triangle), unname(reference), tolerance = 1e-10)))
+
+          stopifnot(
+            isTRUE(
+              all.equal(
+                unname(prediction$full_triangle),
+                unname(reference),
+                tolerance = 1e-10
+              )
+            )
+          )
         shell: Rscript {0}
 
-      - name: Build source package
-        run: R CMD build --no-manual .
+      - name: Check package URLs
+        run: urlchecker::url_check(".", parallel = FALSE)
+        shell: Rscript {0}
+
+  platform-checks:
+    name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macos-latest,   r: release}
+          - {os: windows-latest, r: release}
+          - {os: ubuntu-latest,  r: devel, http-user-agent: release}
+          - {os: ubuntu-latest,  r: oldrel-1}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
 
       - uses: r-lib/actions/check-r-package@v2
         with:
+          args: 'c("--no-manual", "--as-cran")'
+          build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
+          error-on: '"warning"'
+          upload-results: true
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+
+  cran-release-check:
+    name: Ubuntu release, manual and vignettes
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-tinytex@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - name: Full CRAN-style check
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--as-cran")'
+          build_args: 'c("--compact-vignettes=gs+qpdf")'
+          error-on: '"note"'
+          upload-results: true
+          upload-snapshots: true
