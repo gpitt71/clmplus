@@ -13,16 +13,16 @@ plot(x, ...)
 
 - x:
 
-  AggregateDataPP to be plotted.
+  An \`AggregateDataPP\` object.
 
 - ...:
 
-  Arguments to be passed to plot.
+  Reserved; currently ignored.
 
 ## Value
 
-No return value, plots the run-off triangle cumulative payments and
-incremental payments.
+A \`gtable\` containing two ggplot panels (incremental and cumulative
+paid amounts), returned visibly after being drawn.
 
 ## References
 
@@ -37,9 +37,5 @@ arXiv:2301.03858 (2023).
 data(sifa.mtpl)
 sifa.mtpl.pp <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 plot(sifa.mtpl.pp)
-#> Warning: Removed 66 rows containing missing values or values outside the scale range
-#> (`geom_line()`).
-#> Warning: Removed 66 rows containing missing values or values outside the scale range
-#> (`geom_line()`).
 
 ```

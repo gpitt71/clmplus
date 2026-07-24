@@ -10,12 +10,8 @@
   : Amases MOD
 - [`amases.mtpl`](https://gpitt71.github.io/clmplus/reference/amases.mtpl.md)
   : Amases MTPL
-- [`clmplus(`*`<AggregateDataPP>`*`)`](https://gpitt71.github.io/clmplus/reference/clmplus.AggregateDataPP.md)
-  : Fit Chain Ladder Plus to reverse time triangles.
 - [`clmplus()`](https://gpitt71.github.io/clmplus/reference/clmplus.md)
-  : Fit Chain Ladder plus on Run-off Triangles.
-- [`clmplus(`*`<default>`*`)`](https://gpitt71.github.io/clmplus/reference/clmplus.default.md)
-  : Fit Chain Ladder Plus to reverse time triangles.
+  : Fit a Chain Ladder Plus hazard model
 - [`plot(`*`<AggregateDataPP>`*`)`](https://gpitt71.github.io/clmplus/reference/plot.AggregateDataPP.md)
   : Plot the payments behavior
 - [`plot(`*`<clmplusmodel>`*`)`](https://gpitt71.github.io/clmplus/reference/plot.clmplusmodel.md)

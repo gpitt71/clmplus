@@ -51,14 +51,14 @@ predict(
   `integer`, between 1 and the triangle width. Calendar periods ahead
   for the predictions. Default predictions are to run-off.
 
-- ...:
-
-  Extra arguments to be passed to the predict function.
-
-- constrained_development_factor:
+- constrained_development_factors:
 
   `logical`, if `TRUE` the predict function will set negative
   development factors to 1.
+
+- ...:
+
+  Extra arguments to be passed to the predict function.
 
 ## Value
 

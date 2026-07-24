@@ -1,6 +1,9 @@
-# Fit Chain Ladder plus on Run-off Triangles.
+# Fit a Chain Ladder Plus hazard model
 
-Method to Estimate Chain Ladder plus models.
+Fits one of the package's age, age-cohort, age-period, or
+age-period-cohort claim-development models to data prepared by
+\[AggregateDataPP()\]. Estimation is performed by
+\[StMoMo::fit.StMoMo()\].
 
 ## Usage
 
@@ -13,8 +16,45 @@ clmplus(
   periodAgeFun = "NP",
   cohortAgeFun = NULL,
   effect_log_scale = TRUE,
-  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x
-    = b0x, gc = gc),
+  verbose = FALSE,
+  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) {
+     list(ax = ax, bx = bx, kt =
+    kt, b0x = b0x, gc = gc)
+ },
+  ...
+)
+
+# Default S3 method
+clmplus(
+  AggregateDataPP,
+  hazard.model = NULL,
+  link = c("log", "logit"),
+  staticAgeFun = TRUE,
+  periodAgeFun = "NP",
+  cohortAgeFun = NULL,
+  effect_log_scale = TRUE,
+  verbose = FALSE,
+  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) {
+     list(ax = ax, bx = bx, kt =
+    kt, b0x = b0x, gc = gc)
+ },
+  ...
+)
+
+# S3 method for class 'AggregateDataPP'
+clmplus(
+  AggregateDataPP,
+  hazard.model = NULL,
+  link = c("log", "logit"),
+  staticAgeFun = TRUE,
+  periodAgeFun = "NP",
+  cohortAgeFun = NULL,
+  effect_log_scale = TRUE,
+  verbose = FALSE,
+  constFun = function(ax, bx, kt, b0x, gc, wxt, ages) {
+     list(ax = ax, bx = bx, kt =
+    kt, b0x = b0x, gc = gc)
+ },
   ...
 )
 ```
@@ -23,162 +63,111 @@ clmplus(
 
 - AggregateDataPP:
 
-  `AggregateDataPP` object, reverse time triangle to be fitted.
+  An object created by \[AggregateDataPP()\]. It contains a square
+  cumulative paid-claims triangle and the corresponding
+  development-calendar occurrence, exposure, and weight matrices.
 
 - hazard.model:
 
-  `character`, hazard model supported from our package. The model can be
-  chosen from:
+  A required character scalar selecting \`"a"\` (age only, equivalent to
+  chain ladder), \`"ac"\` (age-cohort), \`"ap"\` (age-period), or
+  \`"apc"\` (age-period-cohort).
 
-  - 'a': Age model, this is equivalent to the Mack chain-ladder.
+- link, staticAgeFun, periodAgeFun, cohortAgeFun, constFun:
 
-  - 'ac': Age and cohort effects.
-
-  - 'ap': Age and cohort effects.
-
-  - 'apc': Age cohort and period effects.
-
-- link:
-
-  `character`, defines the link function and random component associated
-  with the mortality model. `"log"` would assume that deaths follow a
-  Poisson distribution and use a log link while `"logit"` would assume
-  that deaths follow a Binomial distribution and a logit link. To be
-  disregarded unless the practitioner specifies his own hazard model in
-  StMoMo.
-
-- staticAgeFun:
-
-  `logical`, indicates if a static age function \\\alpha_x\\ is to be
-  included. To be disregarded unless the practitioner specifies his own
-  hazard model in StMoMo.
-
-- periodAgeFun:
-
-  `list`, a list of length \\N\\ with the definitions of the period age
-  modulating parameters \\\beta_x^{(i)}\\. Each entry can take values:
-  `"NP"` for non-parametric age terms, `"1"` for \\\beta_x^{(i)}=1\\ or
-  a predefined parametric function of age (see details). Set this to
-  `NULL` if there are no period terms in the model. To be disregarded
-  unless the practitioner specifies his own hazard model in StMoMo.
-
-- cohortAgeFun:
-
-  `character` or `function`, defines the cohort age modulating parameter
-  \\\beta_x^{(0)}\\. It can take values: `"NP"` for non-parametric age
-  terms, `"1"` for \\\beta_x^{(0)}=1\\, a predefined parametric function
-  of age (see details) or `NULL` if there is no cohort effect. To be
-  disregarded unless the practitioner specifies his own hazard model in
-  StMoMo.
+  Compatibility arguments retained from the original interface. The
+  package's four built-in model definitions determine these settings, so
+  these arguments are currently ignored.
 
 - effect_log_scale:
 
-  `logical`, whether effects should be on the logarithmic scale. By
-  default, `TRUE`.
+  A logical scalar. If \`TRUE\` (the default), fitted effects are
+  returned on the linear-predictor/log scale; if \`FALSE\`, they are
+  exponentiated.
 
-- constFun:
+- verbose:
 
-  `function`, it defines the identifiability constraints of the model.
-  It must be a function of the form
-  `constFun <- function(ax, bx, kt, b0x, gc, wxt, ages)` taking a set of
-  fitted model parameters and returning a list
-  `list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)` of the model
-  parameters with the identifiability constraints applied. If omitted no
-  identifiability constraints are applied to the model. To be
-  disregarded unless the practitioner specifies his own hazard model in
-  StMoMo.
+  A logical scalar passed to \[StMoMo::fit.StMoMo()\]. The default
+  \`FALSE\` hides StMoMo fitting progress. \`TRUE\` displays progress,
+  including zero-weighted ages, years, and cohorts and the start/finish
+  of the gnm fit.
 
 - ...:
 
-  parameters to be passed to clmplus.
+  Reserved for future extensions; no arguments are currently forwarded.
 
 ## Value
 
-No return value, called to pass method `clmplus.AggregateDataPP`. See
-`clmplus.AggregateDataPP` documentation.
+A \`clmplusmodel\` list with:
 
-## References
+- model.fit:
 
-Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating
-and extending chain ladder via an age-period-cohort structure on the
-claim development in a run-off triangle." arXiv preprint
-arXiv:2301.03858 (2023).
+  The underlying \`fitStMoMo\` object. Its fitted \`ax\`, \`kt\`, and
+  \`gc\` fields contain the selected age, period, and cohort effects;
+  inapplicable effects are \`NULL\`. Other fields are supplied by StMoMo
+  and should be treated as implementation details.
+
+- apc_input:
+
+  A list containing \`J\` (triangle dimension), \`eta\` (within-cell
+  exposure timing), \`hazard.model\`, \`diagonal\` (latest observed
+  cumulative payments by calendar representation), and the original
+  \`cumulative.payments.triangle\`.
+
+- hazard_scaled_deviance_residuals:
+
+  A \`J\` by \`J\` numeric matrix in accident-year by development-year
+  triangle orientation. Unobserved cells are \`NA\`.
+
+- fitted_development_factors:
+
+  A \`J\` by \`J\` numeric matrix of fitted multiplicative cumulative
+  development factors; unavailable cells are \`NA\`.
+
+- fitted_effects:
+
+  A list with \`fitted_development_effect\`, \`fitted_calendar_effect\`,
+  and \`fitted_accident_effect\`. Components not included in the
+  selected model are \`NULL\`.
+
+The default method always raises an informative error because
+\`AggregateDataPP\` does not inherit from \`"AggregateDataPP"\`.
+
+## Details
+
+Incremental payment amounts can be non-integer even though the StMoMo
+fit uses a Poisson quasi-likelihood. Warnings whose messages begin
+exactly with \`non-integer x =\` are therefore expected and are
+selectively muffled. All other warnings, including convergence and
+numerical warnings, remain visible.
+
+## See also
+
+\[AggregateDataPP()\], \[predict.clmplusmodel()\],
+\[predictReserve.clmplusmodel()\], \[plot.clmplusmodel()\]
 
 ## Examples
 
 ``` r
 data(sifa.mtpl)
-sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-hz.chl=clmplus(sifa.mtpl.rtt, 'a')
-#> Warning: StMoMo: 66 missing values which have been zero weighted
-#> StMoMo: The following ages have been zero weigthed: 1 
-#> StMoMo: The following years have been zero weigthed: 1 
-#> StMoMo: The following cohorts have been zero weigthed: -11 -10 -9 -8 -7 -6 -5 -4 -3 -2 -1 11 
-#> StMoMo: Start fitting with gnm
-#> Warning: non-integer x = 860.063891
-#> Warning: non-integer x = 458.156066
-#> Warning: non-integer x = 559.340054
-#> Warning: non-integer x = 281.869679
-#> Warning: non-integer x = 456.270650
-#> Warning: non-integer x = 727.142070
-#> Warning: non-integer x = 49353.589600
-#> Warning: non-integer x = 50605.820000
-#> Warning: non-integer x = 29251.193380
-#> Warning: non-integer x = 36106.295210
-#> Warning: non-integer x = 40125.390780
-#> Warning: non-integer x = 44498.942240
-#> Warning: non-integer x = 45490.189570
-#> Warning: non-integer x = 48040.321560
-#> Warning: non-integer x = 49991.357650
-#> Warning: non-integer x = 49694.294990
-#> Warning: non-integer x = 20880.666980
-#> Warning: non-integer x = 18304.246140
-#> Warning: non-integer x = 18603.713030
-#> Warning: non-integer x = 12463.983790
-#> Warning: non-integer x = 13441.333110
-#> Warning: non-integer x = 12951.176400
-#> Warning: non-integer x = 15370.423630
-#> Warning: non-integer x = 15339.426370
-#> Warning: non-integer x = 17842.901760
-#> Warning: non-integer x = 19570.203660
-#> Warning: non-integer x = 10047.067150
-#> Warning: non-integer x = 8201.559214
-#> Warning: non-integer x = 8833.487780
-#> Warning: non-integer x = 5144.085289
-#> Warning: non-integer x = 5868.234632
-#> Warning: non-integer x = 6033.755464
-#> Warning: non-integer x = 5593.853546
-#> Warning: non-integer x = 5478.076757
-#> Warning: non-integer x = 7035.199194
-#> Warning: non-integer x = 3933.606063
-#> Warning: non-integer x = 5749.890057
-#> Warning: non-integer x = 4714.168250
-#> Warning: non-integer x = 2726.947823
-#> Warning: non-integer x = 2881.972323
-#> Warning: non-integer x = 3009.655856
-#> Warning: non-integer x = 2615.516340
-#> Warning: non-integer x = 2540.639658
-#> Warning: non-integer x = 2906.368627
-#> Warning: non-integer x = 2725.682936
-#> Warning: non-integer x = 3312.691467
-#> Warning: non-integer x = 2359.362462
-#> Warning: non-integer x = 2421.987896
-#> Warning: non-integer x = 1264.396267
-#> Warning: non-integer x = 1984.311792
-#> Warning: non-integer x = 2136.804699
-#> Warning: non-integer x = 1294.338023
-#> Warning: non-integer x = 2266.599873
-#> Warning: non-integer x = 1333.856105
-#> Warning: non-integer x = 918.004039
-#> Warning: non-integer x = 1249.952517
-#> Warning: non-integer x = 1134.706143
-#> Warning: non-integer x = 1184.355428
-#> Warning: non-integer x = 1124.336355
-#> Warning: non-integer x = 1238.429974
-#> Warning: non-integer x = 1075.978340
-#> Warning: non-integer x = 733.741025
-#> Warning: non-integer x = 904.371165
-#> Warning: non-integer x = 872.633331
-#> Warning: non-integer x = 941.440475
-#> StMoMo: Finish fitting with gnm
+prepared <- AggregateDataPP(sifa.mtpl)
+age_fit <- clmplus(prepared, hazard.model = "a", verbose = FALSE)
+age_fit$fitted_effects
+#> $fitted_development_effect
+#>          0          1          2          3          4          5          6 
+#>         NA -0.3941653 -1.7576623 -2.7225557 -3.4273738 -3.8019315 -4.2345595 
+#>          7          8          9         10         11 
+#> -4.4846324 -4.7442044 -5.0214737 -5.5021373 -4.7661088 
+#> 
+#> $fitted_calendar_effect
+#> NULL
+#> 
+#> $fitted_accident_effect
+#> NULL
+#> 
+# \donttest{
+apc_fit <- clmplus(prepared, hazard.model = "apc", verbose = FALSE)
+plot(apc_fit)
+
+# }
 ```
