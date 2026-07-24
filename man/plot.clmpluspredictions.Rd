@@ -7,14 +7,17 @@
 \method{plot}{clmpluspredictions}(x, cy.type = "fe", ...)
 }
 \arguments{
-\item{x}{\code{clmpluspredictions}, Model effects (fitted and extrapolated) to be plotted.}
+\item{x}{A `clmpluspredictions` object returned by
+[predict.clmplusmodel()].}
 
-\item{cy.type}{\code{character}, whether to show fitted period effect with or without extrapolatio Default is "fe", standing for fitted and extrapolated. Alternative is to specify "f" for fitted effect.}
+\item{cy.type}{Either `"fe"` (the default) to include extrapolated calendar
+effects or `"f"` to show only fitted calendar effects.}
 
-\item{...}{Arguments to be passed to plot.}
+\item{...}{Reserved; currently ignored.}
 }
 \value{
-No return value, plots coefficients of the hazard models.
+A `gtable` containing one ggplot panel for each effect included in
+  the fitted model. The table is returned visibly after being drawn.
 }
 \description{
 This function allows to define the behavior of the triangle payments.

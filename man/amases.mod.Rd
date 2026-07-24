@@ -5,7 +5,10 @@
 \alias{amases.mod}
 \title{Amases MOD}
 \format{
-Run-off triangle with 12 development periods.
+A 12 by 12 numeric matrix of cumulative paid claims. Rows index
+  accident years and columns index development years; cells below the
+  observed run-off triangle are `NA`. Amounts are in the source's recorded
+  monetary units. No additional preprocessing has been applied.
 }
 \usage{
 amases.mod

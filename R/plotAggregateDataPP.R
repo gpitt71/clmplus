@@ -2,14 +2,15 @@
 #'
 #' This function allows to define the behavior of the triangle payments.
 #' 
-#' @param x AggregateDataPP to be plotted.
-#' @param ... Arguments to be passed to plot.
+#' @param x An `AggregateDataPP` object.
+#' @param ... Reserved; currently ignored.
 #' @examples
 #' data(sifa.mtpl)
 #' sifa.mtpl.pp <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
 #' plot(sifa.mtpl.pp)
 #' 
-#' @return No return value, plots the run-off triangle cumulative payments and incremental payments.
+#' @return A `gtable` containing two ggplot panels (incremental and cumulative
+#'   paid amounts), returned visibly after being drawn.
 #' 
 #' @references 
 #' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
@@ -34,7 +35,7 @@ plot.AggregateDataPP <- function(x, ...){
                                      y=incrementals,
                                      by=ay,
                                      colour=ay))+
-    ggplot2::geom_line()+
+    ggplot2::geom_line(na.rm = TRUE)+
     ggplot2::ggtitle("Incremental payments")+
     ggplot2::theme_classic()
   
@@ -43,7 +44,7 @@ plot.AggregateDataPP <- function(x, ...){
                                      y=cumulatives,
                                      by=ay,
                                      colour=ay))+
-    ggplot2::geom_line()+
+    ggplot2::geom_line(na.rm = TRUE)+
     ggplot2::ggtitle("Cumulative payments")+
     ggplot2::theme_classic()
   

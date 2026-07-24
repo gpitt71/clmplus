@@ -1,1 +1,0 @@
-load("amases.gtpl.RDa")

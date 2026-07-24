@@ -8,7 +8,7 @@
 #' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
 #' @param ckj.order \code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
 #' @param forecasting_horizon \code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off. 
-#' @param constrained_development_factor \code{logical}, if \code{TRUE} the predict function will set negative development factors to 1.
+#' @param constrained_development_factors \code{logical}, if \code{TRUE} the predict function will set negative development factors to 1.
 #' @param ... Extra arguments to be passed to the predict function.
 #' 
 #' @return Returns the following output:
@@ -42,115 +42,59 @@ predict.clmplusmodel <- function(object,
                                  forecasting_horizon=NULL,
                                  constrained_development_factors=FALSE,
                                  ...){
-  
-  # forecasting horizon
-  J <- object$apc_input$J
-  # fitted model
+  if (!inherits(object, "clmplusmodel")) {
+    stop("`object` must be a `clmplusmodel` object.", call. = FALSE)
+  }
+  size <- object$apc_input$J
+  horizon <- validate_horizon(forecasting_horizon, size)
   model <- object$model.fit
-  # occurrences distribution
   eta <- object$apc_input$eta
-  # hazard model
-  hazard.model <- object$apc_input$hazard.model
-  # diagonal
-  d <- object$apc_input$diagonal[1:J-1]
-  # cumulative payments 
-  cumulative.payments.triangle <- object$apc_input$cumulative.payments.triangle
-  
-  if(hazard.model %in% names(pkg.env$models)){
-    
-  alphaij <- pkg.env$fcst(model, 
-                          hazard.model = hazard.model,
-                          gk.fc.model=gk.fc.model,
-                          ckj.fc.model=ckj.fc.model,
-                          gk.order=gk.order,
-                          ckj.order=ckj.order
-  )
-  
-  fij=(1+(1-eta)*alphaij$rates)/(1-(eta*alphaij$rates))
-  
-  if(constrained_development_factors){fij=apply(fij,MARGIN = 2,function(x) pmax(1,x))}
-  
-  # browser()
-  
-  # d=AggregateDataPP$diagonal[1:(J-1)]
-  if(is.null(forecasting_horizon)){
-    J.stop=J
-  }else{
-    J.stop=forecasting_horizon
-    }
-  
-  
-  lt=array(0.,c(J,J.stop))
-  
-  if(!is.null(forecasting_horizon)){
-    # plus one is added artificially to make indexing consistent
-    J.stop=J.stop+1
+  model_name <- object$apc_input$hazard.model
+  if (!model_name %in% names(supported_models)) {
+    stop("The fitted object's hazard model is not supported.", call. = FALSE)
   }
-  
-  lt[,1]=c(0.,d)*fij[,1]
-  
-  if(J.stop>2){
-    for(j in 2:J.stop){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  }
-  
-  # ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
 
-  ot_=pkg.env$t2c(cumulative.payments.triangle)
-  
-  if(is.null(forecasting_horizon)){
-    
-    
-    ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-    reserve=rev(ultimate_cost-ot_[,J])
-    ultimate_cost=rev(ultimate_cost)
-    #remove last column (not necessary)
-    lt <- lt[,1:(dim(lt)[2]-1)]
-    fij <- fij[,1:(dim(fij)[2]-1)]
-    
-  }else{
-      
-      ultimate_cost=rev(lt[,J.stop-1])
-      ultimate_cost<-c(ultimate_cost[ultimate_cost==0],ultimate_cost[ultimate_cost!=0])
-      ultimate_cost[1]=c(ot_[J,J])
-      
-      fij <- fij[1:dim(lt)[1],1:dim(lt)[2],drop=FALSE]
-      
-      if(J.stop>2){
-        
-        for(cohort in 2:(J.stop-1)){
-          
-          ultimate_cost[cohort] <- lt[J,cohort-1]
-          
-        }
-        
-      }
-      
-      reserve=ultimate_cost-rev(ot_[,J])
-      
+  alphaij <- forecast_hazard_rates(
+    model, model_name, gk.fc.model, ckj.fc.model, gk.order, ckj.order
+  )
+  factors <- (1 + (1 - eta) * alphaij$rates) / (1 - eta * alphaij$rates)
+  if (isTRUE(constrained_development_factors)) factors <- pmax(1, factors)
+
+  forecast <- matrix(0, size, horizon)
+  forecast[, 1L] <- c(0, object$apc_input$diagonal[seq_len(size - 1L)]) * factors[, 1L]
+  if (horizon >= 2L) {
+    for (calendar in 2L:horizon) {
+      forecast[, calendar] <- c(0, forecast[seq_len(size - 1L), calendar - 1L]) *
+        factors[, calendar]
     }
-  
-  
-  names(reserve) <- 0:(length(reserve)-1)
-  names(ultimate_cost) <- 0:(length(ultimate_cost)-1)
-  
-  out <- list(reserve=reserve,
-              ultimate_cost=ultimate_cost,
-              full_triangle= pkg.env$create_full_triangle(cumulative.payments.triangle=cumulative.payments.triangle,
-                                                          lt),
-              lower_triangle = pkg.env$create_lower_triangle(lt),
-              development_factors_predicted = pkg.env$create_lower_triangle(fij),
-              apc_output=list(model.fit=model,
-                              hazard.model=hazard.model,
-                              alphaij=alphaij,
-                              lower_triangle_apc=lt,
-                              development_factors_apc=fij))
-  
-  class(out) <- 'clmpluspredictions'
-  
-  return(out)
-  
-  
-  
   }
+  factors <- factors[, seq_len(horizon), drop = FALSE]
+  observed_calendar <- triangle_to_calendar(object$apc_input$cumulative.payments.triangle)
+
+  if (is.null(forecasting_horizon)) {
+    ultimate_cost <- rev(c(rev(forecast[size, ]), observed_calendar[size, size]))
+  } else {
+    ultimate_cost <- rev(forecast[, horizon])
+    ultimate_cost <- c(ultimate_cost[ultimate_cost == 0], ultimate_cost[ultimate_cost != 0])
+    ultimate_cost[1L] <- observed_calendar[size, size]
+    if (horizon >= 2L) ultimate_cost[2L:horizon] <- forecast[size, seq_len(horizon - 1L)]
+  }
+  reserve <- ultimate_cost - rev(observed_calendar[, size])
+  names(reserve) <- names(ultimate_cost) <- seq_along(reserve) - 1L
+
+  lower <- place_forecast_triangle(forecast)
+  out <- list(
+    reserve = reserve,
+    ultimate_cost = ultimate_cost,
+    full_triangle = place_forecast_triangle(forecast, object$apc_input$cumulative.payments.triangle),
+    lower_triangle = lower,
+    development_factors_predicted = place_forecast_triangle(factors),
+    apc_output = list(
+      model.fit = model, hazard.model = model_name, alphaij = alphaij,
+      lower_triangle_apc = forecast, development_factors_apc = factors
+    )
+  )
+  class(out) <- "clmpluspredictions"
+  out
 }
 

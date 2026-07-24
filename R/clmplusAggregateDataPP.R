@@ -1,309 +1,164 @@
-#' Fit Chain Ladder plus on Run-off Triangles.
+#' Fit a Chain Ladder Plus hazard model
 #'
-#' Method to Estimate Chain Ladder plus models.
-#' 
-#' @param AggregateDataPP \code{AggregateDataPP} object, reverse time triangle to be fitted.
-#' @param hazard.model \code{character}, hazard model supported from our package. The model can be chosen from:
-#' \itemize{
-#' \item{'a': Age model, this is equivalent to the Mack chain-ladder.}
-#' \item{'ac': Age and cohort effects.}
-#' \item{'ap': Age and cohort effects.}
-#' \item{'apc': Age cohort and period effects.}
+#' Fits one of the package's age, age-cohort, age-period, or
+#' age-period-cohort claim-development models to data prepared by
+#' [AggregateDataPP()]. Estimation is performed by [StMoMo::fit.StMoMo()].
+#'
+#' @param AggregateDataPP An object created by [AggregateDataPP()]. It contains
+#'   a square cumulative paid-claims triangle and the corresponding
+#'   development-calendar occurrence, exposure, and weight matrices.
+#' @param hazard.model A required character scalar selecting `"a"` (age only,
+#'   equivalent to chain ladder), `"ac"` (age-cohort), `"ap"` (age-period), or
+#'   `"apc"` (age-period-cohort).
+#' @param link,staticAgeFun,periodAgeFun,cohortAgeFun,constFun Compatibility
+#'   arguments retained from the original interface. The package's four
+#'   built-in model definitions determine these settings, so these arguments
+#'   are currently ignored.
+#' @param effect_log_scale A logical scalar. If `TRUE` (the default), fitted
+#'   effects are returned on the linear-predictor/log scale; if `FALSE`, they
+#'   are exponentiated.
+#' @param verbose A logical scalar passed to [StMoMo::fit.StMoMo()]. The default
+#'   `FALSE` hides StMoMo fitting progress. `TRUE` displays progress, including
+#'   zero-weighted ages, years, and cohorts and the start/finish of the gnm fit.
+#' @param ... Reserved for future extensions; no arguments are currently
+#'   forwarded.
+#'
+#' @return A `clmplusmodel` list with:
+#' \describe{
+#'   \item{model.fit}{The underlying `fitStMoMo` object. Its fitted `ax`, `kt`,
+#'   and `gc` fields contain the selected age, period, and cohort effects;
+#'   inapplicable effects are `NULL`. Other fields are supplied by StMoMo and
+#'   should be treated as implementation details.}
+#'   \item{apc_input}{A list containing `J` (triangle dimension), `eta`
+#'   (within-cell exposure timing), `hazard.model`, `diagonal` (latest observed
+#'   cumulative payments by calendar representation), and the original
+#'   `cumulative.payments.triangle`.}
+#'   \item{hazard_scaled_deviance_residuals}{A `J` by `J` numeric matrix in
+#'   accident-year by development-year triangle orientation. Unobserved cells
+#'   are `NA`.}
+#'   \item{fitted_development_factors}{A `J` by `J` numeric matrix of fitted
+#'   multiplicative cumulative development factors; unavailable cells are
+#'   `NA`.}
+#'   \item{fitted_effects}{A list with `fitted_development_effect`,
+#'   `fitted_calendar_effect`, and `fitted_accident_effect`. Components not
+#'   included in the selected model are `NULL`.}
 #' }
-#' 
-#' 
-#' @param link \code{character}, defines the link function and random component associated with 
-#'   the mortality model. \code{"log"} would assume that deaths follow a 
-#'   Poisson distribution and use a log link while \code{"logit"} would assume 
-#'   that deaths follow a Binomial distribution and a logit link.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param staticAgeFun \code{logical}, indicates if a static age function 
-#'   \eqn{\alpha_x} is to be included. To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param periodAgeFun \code{list}, a list of length \eqn{N} with the definitions of the 
-#'   period age modulating parameters \eqn{\beta_x^{(i)}}. Each entry can take 
-#'   values: \code{"NP"} for non-parametric age terms, \code{"1"} for 
-#'   \eqn{\beta_x^{(i)}=1} or a predefined parametric function of 
-#'   age (see details). Set this to \code{NULL} if there are no period terms 
-#'   in the model.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param cohortAgeFun \code{character} or \code{function}, defines the cohort age modulating parameter 
-#'   \eqn{\beta_x^{(0)}}. It can take values: \code{"NP"} for non-parametric 
-#'   age terms, \code{"1"} for \eqn{\beta_x^{(0)}=1}, a predefined parametric 
-#'   function of age (see details) or \code{NULL} if there is no cohort effect. 
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param effect_log_scale \code{logical}, whether effects should be on the logarithmic scale. By default, \code{TRUE}.
-#' @param constFun \code{function}, it defines the identifiability constraints of the 
-#'   model. It must be a function of the form 
-#'   \code{constFun <- function(ax, bx, kt, b0x, gc, wxt, ages)} taking a set
-#'   of fitted model parameters and returning a list 
-#'   \code{list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)}
-#'   of the model parameters with the identifiability constraints applied. If 
-#'   omitted no identifiability constraints are applied to the model.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param ... parameters to be passed to clmplus.
-#' 
-#' @return No return value, called to pass method \code{clmplus.AggregateDataPP}. See \code{clmplus.AggregateDataPP} documentation.
-#' 
+#'
+#' @details Incremental payment amounts can be non-integer even though the
+#'   StMoMo fit uses a Poisson quasi-likelihood. Warnings whose messages begin
+#'   exactly with `non-integer x =` are therefore expected and are selectively
+#'   muffled. All other warnings, including convergence and numerical warnings,
+#'   remain visible.
+#'
 #' @examples
 #' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-#' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
-#' 
-#' @references 
-#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
-#' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
-#' 
-#' @export
-clmplus <- function(AggregateDataPP,
-                    hazard.model=NULL,
-                    link = c("log", "logit"), 
-                    staticAgeFun = TRUE, 
-                    periodAgeFun = "NP",
-                    cohortAgeFun = NULL, 
-                    effect_log_scale=TRUE,
-                    constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                    ...){
-  
-  UseMethod("clmplus")}
-
-#' Fit Chain Ladder Plus to reverse time triangles.
-#' 
-#' Default method to fit Chain Ladder plus models.
-#' 
-#' @param AggregateDataPP \code{AggregateDataPP} object, reverse time triangle to be fitted.
-#' @param hazard.model \code{character}, hazard model supported from our package. The model can be chosen from:
-#' \itemize{
-#' \item{'a': Age model, this is equivalent to the Mack chain-ladder.}
-#' \item{'ac': Age and cohort effects.}
-#' \item{'ap': Age and cohort effects.}
-#' \item{'apc': Age cohort and period effects.}
+#' prepared <- AggregateDataPP(sifa.mtpl)
+#' age_fit <- clmplus(prepared, hazard.model = "a", verbose = FALSE)
+#' age_fit$fitted_effects
+#' \donttest{
+#' apc_fit <- clmplus(prepared, hazard.model = "apc", verbose = FALSE)
+#' plot(apc_fit)
 #' }
-#' 
-#' @param link \code{character}, defines the link function and random component associated with 
-#'   the mortality model. \code{"log"} would assume that deaths follow a 
-#'   Poisson distribution and use a log link while \code{"logit"} would assume 
-#'   that deaths follow a Binomial distribution and a logit link.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param staticAgeFun \code{logical}, indicates if a static age function 
-#'   \eqn{\alpha_x} is to be included. To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param periodAgeFun \code{list}, a list of length \eqn{N} with the definitions of the 
-#'   period age modulating parameters \eqn{\beta_x^{(i)}}. Each entry can take 
-#'   values: \code{"NP"} for non-parametric age terms, \code{"1"} for 
-#'   \eqn{\beta_x^{(i)}=1} or a predefined parametric function of 
-#'   age (see details). Set this to \code{NULL} if there are no period terms 
-#'   in the model.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param cohortAgeFun \code{character} or \code{function}, defines the cohort age modulating parameter 
-#'   \eqn{\beta_x^{(0)}}. It can take values: \code{"NP"} for non-parametric 
-#'   age terms, \code{"1"} for \eqn{\beta_x^{(0)}=1}, a predefined parametric 
-#'   function of age (see details) or \code{NULL} if there is no cohort effect. 
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param effect_log_scale \code{logical}, whether effects should be on the logarithmic scale. By default, \code{TRUE}.
-#' @param constFun \code{function}, it defines the identifiability constraints of the 
-#'   model. It must be a function of the form 
-#'   \code{constFun <- function(ax, bx, kt, b0x, gc, wxt, ages)} taking a set
-#'   of fitted model parameters and returning a list 
-#'   \code{list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)}
-#'   of the model parameters with the identifiability constraints applied. If 
-#'   omitted no identifiability constraints are applied to the model.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param ... parameters to be passed to clmplus.
-#' 
-#' @return No return value, called to pass method \code{clmplus.AggregateDataPP}. See \code{clmplus.AggregateDataPP} documentation.
-#' 
-#' @references 
-#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
-#' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
-#'  
-#' Hiabu, Munir. “On the relationship between classical chain ladder and granular reserving.” 
-#' Scandinavian Actuarial Journal 2017 (2017): 708 - 729.
-#' 
-#' @export
-clmplus.default <- function(AggregateDataPP,
-                            hazard.model=NULL,
-                            link = c("log", "logit"), 
-                            staticAgeFun = TRUE, 
-                            periodAgeFun = "NP",
-                            cohortAgeFun = NULL, 
-                            effect_log_scale=TRUE,
-                            constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                            ...){message('The object provided must be of class AggregateDataPP')}
-
-#' Fit Chain Ladder Plus to reverse time triangles.
 #'
-#' Method to fit Chain Ladder plus models to \code{AggregateDataPP} objects.
-#' 
-#' @param AggregateDataPP \code{AggregateDataPP} object, reverse time triangle to be fitted.
-#' @param hazard.model \code{character}, hazard model supported from our package. The model can be chosen from:
-#' \itemize{
-#' \item{'a': Age model, this is equivalent to the Mack chain-ladder.}
-#' \item{'ac': Age and cohort effects.}
-#' \item{'ap': Age and cohort effects.}
-#' \item{'apc': Age cohort and period effects.}
-#' }
-#' 
-#' @param link \code{character}, defines the link function and random component associated with 
-#'   the mortality model. \code{"log"} would assume that deaths follow a 
-#'   Poisson distribution and use a log link while \code{"logit"} would assume 
-#'   that deaths follow a Binomial distribution and a logit link.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param staticAgeFun \code{logical}, indicates if a static age function 
-#'   \eqn{\alpha_x} is to be included. To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param periodAgeFun \code{list}, a list of length \eqn{N} with the definitions of the 
-#'   period age modulating parameters \eqn{\beta_x^{(i)}}. Each entry can take 
-#'   values: \code{"NP"} for non-parametric age terms, \code{"1"} for 
-#'   \eqn{\beta_x^{(i)}=1} or a predefined parametric function of 
-#'   age (see details). Set this to \code{NULL} if there are no period terms 
-#'   in the model.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param cohortAgeFun \code{character} or \code{function}, defines the cohort age modulating parameter 
-#'   \eqn{\beta_x^{(0)}}. It can take values: \code{"NP"} for non-parametric 
-#'   age terms, \code{"1"} for \eqn{\beta_x^{(0)}=1}, a predefined parametric 
-#'   function of age (see details) or \code{NULL} if there is no cohort effect. 
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param effect_log_scale \code{logical}, whether effects should be on the logarithmic scale. By default, \code{TRUE}.
-#' @param constFun \code{function}, it defines the identifiability constraints of the 
-#'   model. It must be a function of the form 
-#'   \code{constFun <- function(ax, bx, kt, b0x, gc, wxt, ages)} taking a set
-#'   of fitted model parameters and returning a list 
-#'   \code{list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)}
-#'   of the model parameters with the identifiability constraints applied. If 
-#'   omitted no identifiability constraints are applied to the model.
-#'   To be disregarded unless the practitioner specifies his own hazard model in StMoMo. 
-#' @param ... parameters to be passed to clmplus.
-#' 
-#' @return An object of class \code{clmplusmodel}. A list with the following elements:
-#'   \item{model.fit}{\code{fitStMoMo} object, specified hazard model fit from StMoMo.}
-#'   
-#'   \item{apc_input}{\code{list} object. A list containing the following model inputs in age-period-cohort notation: \code{J} (\code{integer}) Run-off triangle dimension.  \code{eta} (\code{numeric}) Expected time-to-event in the cell. I.e., lost exposure.   
-#'   \code{diagonal} (\code{numeric}) Cumulative payments last diagonal. \code{hazard.model} (\code{character}), hazard model specified from the user. Set to \code{user.specific} when a custom model is passed. 
-#'   }   
-#'   
-#'   \item{hazard_scaled_deviance_residuals}{ \code{matrix array} Triangle of the scaled deviance residuals. }
-#'   
-#'   \item{fitted_development_factors}{ \code{matrix array} Triangle of the fitted development factors. }
-#'   
-#'   \item{fitted_effects}{ \code{list} List of the development-accident-calendar effects fitted. }
-#'    
-#'   
-#' @examples
-#' data(sifa.mtpl)
-#' sifa.mtpl.rtt <- AggregateDataPP(cumulative.payments.triangle=sifa.mtpl)
-#' hz.chl=clmplus(sifa.mtpl.rtt, 'a')
-#' 
-#' @references 
-#' Pittarello, Gabriele, Munir Hiabu, and Andrés M. Villegas. "Replicating and extending chain ladder 
-#' via an age-period-cohort structure on the claim development in a run-off triangle." arXiv preprint arXiv:2301.03858 (2023).
-#' 
+#' @seealso [AggregateDataPP()], [predict.clmplusmodel()],
+#'   [predictReserve.clmplusmodel()], [plot.clmplusmodel()]
 #' @export
-clmplus.AggregateDataPP <- function(AggregateDataPP,
-                            hazard.model=NULL,
-                            link = c("log", "logit"), 
-                            staticAgeFun = TRUE, 
-                            periodAgeFun = "NP",
-                            cohortAgeFun = NULL, 
-                            effect_log_scale=TRUE,
-                            constFun = function(ax, bx, kt, b0x, gc, wxt, ages) list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc),
-                            ...){
-  
-  
-  stopifnot(is.null(hazard.model) | typeof(hazard.model)=="character")
-  # 
-  # if(is.null(hazard.model)){
-  #   
-  # 
-  #   stmomo.model = StMoMo::StMoMo(link = link, 
-  #                         staticAgeFun = staticAgeFun, 
-  #                         periodAgeFun = periodAgeFun,
-  #                         cohortAgeFun = cohortAgeFun, 
-  #                         constFun = constFun)
-  #   
-  #   model <- StMoMo::fit(stmomo.model, 
-  #                        Dxt = AggregateDataPP$occurrance, 
-  #                        Ext = AggregateDataPP$exposure,
-  #                        wxt = AggregateDataPP$fit.w,
-  #                        iterMax=as.integer(1e+05))
-  #   
-  #   #forecasting horizon
-  #   J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
-  #   #compute the development factors
-  #   alphaij <- forecast::forecast(model, h = J)
-  #   # fij=(2+alphaij$rates)/(2-alphaij$rates)
-  #   fij=(1+(1-AggregateDataPP$eta)*alphaij$rates)/(1-(AggregateDataPP$eta*alphaij$rates))
-  #   # pick the last diagonal
-  #   d=AggregateDataPP$diagonal[1:(J-1)]
-  #   # extrapolate the results
-  #   lt=array(0.,c(J,J))
-  #   lt[,1]=c(0.,d)*fij[,1]
-  #   for(j in 2:J){lt[,j]=c(0.,lt[1:(J-1),(j-1)])*fij[,j]} 
-  #   
-  #   ot_=pkg.env$t2c(AggregateDataPP$cumulative.payments.triangle)
-  #   ultimate_cost=c(rev(lt[J,1:(J-1)]),ot_[J,J])
-  #   reserve=rev(ultimate_cost-ot_[,J])
-  #   ultimate_cost=rev(ultimate_cost)
-  #   converged=TRUE
-  #   citer=NULL
-  #   
-  # 
-  #  out <- list(model.fit=model,
-  #             hazard.model='user.defined',
-  #             ultimate.cost=ultimate_cost,
-  #             reserve=reserve,
-  #             model.fcst = alphaij,
-  #             converged=converged,
-  #             citer=citer)
-  # 
-  # class(out) <- c('clmplusmodel')
-  # 
-  # out}
-  # 
-  
-  if(hazard.model %in% names(pkg.env$models)){
-    
-  model <- StMoMo::fit(pkg.env$models[[hazard.model]], 
-                       Dxt = AggregateDataPP$occurrance, 
-                       Ext = AggregateDataPP$exposure,
-                       wxt=AggregateDataPP$fit.w,
-                       iterMax=as.integer(1e+05))
-  
+clmplus <- function(AggregateDataPP, hazard.model = NULL,
+                    link = c("log", "logit"), staticAgeFun = TRUE,
+                    periodAgeFun = "NP", cohortAgeFun = NULL,
+                    effect_log_scale = TRUE, verbose = FALSE,
+                    constFun = function(ax, bx, kt, b0x, gc, wxt, ages) {
+                      list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)
+                    }, ...) {
+  UseMethod("clmplus")
+}
 
-  
-  #forecasting horizon
-  J=dim(AggregateDataPP$cumulative.payments.triangle)[2]
-  
-  # Find fitted development factors
-  fij.fit <- pkg.env$find.development.factors(J,
-                                       age.eff= model$ax,
-                                       cohort.eff= model$gc,
-                                       period.eff=model$kt,
-                                       eta=AggregateDataPP$eta)
-  
-  res.m = stats::residuals(model)
-  res.tr=pkg.env$c2t(res.m$residuals)
-  
-  fitted_effects <- pkg.env$find.fitted.effects(J,
-                                                age.eff= model$ax,
-                                                cohort.eff= model$gc,
-                                                period.eff=model$kt,
-                                                effect_log_scale=effect_log_scale)
-  
+#' @rdname clmplus
+#' @return The default method always raises an informative error because
+#'   `AggregateDataPP` does not inherit from `"AggregateDataPP"`.
+#' @export
+clmplus.default <- function(AggregateDataPP, hazard.model = NULL,
+                            link = c("log", "logit"), staticAgeFun = TRUE,
+                            periodAgeFun = "NP", cohortAgeFun = NULL,
+                            effect_log_scale = TRUE, verbose = FALSE,
+                            constFun = function(ax, bx, kt, b0x, gc, wxt, ages) {
+                              list(ax = ax, bx = bx, kt = kt, b0x = b0x, gc = gc)
+                            }, ...) {
+  stop("`AggregateDataPP` must inherit from class \"AggregateDataPP\".",
+       call. = FALSE)
+}
+
+#' @rdname clmplus
+#' @export
+clmplus.AggregateDataPP <- function(AggregateDataPP, hazard.model = NULL,
+                                    link = c("log", "logit"),
+                                    staticAgeFun = TRUE,
+                                    periodAgeFun = "NP",
+                                    cohortAgeFun = NULL,
+                                    effect_log_scale = TRUE,
+                                    verbose = FALSE,
+                                    constFun = function(ax, bx, kt, b0x, gc,
+                                                        wxt, ages) {
+                                      list(ax = ax, bx = bx, kt = kt,
+                                           b0x = b0x, gc = gc)
+                                    }, ...) {
+  if (length(hazard.model) != 1L || !is.character(hazard.model) ||
+      !hazard.model %in% names(supported_models)) {
+    stop("`hazard.model` must be one of: ",
+         paste(names(supported_models), collapse = ", "), ".", call. = FALSE)
   }
-  
-  
-  
-  out <- list(model.fit=model,
-              apc_input=list(J=J,
-                              eta=AggregateDataPP$eta,
-                              hazard.model=hazard.model,
-                              diagonal=AggregateDataPP$diagonal,
-                              cumulative.payments.triangle=AggregateDataPP$cumulative.payments.triangle
-                              ),
-              hazard_scaled_deviance_residuals=res.tr,
-              fitted_development_factors = fij.fit, 
-              fitted_effects=fitted_effects)
-  
-  class(out) <- c('clmplusmodel')
-    
+  if (length(verbose) != 1L || !is.logical(verbose) || is.na(verbose)) {
+    stop("`verbose` must be a single non-missing logical value.", call. = FALSE)
+  }
+
+  model <- withCallingHandlers(
+    StMoMo::fit(
+      supported_models[[hazard.model]],
+      Dxt = AggregateDataPP$occurrance,
+      Ext = AggregateDataPP$exposure,
+      wxt = AggregateDataPP$fit.w,
+      iterMax = as.integer(1e+05),
+      verbose = verbose
+    ),
+    warning = function(w) {
+      if (
+        !isTRUE(verbose) ||
+        grepl("^non-integer x\\s*=", conditionMessage(w))
+      ) {
+        invokeRestart("muffleWarning")
+      }
+    },
+    message = function(m) {
+      if (!isTRUE(verbose)) {
+        invokeRestart("muffleMessage")
+      }
+    }
+  )
+
+  J <- ncol(AggregateDataPP$cumulative.payments.triangle)
+  fij.fit <- fitted_development_factors(
+    J, age = model$ax, cohort = model$gc, period = model$kt,
+    eta = AggregateDataPP$eta
+  )
+  residuals <- stats::residuals(model)
+  residual_triangle <- calendar_to_triangle(residuals$residuals)
+  effects <- extract_fitted_effects(
+    age = model$ax, cohort = model$gc, period = model$kt,
+    log_scale = effect_log_scale
+  )
+
+  out <- list(
+    model.fit = model,
+    apc_input = list(
+      J = J, eta = AggregateDataPP$eta, hazard.model = hazard.model,
+      diagonal = AggregateDataPP$diagonal,
+      cumulative.payments.triangle =
+        AggregateDataPP$cumulative.payments.triangle
+    ),
+    hazard_scaled_deviance_residuals = residual_triangle,
+    fitted_development_factors = fij.fit,
+    fitted_effects = effects
+  )
+  class(out) <- "clmplusmodel"
   out
-  
 }

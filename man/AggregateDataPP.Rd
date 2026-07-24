@@ -11,29 +11,47 @@ AggregateDataPP(
 )
 }
 \arguments{
-\item{cumulative.payments.triangle}{\code{triangle matrix} or \code{matrix array} object, input triangle of cumulative payments.}
+\item{cumulative.payments.triangle}{A square numeric matrix with at least
+two rows. Rows are accident periods, columns are development periods, and
+observed upper-triangle cells satisfy `row + column <= J + 1`. Values are
+non-negative cumulative paid amounts in the source data's monetary units,
+non-decreasing across each row; unavailable cells may be `NA`. Recoveries
+(negative incremental payments) are not supported.}
 
-\item{entries.weights}{\code{triangle matrix} or \code{matrix array} model entries weights.}
+\item{entries.weights}{Optional non-negative numeric `J` by `J` matrix of
+fitting weights in the same accident/development layout. `NULL` gives
+observed cells weight one. The first development period and missing cells
+are always zero-weighted after conversion to calendar coordinates.}
 
-\item{eta}{\code{numeric}, individual claims exposure in the cell, also known as lost exposure. It must be in the interval (0,1].}
+\item{eta}{One finite numeric value in `(0, 1]`, default `0.5`, describing
+expected within-cell payment timing (lost exposure). It is used to derive
+exposure and to convert fitted hazards to development factors.}
 }
 \value{
-An object of class \code{AggregateDataPP}. Lists the following elements:
-  \item{cumulative.payments.triangle}{\code{triangle matrix} object, input triangle of cumulative payments.}
+An `AggregateDataPP` list with:
+  \item{cumulative.payments.triangle}{The input `J` by `J` cumulative paid
+  triangle, unchanged.}
   
-  \item{occurrance}{\code{matrix array} object, the occurrence derived from the input triangle.}
+  \item{occurrance}{A `J` by `J` matrix of incremental paid amounts in
+  development-period by calendar-period coordinates. The misspelling is
+  retained as a stable public field name.}
   
-  \item{exposure}{\code{matrix array} object, the exposure derived from the input triangle, under the \code{eta} claims arrival assumption.}
+  \item{exposure}{A `J` by `J` numeric matrix in the same calendar
+  coordinates, calculated as cumulative payments minus
+  `(1 - eta) * occurrence`.}
   
-  \item{incremental.payments.triangle}{\code{triangle matrix} object, incremental payments derived from the input.}
+  \item{incremental.payments.triangle}{A `J` by `J`
+  accident/development matrix of incremental paid amounts.}
   
-  \item{fit.w}{\code{matrix array} object, the weights used during estimation.}
+  \item{fit.w}{The `J` by `J` fitting-weight matrix in
+  development/calendar coordinates.}
   
-  \item{J}{\code{integer}, Run-off triangle dimension.}
+  \item{J}{The integer triangle dimension.}
   
-  \item{diagonal}{ \code{numeric}, cumulative payments last diagonal.}
+  \item{diagonal}{A length-`J` numeric vector containing the latest observed
+  cumulative diagonal in calendar representation.}
   
-  \item{eta}{ \code{numeric}, Expected time-to-event in the cell. I.e., lost exposure.}
+  \item{eta}{The supplied within-cell timing scalar.}
 }
 \description{
 Pre-process Run-Off Triangles.
