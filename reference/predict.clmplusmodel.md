@@ -53,8 +53,8 @@ predict(
 
 - constrained_development_factors:
 
-  `logical`, if `TRUE` the predict function will set negative
-  development factors to 1.
+  `logical`, if `TRUE` the predict function will set development factors
+  below 1 to 1.
 
 - ...:
 
