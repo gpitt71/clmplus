@@ -8,7 +8,7 @@
 #' @param gk.order \code{integer}, order of the arima model with drift for the accident year effect extrapolation. Default to (1,1,0).
 #' @param ckj.order \code{integer}, order of the arima model with drift for the calendar year effect extrapolation. Default to (0,1,0).
 #' @param forecasting_horizon \code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off. 
-#' @param constrained_development_factors \code{logical}, if \code{TRUE} the predict function will set negative development factors to 1.
+#' @param constrained_development_factors \code{logical}, if \code{TRUE} the predict function will set development factors below 1 to 1.
 #' @param ... Extra arguments to be passed to the predict function.
 #' 
 #' @return Returns the following output:
@@ -58,7 +58,7 @@ predict.clmplusmodel <- function(object,
     model, model_name, gk.fc.model, ckj.fc.model, gk.order, ckj.order
   )
   factors <- (1 + (1 - eta) * alphaij$rates) / (1 - eta * alphaij$rates)
-  if (isTRUE(constrained_development_factors)) factors <- pmax(1, factors)
+  if (isTRUE(constrained_development_factors)) factors <- pmax(factors, 1)
 
   forecast <- matrix(0, size, horizon)
   forecast[, 1L] <- c(0, object$apc_input$diagonal[seq_len(size - 1L)]) * factors[, 1L]
