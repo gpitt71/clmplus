@@ -28,7 +28,7 @@
 
 \item{forecasting_horizon}{\code{integer}, between 1 and the triangle width. Calendar periods ahead for the predictions. Default predictions are to run-off.}
 
-\item{constrained_development_factors}{\code{logical}, if \code{TRUE} the predict function will set negative development factors to 1.}
+\item{constrained_development_factors}{\code{logical}, if \code{TRUE} the predict function will set development factors below 1 to 1.}
 
 \item{...}{Extra arguments to be passed to the predict function.}
 }

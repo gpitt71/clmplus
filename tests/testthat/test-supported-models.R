@@ -11,3 +11,26 @@ test_that("every documented hazard model fits and predicts", {
     expect_identical(dim(prediction$apc_output$lower_triangle_apc), c(8L, 1L))
   }
 })
+
+test_that("constrained development factors retain matrix dimensions", {
+  pp <- AggregateDataPP(auto_bi_fixture())
+
+  for (model_name in c("ac", "apc")) {
+    set.seed(42)
+    fit <- suppressWarnings(clmplus(pp, model_name))
+    prediction <- suppressWarnings(predict(
+      fit,
+      forecasting_horizon = 1,
+      constrained_development_factors = TRUE
+    ))
+
+    expect_identical(
+      dim(prediction$apc_output$development_factors_apc),
+      c(8L, 1L)
+    )
+    expect_true(all(
+      prediction$apc_output$development_factors_apc >= 1,
+      na.rm = TRUE
+    ))
+  }
+})

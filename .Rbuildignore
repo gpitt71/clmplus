@@ -10,3 +10,4 @@
 ^\.positai$
 ^\.claude$
 ^data-raw$
+^cran-comments\.md$
