@@ -75,7 +75,7 @@ jobs:
         with:
           extra-packages: |
             any::devtools
-            any::roxygen2@7.3.3
+            standard::roxygen2@7.3.3
             any::rcmdcheck
             any::testthat
             any::urlchecker
