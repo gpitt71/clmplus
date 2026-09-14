@@ -75,6 +75,7 @@ jobs:
         with:
           extra-packages: |
             any::devtools
+            any::roxygen2@7.3.3
             any::rcmdcheck
             any::testthat
             any::urlchecker
@@ -82,6 +83,8 @@ jobs:
           needs: check
 
       - name: Regenerate and verify documentation
+        # Keep the roxygen2 pin above in sync with DESCRIPTION's RoxygenNote.
+        # Generator upgrades can change formatting without source changes.
         run: |
           devtools::document()
           changes <- system2(
